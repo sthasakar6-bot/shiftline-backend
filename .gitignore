@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+
+# Local agent/IDE config and skill docs scaffolded by prisma's postinstall sync - not app code
+.claude/
+.cursor/
+.agents/
+.devin/

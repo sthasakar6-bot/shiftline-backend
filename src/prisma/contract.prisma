@@ -1,0 +1,63 @@
+model User {
+  id            Int            @id @default(autoincrement())
+  name          String
+  email         String         @unique
+  passwordHash  String
+  role          String         @default("employee")
+  managerId     Int?
+  manager       User?          @relation("ManagerReports", fields: [managerId], references: [id])
+  reports       User[]         @relation("ManagerReports")
+  contracts     Contract[]
+  shifts        Shift[]
+  attendances   Attendance[]
+  notifications Notification[]
+}
+
+model Contract {
+  id          Int                @id @default(autoincrement())
+  title       String
+  description String?
+  startDate   TimestamptzString
+  endDate     TimestamptzString?
+  status      String             @default("active")
+  userId      Int
+  user        User               @relation(fields: [userId], references: [id])
+
+  createdAt   TimestamptzString  @default(now())
+  updatedAt   TimestamptzString  @default(now())
+}
+
+model Shift {
+  id         Int                @id @default(autoincrement())
+  userId     Int
+  user       User               @relation(fields: [userId], references: [id])
+  startsAt   TimestamptzString
+  endsAt     TimestamptzString
+  attendance Attendance[]
+
+  createdAt  TimestamptzString  @default(now())
+  updatedAt  TimestamptzString  @default(now())
+}
+
+model Attendance {
+  id        Int                @id @default(autoincrement())
+  userId    Int
+  user      User               @relation(fields: [userId], references: [id])
+  shiftId   Int
+  shift     Shift              @relation(fields: [shiftId], references: [id])
+  clockIn   TimestamptzString?
+  clockOut  TimestamptzString?
+
+  createdAt TimestamptzString  @default(now())
+  updatedAt TimestamptzString  @default(now())
+}
+
+model Notification {
+  id        Int               @id @default(autoincrement())
+  userId    Int
+  user      User              @relation(fields: [userId], references: [id])
+  message   String
+  read      Boolean           @default(false)
+
+  createdAt TimestamptzString @default(now())
+}
