@@ -11,6 +11,7 @@ model User {
   shifts        Shift[]
   attendances   Attendance[]
   notifications Notification[]
+  leaveRequests LeaveRequest[]
 }
 
 model Contract {
@@ -60,4 +61,18 @@ model Notification {
   read      Boolean           @default(false)
 
   createdAt TimestamptzString @default(now())
+}
+
+model LeaveRequest {
+  id        Int                @id @default(autoincrement())
+  userId    Int
+  user      User               @relation(fields: [userId], references: [id])
+  type      String
+  startDate TimestamptzString
+  endDate   TimestamptzString
+  reason    String?
+  status    String             @default("pending")
+
+  createdAt TimestamptzString  @default(now())
+  updatedAt TimestamptzString  @default(now())
 }
