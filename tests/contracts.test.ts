@@ -1,13 +1,25 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import request from "supertest";
 import app from "../src/app";
-import { registerAndLogin } from "./helpers";
+import { db } from "../src/prisma/db";
+import { registerAndLogin, registerUser, loginUser, uniqueEmail } from "./helpers";
 
 describe("Contracts", () => {
-  let token: string;
+  let employeeToken: string;
+  let managerToken: string;
+  let reportId: number;
 
   beforeAll(async () => {
-    ({ token } = await registerAndLogin());
+    const managerUser = await registerUser({ email: uniqueEmail("contract-manager") });
+    await db.orm.public.User.where({ id: managerUser.id }).update({ role: "manager" });
+    managerToken = await loginUser(managerUser.email, managerUser.password);
+
+    const { user, token } = await registerAndLogin({
+      email: uniqueEmail("contract-employee"),
+      managerId: managerUser.id,
+    });
+    reportId = user.id;
+    employeeToken = token;
   });
 
   it("rejects unauthenticated requests", async () => {
@@ -15,56 +27,73 @@ describe("Contracts", () => {
     expect(res.status).toBe(401);
   });
 
-  it("starts with an empty list", async () => {
-    const res = await request(app).get("/api/contracts").set("Authorization", `Bearer ${token}`);
+  it("starts with an empty list for a fresh employee", async () => {
+    const res = await request(app)
+      .get("/api/contracts")
+      .set("Authorization", `Bearer ${employeeToken}`);
     expect(res.status).toBe(200);
     expect(res.body).toEqual([]);
   });
 
-  it("rejects creating a contract with missing fields", async () => {
+  it("no longer exposes self-service contract creation", async () => {
     const res = await request(app)
       .post("/api/contracts")
-      .set("Authorization", `Bearer ${token}`)
-      .send({});
-    expect(res.status).toBe(400);
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ title: "Self Contract", startDate: "2026-09-01" });
+    expect(res.status).toBe(404);
   });
 
-  it("creates, reads, updates, and deletes a contract", async () => {
+  it("blocks a non-manager from creating a contract for anyone", async () => {
+    const res = await request(app)
+      .post(`/api/users/${reportId}/contracts`)
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ title: "Should fail", startDate: "2026-09-01" });
+    expect(res.status).toBe(403);
+  });
+
+  it("lets a manager create, view, update, and delete a report's contract", async () => {
     const create = await request(app)
-      .post("/api/contracts")
-      .set("Authorization", `Bearer ${token}`)
-      .send({ title: "Test Contract", startDate: "2026-09-01" });
+      .post(`/api/users/${reportId}/contracts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ title: "Employment Contract", startDate: "2026-09-01", endDate: "2027-09-01" });
     expect(create.status).toBe(201);
-    const id = create.body.id;
+    const contractId = create.body.id;
+    expect(create.body.userId).toBe(reportId);
 
-    const get = await request(app)
-      .get(`/api/contracts/${id}`)
-      .set("Authorization", `Bearer ${token}`);
-    expect(get.status).toBe(200);
-    expect(get.body.title).toBe("Test Contract");
+    const seenByEmployee = await request(app)
+      .get(`/api/contracts/${contractId}`)
+      .set("Authorization", `Bearer ${employeeToken}`);
+    expect(seenByEmployee.status).toBe(200);
+    expect(seenByEmployee.body.endDate).toBeTruthy();
 
-    const update = await request(app)
-      .patch(`/api/contracts/${id}`)
-      .set("Authorization", `Bearer ${token}`)
-      .send({ status: "terminated" });
-    expect(update.status).toBe(200);
-    expect(update.body.status).toBe("terminated");
+    const employeeTriesUpdate = await request(app)
+      .patch(`/api/contracts/${contractId}`)
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ endDate: "2099-01-01" });
+    expect(employeeTriesUpdate.status).toBe(404);
 
-    const del = await request(app)
-      .delete(`/api/contracts/${id}`)
-      .set("Authorization", `Bearer ${token}`);
-    expect(del.status).toBe(204);
+    const managerUpdate = await request(app)
+      .patch(`/api/users/${reportId}/contracts/${contractId}`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ endDate: "2028-01-01" });
+    expect(managerUpdate.status).toBe(200);
+    expect(managerUpdate.body.endDate).toContain("2028-01-01");
+
+    const managerDelete = await request(app)
+      .delete(`/api/users/${reportId}/contracts/${contractId}`)
+      .set("Authorization", `Bearer ${managerToken}`);
+    expect(managerDelete.status).toBe(204);
 
     const getAfterDelete = await request(app)
-      .get(`/api/contracts/${id}`)
-      .set("Authorization", `Bearer ${token}`);
+      .get(`/api/contracts/${contractId}`)
+      .set("Authorization", `Bearer ${employeeToken}`);
     expect(getAfterDelete.status).toBe(404);
   });
 
   it("returns 404 for a nonexistent contract", async () => {
     const res = await request(app)
       .get("/api/contracts/999999999")
-      .set("Authorization", `Bearer ${token}`);
+      .set("Authorization", `Bearer ${employeeToken}`);
     expect(res.status).toBe(404);
   });
 });
