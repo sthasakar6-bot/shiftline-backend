@@ -1,24 +1,36 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import request from "supertest";
 import app from "../src/app";
-import { registerAndLogin } from "./helpers";
+import { db } from "../src/prisma/db";
+import { registerAndLogin, registerUser, loginUser, uniqueEmail } from "./helpers";
 
 describe("Notifications", () => {
   let token: string;
+  let managerToken: string;
+  let reportId: number;
 
   beforeAll(async () => {
-    ({ token } = await registerAndLogin());
+    const managerUser = await registerUser({ email: uniqueEmail("notif-manager") });
+    await db.orm.public.User.where({ id: managerUser.id }).update({ role: "manager" });
+    managerToken = await loginUser(managerUser.email, managerUser.password);
+
+    const result = await registerAndLogin({
+      email: uniqueEmail("notif-employee"),
+      managerId: managerUser.id,
+    });
+    reportId = result.user.id;
+    token = result.token;
   });
 
-  it("creates a notification when a shift is created", async () => {
+  it("creates a notification when a manager assigns a shift", async () => {
     const before = await request(app)
       .get("/api/notifications")
       .set("Authorization", `Bearer ${token}`);
     const beforeCount = before.body.length;
 
     await request(app)
-      .post("/api/shifts")
-      .set("Authorization", `Bearer ${token}`)
+      .post(`/api/users/${reportId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
       .send({ startsAt: "2026-11-01T09:00:00Z", endsAt: "2026-11-01T17:00:00Z" });
 
     const after = await request(app)

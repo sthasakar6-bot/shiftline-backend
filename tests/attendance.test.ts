@@ -1,17 +1,34 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import request from "supertest";
 import app from "../src/app";
-import { registerAndLogin } from "./helpers";
+import { db } from "../src/prisma/db";
+import { registerAndLogin, registerUser, loginUser, uniqueEmail } from "./helpers";
 
 describe("Attendance", () => {
   let token: string;
+  let managerToken: string;
+  let reportId: number;
+  let outsiderToken: string;
   let shiftId: number;
 
   beforeAll(async () => {
-    ({ token } = await registerAndLogin());
+    const managerUser = await registerUser({ email: uniqueEmail("attendance-manager") });
+    await db.orm.public.User.where({ id: managerUser.id }).update({ role: "manager" });
+    managerToken = await loginUser(managerUser.email, managerUser.password);
+
+    const result = await registerAndLogin({
+      email: uniqueEmail("attendance-employee"),
+      managerId: managerUser.id,
+    });
+    reportId = result.user.id;
+    token = result.token;
+
+    const outsider = await registerAndLogin({ email: uniqueEmail("attendance-outsider") });
+    outsiderToken = outsider.token;
+
     const shift = await request(app)
-      .post("/api/shifts")
-      .set("Authorization", `Bearer ${token}`)
+      .post(`/api/users/${reportId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
       .send({ startsAt: "2026-10-01T09:00:00Z", endsAt: "2026-10-01T17:00:00Z" });
     shiftId = shift.body.id;
   });
@@ -56,5 +73,20 @@ describe("Attendance", () => {
       .post(`/api/attendance/${attendanceId}/clock-out`)
       .set("Authorization", `Bearer ${token}`);
     expect(out2.status).toBe(409);
+  });
+
+  it("lets a manager view their report's attendance records", async () => {
+    const res = await request(app)
+      .get(`/api/users/${reportId}/attendance`)
+      .set("Authorization", `Bearer ${managerToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.length).toBeGreaterThan(0);
+  });
+
+  it("blocks a non-manager from viewing another user's attendance", async () => {
+    const res = await request(app)
+      .get(`/api/users/${reportId}/attendance`)
+      .set("Authorization", `Bearer ${outsiderToken}`);
+    expect(res.status).toBe(403);
   });
 });

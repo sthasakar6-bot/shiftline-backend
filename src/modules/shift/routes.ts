@@ -2,11 +2,10 @@ import { Router } from "express";
 import {
   listShiftsController,
   getShiftController,
-  createShiftController,
-  updateShiftController,
-  deleteShiftController,
   listShiftsForReportController,
   createShiftForReportController,
+  updateShiftForReportController,
+  deleteShiftForReportController,
 } from "./controller";
 import { requireAuth } from "../../middleware/requireAuth";
 import { requireRole } from "../../middleware/requireRole";
@@ -16,11 +15,10 @@ import { createShiftSchema, updateShiftSchema } from "./schemas";
 
 const router = Router();
 
+// Shifts (roster) are set by a manager, not self-service.
+// Employees can only view their own.
 router.get("/shifts", requireAuth, listShiftsController);
 router.get("/shifts/:id", requireAuth, getShiftController);
-router.post("/shifts", requireAuth, validate(createShiftSchema), createShiftController);
-router.patch("/shifts/:id", requireAuth, validate(updateShiftSchema), updateShiftController);
-router.delete("/shifts/:id", requireAuth, deleteShiftController);
 
 router.get(
   "/users/:id/shifts",
@@ -36,6 +34,21 @@ router.post(
   requireManagesTarget,
   validate(createShiftSchema),
   createShiftForReportController,
+);
+router.patch(
+  "/users/:id/shifts/:shiftId",
+  requireAuth,
+  requireRole("manager"),
+  requireManagesTarget,
+  validate(updateShiftSchema),
+  updateShiftForReportController,
+);
+router.delete(
+  "/users/:id/shifts/:shiftId",
+  requireAuth,
+  requireRole("manager"),
+  requireManagesTarget,
+  deleteShiftForReportController,
 );
 
 export default router;

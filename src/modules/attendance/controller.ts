@@ -16,3 +16,8 @@ export async function clockOutController(req: Request, res: Response) {
   const record = await clockOut(Number(req.params.id), req.user!.sub);
   res.json(record);
 }
+
+export async function listAttendanceForReportController(req: Request, res: Response) {
+  const records = await listAttendance(Number(req.params.id));
+  res.json(records);
+}
