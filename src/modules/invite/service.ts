@@ -1,7 +1,5 @@
 import crypto from "crypto";
 import { AppError } from "../../errors/AppError";
-import { env } from "../../config/env";
-import { sendInviteEmail } from "../../lib/mailer";
 import { findUserByEmail, findUserById } from "../identity/model";
 import {
   createInvite as createInviteRecord,
@@ -32,12 +30,7 @@ export async function createInvite(managerId: number, email: string) {
   const token = crypto.randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + INVITE_TTL_MS).toISOString();
 
-  const invite = await createInviteRecord({ email, token, managerId, expiresAt });
-
-  const inviteLink = `${env.frontendUrl}/register?token=${token}`;
-  await sendInviteEmail(email, inviteLink, manager.name);
-
-  return invite;
+  return createInviteRecord({ email, token, managerId, expiresAt });
 }
 
 export async function listInvites(managerId: number) {
