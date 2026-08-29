@@ -1,4 +1,11 @@
-import { findNotificationsByUser, createNotification, markNotificationRead } from "./model";
+import {
+  findNotificationsByUser,
+  findNotificationByIdForUser,
+  createNotification,
+  markNotificationRead,
+  markAllNotificationsRead,
+  deleteNotificationForUser,
+} from "./model";
 import { AppError } from "../../errors/AppError";
 import { sendPushToUser } from "../../lib/webPush";
 
@@ -18,4 +25,16 @@ export async function markAsRead(id: number, userId: number) {
     throw new AppError(404, "Notification not found");
   }
   return updated;
+}
+
+export async function markAllAsRead(userId: number) {
+  await markAllNotificationsRead(userId);
+}
+
+export async function removeNotification(id: number, userId: number) {
+  const existing = await findNotificationByIdForUser(id, userId);
+  if (!existing) {
+    throw new AppError(404, "Notification not found");
+  }
+  await deleteNotificationForUser(id, userId);
 }
