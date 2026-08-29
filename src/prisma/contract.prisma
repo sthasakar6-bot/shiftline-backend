@@ -33,6 +33,8 @@ model Shift {
   user       User               @relation(fields: [userId], references: [id])
   startsAt   TimestamptzString
   endsAt     TimestamptzString
+  breakStart TimestamptzString?
+  breakEnd   TimestamptzString?
   attendance Attendance[]
 
   createdAt  TimestamptzString  @default(now())

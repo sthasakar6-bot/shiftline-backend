@@ -95,4 +95,44 @@ describe("Shifts", () => {
     expect(create.status).toBe(201);
     expect(create.body.userId).toBe(managerId);
   });
+
+  it("lets a manager set a break window within the shift", async () => {
+    const create = await request(app)
+      .post(`/api/users/${reportId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({
+        startsAt: "2026-09-03T09:00:00Z",
+        endsAt: "2026-09-03T17:00:00Z",
+        breakStart: "2026-09-03T12:00:00Z",
+        breakEnd: "2026-09-03T12:30:00Z",
+      });
+    expect(create.status).toBe(201);
+    expect(create.body.breakStart).toBeTruthy();
+    expect(create.body.breakEnd).toBeTruthy();
+  });
+
+  it("rejects a break window outside the shift", async () => {
+    const res = await request(app)
+      .post(`/api/users/${reportId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({
+        startsAt: "2026-09-04T09:00:00Z",
+        endsAt: "2026-09-04T17:00:00Z",
+        breakStart: "2026-09-04T18:00:00Z",
+        breakEnd: "2026-09-04T18:30:00Z",
+      });
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects a lone breakStart without breakEnd", async () => {
+    const res = await request(app)
+      .post(`/api/users/${reportId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({
+        startsAt: "2026-09-05T09:00:00Z",
+        endsAt: "2026-09-05T17:00:00Z",
+        breakStart: "2026-09-05T12:00:00Z",
+      });
+    expect(res.status).toBe(400);
+  });
 });

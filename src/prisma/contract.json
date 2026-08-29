@@ -539,6 +539,20 @@
           },
           "Shift": {
             "fields": {
+              "breakEnd": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "breakStart": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
               "createdAt": {
                 "nullable": false,
                 "type": {
@@ -616,6 +630,12 @@
             },
             "storage": {
               "fields": {
+                "breakEnd": {
+                  "column": "breakEnd"
+                },
+                "breakStart": {
+                  "column": "breakStart"
+                },
                 "createdAt": {
                   "column": "createdAt"
                 },
@@ -1301,6 +1321,16 @@
             },
             "shift": {
               "columns": {
+                "breakEnd": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
+                "breakStart": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
                 "createdAt": {
                   "codecId": "pg/timestamptz-string@1",
                   "default": {
@@ -1467,7 +1497,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "7673f83201f32b39a52e4b02c0c01a091ded7d495793e57c549023f6a4263bdf"
+    "storageHash": "d47ead797f366f02ccd1afd846b43385ba3955733d7f361178e09a2c7a4f418a"
   },
   "capabilities": {
     "postgres": {
