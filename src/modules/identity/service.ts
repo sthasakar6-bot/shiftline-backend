@@ -3,22 +3,29 @@ import jwt from "jsonwebtoken";
 import { env } from "../../config/env";
 import { AppError } from "../../errors/AppError";
 import { findUserByEmail, findUserById, createUser } from "./model";
+import { validateInviteToken, consumeInvite } from "../invite/service";
 
-export async function register(name: string, email: string, password: string, managerId?: number) {
+export async function register(name: string, email: string, password: string, token: string) {
   const existing = await findUserByEmail(email);
   if (existing) {
     throw new AppError(400, "Email already registered");
   }
 
-  if (managerId !== undefined) {
-    const manager = await findUserById(managerId);
-    if (!manager || manager.role !== "manager") {
-      throw new AppError(400, "managerId must reference an existing manager");
-    }
+  const invite = await validateInviteToken(token);
+  if (invite.email.toLowerCase() !== email.toLowerCase()) {
+    throw new AppError(400, "This invite was issued for a different email address");
   }
 
   const passwordHash = await argon2.hash(password);
-  const user = await createUser({ name, email, passwordHash, role: "employee", managerId });
+  const user = await createUser({
+    name,
+    email,
+    passwordHash,
+    role: "employee",
+    managerId: invite.managerId,
+  });
+
+  await consumeInvite(invite.id);
 
   return { id: user.id, name: user.name, email: user.email, role: user.role };
 }

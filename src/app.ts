@@ -7,6 +7,7 @@ import shiftRoutes from "./modules/shift/routes";
 import attendanceRoutes from "./modules/attendance/routes";
 import notificationRoutes from "./modules/notifications/routes";
 import leaveRoutes from "./modules/leave/routes";
+import inviteRoutes from "./modules/invite/routes";
 import { notFoundHandler, errorHandler } from "./middleware/errorHandler";
 import { env } from "./config/env";
 
@@ -25,6 +26,7 @@ app.use("/api", shiftRoutes);
 app.use("/api", attendanceRoutes);
 app.use("/api", notificationRoutes);
 app.use("/api", leaveRoutes);
+app.use("/api", inviteRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

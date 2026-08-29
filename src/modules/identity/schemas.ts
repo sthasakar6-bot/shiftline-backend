@@ -4,7 +4,7 @@ export const registerSchema = z.object({
   name: z.string().min(1, "name is required"),
   email: z.string().email("invalid email"),
   password: z.string().min(8, "password must be at least 8 characters"),
-  managerId: z.coerce.number().int().positive().optional(),
+  token: z.string().min(1, "an invite token is required to register"),
 });
 
 export const loginSchema = z.object({

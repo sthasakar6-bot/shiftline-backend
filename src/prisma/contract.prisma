@@ -12,6 +12,7 @@ model User {
   attendances   Attendance[]
   notifications Notification[]
   leaveRequests LeaveRequest[]
+  invitesSent   Invite[]
 }
 
 model Contract {
@@ -59,6 +60,18 @@ model Notification {
   user      User              @relation(fields: [userId], references: [id])
   message   String
   read      Boolean           @default(false)
+
+  createdAt TimestamptzString @default(now())
+}
+
+model Invite {
+  id        Int               @id @default(autoincrement())
+  email     String
+  token     String            @unique
+  status    String            @default("pending")
+  managerId Int
+  manager   User              @relation(fields: [managerId], references: [id])
+  expiresAt TimestamptzString
 
   createdAt TimestamptzString @default(now())
 }
