@@ -12,7 +12,7 @@ export async function listAttendance(userId: number) {
   return findAttendanceByUser(userId);
 }
 
-export async function clockIn(userId: number, shiftId: number) {
+export async function clockIn(userId: number, shiftId: number, lat?: number, lng?: number) {
   const shift = await findShiftByIdForUser(shiftId, userId);
   if (!shift) {
     throw new AppError(404, "Shift not found");
@@ -23,10 +23,10 @@ export async function clockIn(userId: number, shiftId: number) {
     throw new AppError(409, "Already clocked in for this shift");
   }
 
-  return createAttendance(userId, shiftId, new Date().toISOString());
+  return createAttendance(userId, shiftId, new Date().toISOString(), lat, lng);
 }
 
-export async function clockOut(attendanceId: number, userId: number) {
+export async function clockOut(attendanceId: number, userId: number, lat?: number, lng?: number) {
   const existing = await findAttendanceByIdForUser(attendanceId, userId);
   if (!existing) {
     throw new AppError(404, "Attendance record not found");
@@ -35,7 +35,7 @@ export async function clockOut(attendanceId: number, userId: number) {
     throw new AppError(409, "Already clocked out");
   }
 
-  const updated = await setClockOut(attendanceId, userId, new Date().toISOString());
+  const updated = await setClockOut(attendanceId, userId, new Date().toISOString(), lat, lng);
   if (!updated) {
     throw new AppError(404, "Attendance record not found");
   }

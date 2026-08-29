@@ -89,4 +89,35 @@ describe("Attendance", () => {
       .set("Authorization", `Bearer ${outsiderToken}`);
     expect(res.status).toBe(403);
   });
+
+  it("records location on clock-in and clock-out when provided", async () => {
+    const shift = await request(app)
+      .post(`/api/users/${reportId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ startsAt: "2026-10-02T09:00:00Z", endsAt: "2026-10-02T17:00:00Z" });
+
+    const in1 = await request(app)
+      .post("/api/attendance/clock-in")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ shiftId: shift.body.id, lat: 40.7128, lng: -74.006 });
+    expect(in1.status).toBe(201);
+    expect(in1.body.clockInLat).toBe(40.7128);
+    expect(in1.body.clockInLng).toBe(-74.006);
+
+    const out1 = await request(app)
+      .post(`/api/attendance/${in1.body.id}/clock-out`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ lat: 40.71, lng: -74.01 });
+    expect(out1.status).toBe(200);
+    expect(out1.body.clockOutLat).toBe(40.71);
+    expect(out1.body.clockOutLng).toBe(-74.01);
+  });
+
+  it("rejects an out-of-range latitude", async () => {
+    const res = await request(app)
+      .post("/api/attendance/clock-in")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ shiftId, lat: 999, lng: 0 });
+    expect(res.status).toBe(400);
+  });
 });

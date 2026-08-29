@@ -50,10 +50,38 @@
                   "kind": "scalar"
                 }
               },
+              "clockInLat": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "clockInLng": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
               "clockOut": {
                 "nullable": true,
                 "type": {
                   "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "clockOutLat": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "clockOutLng": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/float8@1",
                   "kind": "scalar"
                 }
               },
@@ -130,8 +158,20 @@
                 "clockIn": {
                   "column": "clockIn"
                 },
+                "clockInLat": {
+                  "column": "clockInLat"
+                },
+                "clockInLng": {
+                  "column": "clockInLng"
+                },
                 "clockOut": {
                   "column": "clockOut"
+                },
+                "clockOutLat": {
+                  "column": "clockOutLat"
+                },
+                "clockOutLng": {
+                  "column": "clockOutLng"
                 },
                 "createdAt": {
                   "column": "createdAt"
@@ -963,9 +1003,29 @@
                   "nativeType": "timestamptz",
                   "nullable": true
                 },
+                "clockInLat": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
+                  "nullable": true
+                },
+                "clockInLng": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
+                  "nullable": true
+                },
                 "clockOut": {
                   "codecId": "pg/timestamptz-string@1",
                   "nativeType": "timestamptz",
+                  "nullable": true
+                },
+                "clockOutLat": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
+                  "nullable": true
+                },
+                "clockOutLng": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
                   "nullable": true
                 },
                 "createdAt": {
@@ -1670,7 +1730,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "5d6f384360254ff2f66d1ecf3a738d21060ad2c74f5e4c40329eb4463a425756"
+    "storageHash": "23181a2c0c2c9c585af07b26892a04b81aa58405351aa38769f27327ef28f406"
   },
   "capabilities": {
     "postgres": {

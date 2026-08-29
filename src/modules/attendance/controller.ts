@@ -7,13 +7,14 @@ export async function listAttendanceController(req: Request, res: Response) {
 }
 
 export async function clockInController(req: Request, res: Response) {
-  const { shiftId } = req.body;
-  const record = await clockIn(req.user!.sub, shiftId);
+  const { shiftId, lat, lng } = req.body;
+  const record = await clockIn(req.user!.sub, shiftId, lat, lng);
   res.status(201).json(record);
 }
 
 export async function clockOutController(req: Request, res: Response) {
-  const record = await clockOut(Number(req.params.id), req.user!.sub);
+  const { lat, lng } = req.body;
+  const record = await clockOut(Number(req.params.id), req.user!.sub, lat, lng);
   res.json(record);
 }
 

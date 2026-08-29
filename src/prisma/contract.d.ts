@@ -33,7 +33,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'5d6f384360254ff2f66d1ecf3a738d21060ad2c74f5e4c40329eb4463a425756'>;
+  StorageHashBase<'23181a2c0c2c9c585af07b26892a04b81aa58405351aa38769f27327ef28f406'>;
 export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
@@ -246,6 +246,10 @@ export type FieldOutputTypes = {
       readonly shiftId: CodecTypes['pg/int4@1']['output'];
       readonly clockIn: CodecTypes['pg/timestamptz-string@1']['output'] | null;
       readonly clockOut: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+      readonly clockInLat: CodecTypes['pg/float8@1']['output'] | null;
+      readonly clockInLng: CodecTypes['pg/float8@1']['output'] | null;
+      readonly clockOutLat: CodecTypes['pg/float8@1']['output'] | null;
+      readonly clockOutLng: CodecTypes['pg/float8@1']['output'] | null;
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
     };
@@ -320,6 +324,10 @@ export type FieldInputTypes = {
       readonly shiftId: CodecTypes['pg/int4@1']['input'];
       readonly clockIn: CodecTypes['pg/timestamptz-string@1']['input'] | null;
       readonly clockOut: CodecTypes['pg/timestamptz-string@1']['input'] | null;
+      readonly clockInLat: CodecTypes['pg/float8@1']['input'] | null;
+      readonly clockInLng: CodecTypes['pg/float8@1']['input'] | null;
+      readonly clockOutLat: CodecTypes['pg/float8@1']['input'] | null;
+      readonly clockOutLng: CodecTypes['pg/float8@1']['input'] | null;
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
     };
@@ -390,7 +398,11 @@ export type StorageColumnTypes = {
   readonly public: {
     readonly attendance: {
       readonly clockIn: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+      readonly clockInLat: CodecTypes['pg/float8@1']['output'] | null;
+      readonly clockInLng: CodecTypes['pg/float8@1']['output'] | null;
       readonly clockOut: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+      readonly clockOutLat: CodecTypes['pg/float8@1']['output'] | null;
+      readonly clockOutLng: CodecTypes['pg/float8@1']['output'] | null;
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly shiftId: CodecTypes['pg/int4@1']['output'];
@@ -464,7 +476,11 @@ export type StorageColumnInputTypes = {
   readonly public: {
     readonly attendance: {
       readonly clockIn: CodecTypes['pg/timestamptz-string@1']['input'] | null;
+      readonly clockInLat: CodecTypes['pg/float8@1']['input'] | null;
+      readonly clockInLng: CodecTypes['pg/float8@1']['input'] | null;
       readonly clockOut: CodecTypes['pg/timestamptz-string@1']['input'] | null;
+      readonly clockOutLat: CodecTypes['pg/float8@1']['input'] | null;
+      readonly clockOutLng: CodecTypes['pg/float8@1']['input'] | null;
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly shiftId: CodecTypes['pg/int4@1']['input'];
@@ -581,6 +597,26 @@ type ContractBase = Omit<
                 readonly clockOut: {
                   readonly nativeType: 'timestamptz';
                   readonly codecId: 'pg/timestamptz-string@1';
+                  readonly nullable: true;
+                };
+                readonly clockInLat: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: true;
+                };
+                readonly clockInLng: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: true;
+                };
+                readonly clockOutLat: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: true;
+                };
+                readonly clockOutLng: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
                   readonly nullable: true;
                 };
                 readonly createdAt: {
@@ -1187,6 +1223,22 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/timestamptz-string@1';
                 };
               };
+              readonly clockInLat: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly clockInLng: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly clockOutLat: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly clockOutLng: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
               readonly createdAt: {
                 readonly nullable: false;
                 readonly type: {
@@ -1232,6 +1284,10 @@ type ContractBase = Omit<
                 readonly shiftId: { readonly column: 'shiftId' };
                 readonly clockIn: { readonly column: 'clockIn' };
                 readonly clockOut: { readonly column: 'clockOut' };
+                readonly clockInLat: { readonly column: 'clockInLat' };
+                readonly clockInLng: { readonly column: 'clockInLng' };
+                readonly clockOutLat: { readonly column: 'clockOutLat' };
+                readonly clockOutLng: { readonly column: 'clockOutLng' };
                 readonly createdAt: { readonly column: 'createdAt' };
                 readonly updatedAt: { readonly column: 'updatedAt' };
               };
