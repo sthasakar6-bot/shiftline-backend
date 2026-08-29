@@ -13,6 +13,7 @@ model User {
   notifications Notification[]
   leaveRequests LeaveRequest[]
   invitesSent   Invite[]
+  pushSubscriptions PushSubscription[]
 }
 
 model Contract {
@@ -72,6 +73,17 @@ model Invite {
   managerId Int
   manager   User              @relation(fields: [managerId], references: [id])
   expiresAt TimestamptzString
+
+  createdAt TimestamptzString @default(now())
+}
+
+model PushSubscription {
+  id        Int               @id @default(autoincrement())
+  userId    Int
+  user      User              @relation(fields: [userId], references: [id])
+  endpoint  String            @unique
+  p256dh    String
+  auth      String
 
   createdAt TimestamptzString @default(now())
 }

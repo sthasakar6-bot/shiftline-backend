@@ -24,6 +24,10 @@
       "model": "Notification",
       "namespace": "public"
     },
+    "pushSubscription": {
+      "model": "PushSubscription",
+      "namespace": "public"
+    },
     "shift": {
       "model": "Shift",
       "namespace": "public"
@@ -537,6 +541,93 @@
               "table": "notification"
             }
           },
+          "PushSubscription": {
+            "fields": {
+              "auth": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "endpoint": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "p256dh": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "user": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "userId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "auth": {
+                  "column": "auth"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "endpoint": {
+                  "column": "endpoint"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "p256dh": {
+                  "column": "p256dh"
+                },
+                "userId": {
+                  "column": "userId"
+                }
+              },
+              "namespaceId": "public",
+              "table": "pushSubscription"
+            }
+          },
           "Shift": {
             "fields": {
               "breakEnd": {
@@ -792,6 +883,21 @@
                 },
                 "to": {
                   "model": "Notification",
+                  "namespace": "public"
+                }
+              },
+              "pushSubscriptions": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "userId"
+                  ]
+                },
+                "to": {
+                  "model": "PushSubscription",
                   "namespace": "public"
                 }
               },
@@ -1319,6 +1425,88 @@
               },
               "uniques": []
             },
+            "pushSubscription": {
+              "columns": {
+                "auth": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "endpoint": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "p256dh": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "userId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "source": {
+                    "columns": [
+                      "userId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "pushSubscription"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "user"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "userId"
+                  ],
+                  "name": "pushSubscription_userId_idx_a489d58a",
+                  "prefix": "pushSubscription_userId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "endpoint"
+                  ]
+                }
+              ]
+            },
             "shift": {
               "columns": {
                 "breakEnd": {
@@ -1497,7 +1685,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "d47ead797f366f02ccd1afd846b43385ba3955733d7f361178e09a2c7a4f418a"
+    "storageHash": "ef0b80c414bff6cbb695f66b392b5aa55938a8114c34f7649f059a001278e3b2"
   },
   "capabilities": {
     "postgres": {
