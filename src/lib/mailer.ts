@@ -1,12 +1,21 @@
 import nodemailer from "nodemailer";
+import type SMTPTransport from "nodemailer/lib/smtp-transport";
 import { env } from "../config/env";
+
+const transportOptions = {
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: { user: env.gmailUser, pass: env.gmailAppPassword },
+  // Railway's network can fail to route outbound IPv6, which makes a
+  // "service: gmail" connection hang until ETIMEDOUT since Node prefers
+  // IPv6 when resolving smtp.gmail.com. Forcing IPv4 avoids it.
+  family: 4,
+};
 
 const transporter =
   env.gmailUser && env.gmailAppPassword
-    ? nodemailer.createTransport({
-        service: "gmail",
-        auth: { user: env.gmailUser, pass: env.gmailAppPassword },
-      })
+    ? nodemailer.createTransport(transportOptions as SMTPTransport.Options)
     : null;
 
 export async function sendInviteEmail(to: string, inviteLink: string, managerName: string) {
