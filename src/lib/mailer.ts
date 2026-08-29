@@ -1,28 +1,31 @@
+import dns from "dns";
 import nodemailer from "nodemailer";
 import type SMTPTransport from "nodemailer/lib/smtp-transport";
 import { env } from "../config/env";
 
-const transportOptions = {
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  auth: { user: env.gmailUser, pass: env.gmailAppPassword },
-  // Railway's network can fail to route outbound IPv6, which makes a
-  // "service: gmail" connection hang until ETIMEDOUT since Node prefers
-  // IPv6 when resolving smtp.gmail.com. Forcing IPv4 avoids it.
-  family: 4,
-};
-
-const transporter =
-  env.gmailUser && env.gmailAppPassword
-    ? nodemailer.createTransport(transportOptions as SMTPTransport.Options)
-    : null;
-
 export async function sendInviteEmail(to: string, inviteLink: string, managerName: string) {
-  if (!transporter) {
+  if (!env.gmailUser || !env.gmailAppPassword) {
     console.warn("GMAIL_USER/GMAIL_APP_PASSWORD not configured — skipping invite email send");
     return;
   }
+
+  // nodemailer resolves both A and AAAA records for smtp.gmail.com and picks
+  // a *random* one to connect to -- on Railway the IPv6 addresses are
+  // unreachable (ENETUNREACH), so about half of all sends fail. Resolving an
+  // IPv4 address ourselves and connecting to it directly avoids the coin
+  // flip, while keeping the real hostname as the TLS servername (SNI) so
+  // certificate validation against smtp.gmail.com still passes.
+  const [ipv4Address] = await dns.promises.resolve4("smtp.gmail.com");
+
+  const transportOptions: SMTPTransport.Options = {
+    host: ipv4Address,
+    port: 465,
+    secure: true,
+    tls: { servername: "smtp.gmail.com" },
+    auth: { user: env.gmailUser, pass: env.gmailAppPassword },
+  };
+
+  const transporter = nodemailer.createTransport(transportOptions);
 
   await transporter.sendMail({
     from: `Shiftline <${env.gmailUser}>`,
