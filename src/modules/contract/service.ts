@@ -1,8 +1,10 @@
 import {
   findContractsByUser,
   findContractByIdForUser,
+  findContractPdfForUser,
   createContract,
   updateContractForUser,
+  setContractPdf,
   deleteContractForUser,
   CreateContractInput,
   UpdateContractInput,
@@ -22,6 +24,14 @@ export async function getContract(id: number, userId: number) {
   return contract;
 }
 
+export async function getContractPdf(id: number, userId: number) {
+  const pdf = await findContractPdfForUser(id, userId);
+  if (!pdf || !pdf.pdfBase64 || !pdf.pdfFilename) {
+    throw new AppError(404, "No PDF uploaded for this contract");
+  }
+  return { pdfBase64: pdf.pdfBase64, pdfFilename: pdf.pdfFilename };
+}
+
 export async function addContract(userId: number, input: Omit<CreateContractInput, "userId">) {
   return createContract({ ...input, userId });
 }
@@ -31,9 +41,21 @@ export async function editContract(id: number, userId: number, input: UpdateCont
   if (!updated) {
     throw new AppError(404, "Contract not found");
   }
-  if (input.status) {
-    await notify(userId, `Contract "${updated.title}" status changed to ${updated.status}`);
+  return updated;
+}
+
+export async function uploadContractPdf(
+  id: number,
+  userId: number,
+  buffer: Buffer,
+  filename: string,
+) {
+  const existing = await findContractByIdForUser(id, userId);
+  if (!existing) {
+    throw new AppError(404, "Contract not found");
   }
+  const updated = await setContractPdf(id, userId, buffer.toString("base64"), filename);
+  await notify(userId, `Your contract document (${existing.role}) was uploaded`);
   return updated;
 }
 

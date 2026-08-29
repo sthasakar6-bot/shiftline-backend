@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import multer from "multer";
 import { AppError } from "../errors/AppError";
 
 interface SqlError {
@@ -18,6 +19,11 @@ export function errorHandler(err: unknown, req: Request, res: Response, next: Ne
 
   if (err instanceof AppError) {
     res.status(err.status).json({ error: err.message });
+    return;
+  }
+
+  if (err instanceof multer.MulterError) {
+    res.status(400).json({ error: err.message });
     return;
   }
 

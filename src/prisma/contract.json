@@ -158,20 +158,6 @@
                   "kind": "scalar"
                 }
               },
-              "description": {
-                "nullable": true,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "endDate": {
-                "nullable": true,
-                "type": {
-                  "codecId": "pg/timestamptz-string@1",
-                  "kind": "scalar"
-                }
-              },
               "id": {
                 "nullable": false,
                 "type": {
@@ -179,21 +165,21 @@
                   "kind": "scalar"
                 }
               },
-              "startDate": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/timestamptz-string@1",
-                  "kind": "scalar"
-                }
-              },
-              "status": {
-                "nullable": false,
+              "pdfBase64": {
+                "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
-              "title": {
+              "pdfFilename": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "role": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
@@ -237,23 +223,17 @@
                 "createdAt": {
                   "column": "createdAt"
                 },
-                "description": {
-                  "column": "description"
-                },
-                "endDate": {
-                  "column": "endDate"
-                },
                 "id": {
                   "column": "id"
                 },
-                "startDate": {
-                  "column": "startDate"
+                "pdfBase64": {
+                  "column": "pdfBase64"
                 },
-                "status": {
-                  "column": "status"
+                "pdfFilename": {
+                  "column": "pdfFilename"
                 },
-                "title": {
-                  "column": "title"
+                "role": {
+                  "column": "role"
                 },
                 "updatedAt": {
                   "column": "updatedAt"
@@ -980,16 +960,6 @@
                   "nativeType": "timestamptz",
                   "nullable": false
                 },
-                "description": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": true
-                },
-                "endDate": {
-                  "codecId": "pg/timestamptz-string@1",
-                  "nativeType": "timestamptz",
-                  "nullable": true
-                },
                 "id": {
                   "codecId": "pg/int4@1",
                   "default": {
@@ -999,21 +969,17 @@
                   "nativeType": "int4",
                   "nullable": false
                 },
-                "startDate": {
-                  "codecId": "pg/timestamptz-string@1",
-                  "nativeType": "timestamptz",
-                  "nullable": false
-                },
-                "status": {
+                "pdfBase64": {
                   "codecId": "pg/text@1",
-                  "default": {
-                    "kind": "literal",
-                    "value": "active"
-                  },
                   "nativeType": "text",
-                  "nullable": false
+                  "nullable": true
                 },
-                "title": {
+                "pdfFilename": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "role": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
@@ -1501,7 +1467,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "e25d0f1aa5e1f05dcb69a081486bb5a3e1b628e252d0ad7c6bbac361d3c24f61"
+    "storageHash": "7673f83201f32b39a52e4b02c0c01a091ded7d495793e57c549023f6a4263bdf"
   },
   "capabilities": {
     "postgres": {

@@ -4,6 +4,8 @@ import app from "../src/app";
 import { db } from "../src/prisma/db";
 import { registerAndLogin, registerUser, loginUser, uniqueEmail } from "./helpers";
 
+const MIN_PDF = Buffer.from("%PDF-1.4\n%%EOF");
+
 describe("Contracts", () => {
   let employeeToken: string;
   let managerToken: string;
@@ -39,7 +41,7 @@ describe("Contracts", () => {
     const res = await request(app)
       .post("/api/contracts")
       .set("Authorization", `Bearer ${employeeToken}`)
-      .send({ title: "Self Contract", startDate: "2026-09-01" });
+      .send({ role: "Cashier" });
     expect(res.status).toBe(404);
   });
 
@@ -47,7 +49,7 @@ describe("Contracts", () => {
     const res = await request(app)
       .post(`/api/users/${reportId}/contracts`)
       .set("Authorization", `Bearer ${employeeToken}`)
-      .send({ title: "Should fail", startDate: "2026-09-01" });
+      .send({ role: "Should fail" });
     expect(res.status).toBe(403);
   });
 
@@ -55,29 +57,30 @@ describe("Contracts", () => {
     const create = await request(app)
       .post(`/api/users/${reportId}/contracts`)
       .set("Authorization", `Bearer ${managerToken}`)
-      .send({ title: "Employment Contract", startDate: "2026-09-01", endDate: "2027-09-01" });
+      .send({ role: "Cashier" });
     expect(create.status).toBe(201);
     const contractId = create.body.id;
     expect(create.body.userId).toBe(reportId);
+    expect(create.body.role).toBe("Cashier");
 
     const seenByEmployee = await request(app)
       .get(`/api/contracts/${contractId}`)
       .set("Authorization", `Bearer ${employeeToken}`);
     expect(seenByEmployee.status).toBe(200);
-    expect(seenByEmployee.body.endDate).toBeTruthy();
+    expect(seenByEmployee.body.role).toBe("Cashier");
 
     const employeeTriesUpdate = await request(app)
       .patch(`/api/contracts/${contractId}`)
       .set("Authorization", `Bearer ${employeeToken}`)
-      .send({ endDate: "2099-01-01" });
+      .send({ role: "Manager" });
     expect(employeeTriesUpdate.status).toBe(404);
 
     const managerUpdate = await request(app)
       .patch(`/api/users/${reportId}/contracts/${contractId}`)
       .set("Authorization", `Bearer ${managerToken}`)
-      .send({ endDate: "2028-01-01" });
+      .send({ role: "Senior Cashier" });
     expect(managerUpdate.status).toBe(200);
-    expect(managerUpdate.body.endDate).toContain("2028-01-01");
+    expect(managerUpdate.body.role).toBe("Senior Cashier");
 
     const managerDelete = await request(app)
       .delete(`/api/users/${reportId}/contracts/${contractId}`)
@@ -95,5 +98,77 @@ describe("Contracts", () => {
       .get("/api/contracts/999999999")
       .set("Authorization", `Bearer ${employeeToken}`);
     expect(res.status).toBe(404);
+  });
+
+  it("404s fetching the PDF before one is uploaded", async () => {
+    const create = await request(app)
+      .post(`/api/users/${reportId}/contracts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ role: "Pending PDF" });
+    const contractId = create.body.id;
+
+    const res = await request(app)
+      .get(`/api/contracts/${contractId}/pdf`)
+      .set("Authorization", `Bearer ${employeeToken}`);
+    expect(res.status).toBe(404);
+  });
+
+  it("blocks a non-manager from uploading a contract PDF", async () => {
+    const create = await request(app)
+      .post(`/api/users/${reportId}/contracts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ role: "PDF Upload Target" });
+    const contractId = create.body.id;
+
+    const res = await request(app)
+      .post(`/api/users/${reportId}/contracts/${contractId}/pdf`)
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .attach("pdf", MIN_PDF, { filename: "contract.pdf", contentType: "application/pdf" });
+    expect(res.status).toBe(403);
+  });
+
+  it("rejects a non-PDF file upload", async () => {
+    const create = await request(app)
+      .post(`/api/users/${reportId}/contracts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ role: "Bad Upload Target" });
+    const contractId = create.body.id;
+
+    const res = await request(app)
+      .post(`/api/users/${reportId}/contracts/${contractId}/pdf`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .attach("pdf", Buffer.from("not a pdf"), {
+        filename: "contract.txt",
+        contentType: "text/plain",
+      });
+    expect(res.status).toBe(400);
+  });
+
+  it("lets a manager upload a contract PDF and the employee view it", async () => {
+    const create = await request(app)
+      .post(`/api/users/${reportId}/contracts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ role: "PDF Contract" });
+    const contractId = create.body.id;
+
+    const upload = await request(app)
+      .post(`/api/users/${reportId}/contracts/${contractId}/pdf`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .attach("pdf", MIN_PDF, { filename: "contract.pdf", contentType: "application/pdf" });
+    expect(upload.status).toBe(200);
+    expect(upload.body.pdfFilename).toBe("contract.pdf");
+
+    const res = await request(app)
+      .get(`/api/contracts/${contractId}/pdf`)
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .buffer(true)
+      .parse((response, callback) => {
+        const chunks: Buffer[] = [];
+        response.on("data", (chunk: Buffer) => chunks.push(chunk));
+        response.on("end", () => callback(null, Buffer.concat(chunks)));
+      });
+    expect(res.status).toBe(200);
+    expect(res.headers["content-type"]).toBe("application/pdf");
+    expect(Buffer.compare(res.body as Buffer, MIN_PDF)).toBe(0);
   });
 });
