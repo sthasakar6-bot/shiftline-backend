@@ -8,7 +8,7 @@ import {
 } from "./controller";
 import { requireAuth } from "../../middleware/requireAuth";
 import { requireRole } from "../../middleware/requireRole";
-import { requireManagesTarget } from "../../middleware/requireManagesTarget";
+import { requireManagesTargetOrSelf } from "../../middleware/requireManagesTarget";
 import { validate } from "../../middleware/validate";
 import { createLeaveRequestSchema, decideLeaveRequestSchema } from "./schemas";
 
@@ -27,14 +27,14 @@ router.get(
   "/users/:id/leave-requests",
   requireAuth,
   requireRole("manager"),
-  requireManagesTarget,
+  requireManagesTargetOrSelf,
   listLeaveRequestsForReportController,
 );
 router.patch(
   "/users/:id/leave-requests/:requestId",
   requireAuth,
   requireRole("manager"),
-  requireManagesTarget,
+  requireManagesTargetOrSelf,
   validate(decideLeaveRequestSchema),
   decideLeaveRequestController,
 );

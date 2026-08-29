@@ -7,6 +7,7 @@ import { registerAndLogin, registerUser, loginUser, uniqueEmail } from "./helper
 describe("Attendance", () => {
   let token: string;
   let managerToken: string;
+  let managerId: number;
   let reportId: number;
   let outsiderToken: string;
   let shiftId: number;
@@ -14,6 +15,7 @@ describe("Attendance", () => {
   beforeAll(async () => {
     const managerUser = await registerUser({ email: uniqueEmail("attendance-manager") });
     await db.orm.public.User.where({ id: managerUser.id }).update({ role: "manager" });
+    managerId = managerUser.id;
     managerToken = await loginUser(managerUser.email, managerUser.password);
 
     const result = await registerAndLogin({
@@ -119,5 +121,23 @@ describe("Attendance", () => {
       .set("Authorization", `Bearer ${token}`)
       .send({ shiftId, lat: 999, lng: 0 });
     expect(res.status).toBe(400);
+  });
+
+  it("lets a manager view their own attendance records", async () => {
+    const shift = await request(app)
+      .post(`/api/users/${managerId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ startsAt: "2026-10-03T09:00:00Z", endsAt: "2026-10-03T17:00:00Z" });
+
+    await request(app)
+      .post("/api/attendance/clock-in")
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ shiftId: shift.body.id });
+
+    const res = await request(app)
+      .get(`/api/users/${managerId}/attendance`)
+      .set("Authorization", `Bearer ${managerToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.length).toBeGreaterThan(0);
   });
 });

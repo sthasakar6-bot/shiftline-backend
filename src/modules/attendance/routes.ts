@@ -7,7 +7,7 @@ import {
 } from "./controller";
 import { requireAuth } from "../../middleware/requireAuth";
 import { requireRole } from "../../middleware/requireRole";
-import { requireManagesTarget } from "../../middleware/requireManagesTarget";
+import { requireManagesTargetOrSelf } from "../../middleware/requireManagesTarget";
 import { validate } from "../../middleware/validate";
 import { clockInSchema, clockOutSchema } from "./schemas";
 
@@ -26,7 +26,7 @@ router.get(
   "/users/:id/attendance",
   requireAuth,
   requireRole("manager"),
-  requireManagesTarget,
+  requireManagesTargetOrSelf,
   listAttendanceForReportController,
 );
 

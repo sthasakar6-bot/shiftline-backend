@@ -7,12 +7,14 @@ import { registerAndLogin, registerUser, loginUser, uniqueEmail } from "./helper
 describe("Leave requests", () => {
   let employeeToken: string;
   let managerToken: string;
+  let managerId: number;
   let reportId: number;
   let outsiderToken: string;
 
   beforeAll(async () => {
     const managerUser = await registerUser({ email: uniqueEmail("leave-manager") });
     await db.orm.public.User.where({ id: managerUser.id }).update({ role: "manager" });
+    managerId = managerUser.id;
     managerToken = await loginUser(managerUser.email, managerUser.password);
 
     const { user, token } = await registerAndLogin({
@@ -129,5 +131,26 @@ describe("Leave requests", () => {
       .delete(`/api/leave-requests/${requestId}`)
       .set("Authorization", `Bearer ${employeeToken}`);
     expect(cancel.status).toBe(409);
+  });
+
+  it("lets a manager view and approve their own leave request", async () => {
+    const create = await request(app)
+      .post("/api/leave-requests")
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ type: "sick", startDate: "2026-12-01", endDate: "2026-12-02" });
+    expect(create.status).toBe(201);
+
+    const list = await request(app)
+      .get(`/api/users/${managerId}/leave-requests`)
+      .set("Authorization", `Bearer ${managerToken}`);
+    expect(list.status).toBe(200);
+    expect(list.body.some((r: { id: number }) => r.id === create.body.id)).toBe(true);
+
+    const approve = await request(app)
+      .patch(`/api/users/${managerId}/leave-requests/${create.body.id}`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ status: "approved" });
+    expect(approve.status).toBe(200);
+    expect(approve.body.status).toBe("approved");
   });
 });
