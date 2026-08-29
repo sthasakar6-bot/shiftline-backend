@@ -9,11 +9,13 @@ const MIN_PDF = Buffer.from("%PDF-1.4\n%%EOF");
 describe("Contracts", () => {
   let employeeToken: string;
   let managerToken: string;
+  let managerId: number;
   let reportId: number;
 
   beforeAll(async () => {
     const managerUser = await registerUser({ email: uniqueEmail("contract-manager") });
     await db.orm.public.User.where({ id: managerUser.id }).update({ role: "manager" });
+    managerId = managerUser.id;
     managerToken = await loginUser(managerUser.email, managerUser.password);
 
     const { user, token } = await registerAndLogin({
@@ -170,5 +172,31 @@ describe("Contracts", () => {
     expect(res.status).toBe(200);
     expect(res.headers["content-type"]).toBe("application/pdf");
     expect(Buffer.compare(res.body as Buffer, MIN_PDF)).toBe(0);
+  });
+
+  it("lets a manager create and view a contract for themselves", async () => {
+    const create = await request(app)
+      .post(`/api/users/${managerId}/contracts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ role: "Owner" });
+    expect(create.status).toBe(201);
+    expect(create.body.userId).toBe(managerId);
+
+    const seen = await request(app)
+      .get(`/api/users/${managerId}/contracts`)
+      .set("Authorization", `Bearer ${managerToken}`);
+    expect(seen.status).toBe(200);
+    expect(seen.body.some((c: { id: number }) => c.id === create.body.id)).toBe(true);
+  });
+
+  it("blocks a manager from creating a contract for an unrelated manager", async () => {
+    const outsiderManager = await registerUser({ email: uniqueEmail("contract-outsider-mgr") });
+    await db.orm.public.User.where({ id: outsiderManager.id }).update({ role: "manager" });
+
+    const res = await request(app)
+      .post(`/api/users/${outsiderManager.id}/contracts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ role: "Should fail" });
+    expect(res.status).toBe(403);
   });
 });

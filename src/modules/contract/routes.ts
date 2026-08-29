@@ -13,7 +13,7 @@ import {
 } from "./controller";
 import { requireAuth } from "../../middleware/requireAuth";
 import { requireRole } from "../../middleware/requireRole";
-import { requireManagesTarget } from "../../middleware/requireManagesTarget";
+import { requireManagesTargetOrSelf } from "../../middleware/requireManagesTarget";
 import { validate } from "../../middleware/validate";
 import { AppError } from "../../errors/AppError";
 import { createContractSchema, updateContractSchema } from "./schemas";
@@ -42,21 +42,21 @@ router.get(
   "/users/:id/contracts",
   requireAuth,
   requireRole("manager"),
-  requireManagesTarget,
+  requireManagesTargetOrSelf,
   listContractsForReportController,
 );
 router.get(
   "/users/:id/contracts/:contractId/pdf",
   requireAuth,
   requireRole("manager"),
-  requireManagesTarget,
+  requireManagesTargetOrSelf,
   getContractPdfForReportController,
 );
 router.post(
   "/users/:id/contracts",
   requireAuth,
   requireRole("manager"),
-  requireManagesTarget,
+  requireManagesTargetOrSelf,
   validate(createContractSchema),
   createContractForReportController,
 );
@@ -64,7 +64,7 @@ router.patch(
   "/users/:id/contracts/:contractId",
   requireAuth,
   requireRole("manager"),
-  requireManagesTarget,
+  requireManagesTargetOrSelf,
   validate(updateContractSchema),
   updateContractForReportController,
 );
@@ -72,7 +72,7 @@ router.post(
   "/users/:id/contracts/:contractId/pdf",
   requireAuth,
   requireRole("manager"),
-  requireManagesTarget,
+  requireManagesTargetOrSelf,
   upload.single("pdf"),
   uploadContractPdfForReportController,
 );
@@ -80,7 +80,7 @@ router.delete(
   "/users/:id/contracts/:contractId",
   requireAuth,
   requireRole("manager"),
-  requireManagesTarget,
+  requireManagesTargetOrSelf,
   deleteContractForReportController,
 );
 
