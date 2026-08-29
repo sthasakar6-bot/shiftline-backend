@@ -7,11 +7,13 @@ import { registerAndLogin, registerUser, loginUser, uniqueEmail } from "./helper
 describe("Shifts", () => {
   let employeeToken: string;
   let managerToken: string;
+  let managerId: number;
   let reportId: number;
 
   beforeAll(async () => {
     const managerUser = await registerUser({ email: uniqueEmail("shift-manager") });
     await db.orm.public.User.where({ id: managerUser.id }).update({ role: "manager" });
+    managerId = managerUser.id;
     managerToken = await loginUser(managerUser.email, managerUser.password);
 
     const { user, token } = await registerAndLogin({
@@ -83,5 +85,14 @@ describe("Shifts", () => {
       .get("/api/shifts/999999999")
       .set("Authorization", `Bearer ${employeeToken}`);
     expect(res.status).toBe(404);
+  });
+
+  it("lets a manager schedule themselves", async () => {
+    const create = await request(app)
+      .post(`/api/users/${managerId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ startsAt: "2026-09-02T09:00:00Z", endsAt: "2026-09-02T17:00:00Z" });
+    expect(create.status).toBe(201);
+    expect(create.body.userId).toBe(managerId);
   });
 });

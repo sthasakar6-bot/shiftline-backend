@@ -9,7 +9,7 @@ import {
 } from "./controller";
 import { requireAuth } from "../../middleware/requireAuth";
 import { requireRole } from "../../middleware/requireRole";
-import { requireManagesTarget } from "../../middleware/requireManagesTarget";
+import { requireManagesTargetOrSelf } from "../../middleware/requireManagesTarget";
 import { validate } from "../../middleware/validate";
 import { createShiftSchema, updateShiftSchema } from "./schemas";
 
@@ -24,14 +24,14 @@ router.get(
   "/users/:id/shifts",
   requireAuth,
   requireRole("manager"),
-  requireManagesTarget,
+  requireManagesTargetOrSelf,
   listShiftsForReportController,
 );
 router.post(
   "/users/:id/shifts",
   requireAuth,
   requireRole("manager"),
-  requireManagesTarget,
+  requireManagesTargetOrSelf,
   validate(createShiftSchema),
   createShiftForReportController,
 );
@@ -39,7 +39,7 @@ router.patch(
   "/users/:id/shifts/:shiftId",
   requireAuth,
   requireRole("manager"),
-  requireManagesTarget,
+  requireManagesTargetOrSelf,
   validate(updateShiftSchema),
   updateShiftForReportController,
 );
@@ -47,7 +47,7 @@ router.delete(
   "/users/:id/shifts/:shiftId",
   requireAuth,
   requireRole("manager"),
-  requireManagesTarget,
+  requireManagesTargetOrSelf,
   deleteShiftForReportController,
 );
 
