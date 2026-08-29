@@ -51,7 +51,11 @@ export async function addShift(userId: number, input: Omit<CreateShiftInput, "us
   // The exact clock time is left for the app to display (it renders in the
   // viewer's own local timezone); baking a formatted time into the message
   // here would risk showing the wrong hour to whoever reads it.
-  await notify(userId, "You've been scheduled for a new shift. Open Shiftline to see the details.");
+  await notify(
+    userId,
+    "You've been scheduled for a new shift. Open the app to see the details.",
+    "New Shift",
+  );
   return shift;
 }
 
