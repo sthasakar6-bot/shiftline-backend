@@ -534,6 +534,13 @@
                   "kind": "scalar"
                 }
               },
+              "url": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "userId": {
                 "nullable": false,
                 "type": {
@@ -572,6 +579,9 @@
                 },
                 "read": {
                   "column": "read"
+                },
+                "url": {
+                  "column": "url"
                 },
                 "userId": {
                   "column": "userId"
@@ -1434,6 +1444,11 @@
                   "nativeType": "bool",
                   "nullable": false
                 },
+                "url": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "userId": {
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
@@ -1730,7 +1745,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "23181a2c0c2c9c585af07b26892a04b81aa58405351aa38769f27327ef28f406"
+    "storageHash": "fd457f7ebb9f7088255b11f1a286c9027fe4e1a82b982f9b043f00bb3ee9337a"
   },
   "capabilities": {
     "postgres": {

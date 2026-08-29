@@ -4,6 +4,7 @@ export interface Notification {
   id: number;
   userId: number;
   message: string;
+  url: string | null;
   read: boolean;
   createdAt: string;
 }
@@ -19,8 +20,12 @@ export async function findNotificationByIdForUser(
   return db.orm.public.Notification.where({ id, userId }).first();
 }
 
-export async function createNotification(userId: number, message: string): Promise<Notification> {
-  return db.orm.public.Notification.create({ userId, message });
+export async function createNotification(
+  userId: number,
+  message: string,
+  url?: string,
+): Promise<Notification> {
+  return db.orm.public.Notification.create({ userId, message, url });
 }
 
 export async function markNotificationRead(

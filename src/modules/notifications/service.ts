@@ -14,7 +14,7 @@ export async function listNotifications(userId: number) {
 }
 
 export async function notify(userId: number, message: string, title = "Notification", url = "/") {
-  const notification = await createNotification(userId, message);
+  const notification = await createNotification(userId, message, url);
   await sendPushToUser(userId, { title, body: message, url });
   return notification;
 }
