@@ -28,6 +28,21 @@ export async function findDirectReports(managerId: number): Promise<UserSummary[
     .all();
 }
 
+export async function findAllEmployees(): Promise<UserSummary[]> {
+  return db.orm.public.User.select("id", "name", "email", "role", "managerId")
+    .where({ role: "employee" })
+    .all();
+}
+
+export async function setUserManager(
+  id: number,
+  managerId: number | null,
+): Promise<UserSummary | null> {
+  return db.orm.public.User.where({ id })
+    .select("id", "name", "email", "role", "managerId")
+    .update({ managerId });
+}
+
 export async function promoteUserToManager(id: number): Promise<UserSummary | null> {
   return db.orm.public.User.where({ id })
     .select("id", "name", "email", "role", "managerId")

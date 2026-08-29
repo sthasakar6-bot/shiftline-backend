@@ -84,4 +84,52 @@ describe("RBAC", () => {
       .set("Authorization", `Bearer ${outsiderToken}`);
     expect(res.status).toBe(403);
   });
+
+  it("lets a manager list all employees, including unassigned ones", async () => {
+    const res = await request(app)
+      .get("/api/users/employees")
+      .set("Authorization", `Bearer ${managerToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.some((u: { id: number }) => u.id === outsiderId)).toBe(true);
+  });
+
+  it("blocks a non-manager from listing employees", async () => {
+    const res = await request(app)
+      .get("/api/users/employees")
+      .set("Authorization", `Bearer ${outsiderToken}`);
+    expect(res.status).toBe(403);
+  });
+
+  it("lets a manager assign an unassigned employee to their team", async () => {
+    const res = await request(app)
+      .patch(`/api/users/${outsiderId}/manager`)
+      .set("Authorization", `Bearer ${managerToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.managerId).toBe(
+      (await request(app).get("/api/auth/me").set("Authorization", `Bearer ${managerToken}`))
+        .body.id,
+    );
+  });
+
+  it("lets a manager remove an employee from their team", async () => {
+    const res = await request(app)
+      .delete(`/api/users/${outsiderId}/manager`)
+      .set("Authorization", `Bearer ${managerToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.managerId).toBe(null);
+  });
+
+  it("blocks removing an employee who isn't your report", async () => {
+    const res = await request(app)
+      .delete(`/api/users/${reportId}/manager`)
+      .set("Authorization", `Bearer ${outsiderToken}`);
+    expect(res.status).toBe(403);
+  });
+
+  it("blocks a non-manager from assigning themselves as another user's manager", async () => {
+    const res = await request(app)
+      .patch(`/api/users/${outsiderId}/manager`)
+      .set("Authorization", `Bearer ${reportToken}`);
+    expect(res.status).toBe(403);
+  });
 });
