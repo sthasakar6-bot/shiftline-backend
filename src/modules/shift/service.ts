@@ -48,7 +48,10 @@ export async function addShift(userId: number, input: Omit<CreateShiftInput, "us
   }
   validateBreakWindow(input.startsAt, input.endsAt, input.breakStart, input.breakEnd);
   const shift = await createShift({ ...input, userId });
-  await notify(userId, `New shift assigned: ${input.startsAt} to ${input.endsAt}`);
+  // The exact clock time is left for the app to display (it renders in the
+  // viewer's own local timezone); baking a formatted time into the message
+  // here would risk showing the wrong hour to whoever reads it.
+  await notify(userId, "You've been scheduled for a new shift. Open Shiftline to see the details.");
   return shift;
 }
 
