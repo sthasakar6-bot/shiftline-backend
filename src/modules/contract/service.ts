@@ -55,7 +55,12 @@ export async function uploadContractPdf(
     throw new AppError(404, "Contract not found");
   }
   const updated = await setContractPdf(id, userId, buffer.toString("base64"), filename);
-  await notify(userId, `Your ${existing.role} contract document is ready to view.`, "Contract Ready");
+  await notify(
+    userId,
+    `Your ${existing.role} contract document is ready to view.`,
+    "Contract Ready",
+    "/?tab=contracts",
+  );
   return updated;
 }
 

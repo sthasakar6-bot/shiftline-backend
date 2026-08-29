@@ -55,6 +55,7 @@ export async function addShift(userId: number, input: Omit<CreateShiftInput, "us
     userId,
     "You've been scheduled for a new shift. Open the app to see the details.",
     "New Shift",
+    "/?tab=roster",
   );
   return shift;
 }

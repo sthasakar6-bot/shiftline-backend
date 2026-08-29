@@ -54,6 +54,11 @@ export async function decideLeaveRequest(id: number, userId: number, decision: s
   if (!updated) {
     throw new AppError(404, "Leave request not found");
   }
-  await notify(userId, `Your ${existing.type} leave request has been ${decision}.`, "Leave Request Update");
+  await notify(
+    userId,
+    `Your ${existing.type} leave request has been ${decision}.`,
+    "Leave Request Update",
+    "/?tab=leave",
+  );
   return updated;
 }

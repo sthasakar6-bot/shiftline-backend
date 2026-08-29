@@ -6,9 +6,9 @@ export async function listNotifications(userId: number) {
   return findNotificationsByUser(userId);
 }
 
-export async function notify(userId: number, message: string, title = "Notification") {
+export async function notify(userId: number, message: string, title = "Notification", url = "/") {
   const notification = await createNotification(userId, message);
-  await sendPushToUser(userId, { title, body: message });
+  await sendPushToUser(userId, { title, body: message, url });
   return notification;
 }
 
