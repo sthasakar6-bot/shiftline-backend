@@ -17,18 +17,17 @@ export async function listShiftsForReportController(req: Request, res: Response)
 }
 
 export async function createShiftForReportController(req: Request, res: Response) {
-  const { startsAt, endsAt, breakStart, breakEnd } = req.body;
-  const shift = await addShift(Number(req.params.id), { startsAt, endsAt, breakStart, breakEnd });
+  const { startsAt, endsAt, breakMinutes } = req.body;
+  const shift = await addShift(Number(req.params.id), { startsAt, endsAt, breakMinutes });
   res.status(201).json(shift);
 }
 
 export async function updateShiftForReportController(req: Request, res: Response) {
-  const { startsAt, endsAt, breakStart, breakEnd } = req.body;
+  const { startsAt, endsAt, breakMinutes } = req.body;
   const shift = await editShift(Number(req.params.shiftId), Number(req.params.id), {
     startsAt,
     endsAt,
-    breakStart,
-    breakEnd,
+    breakMinutes,
   });
   res.json(shift);
 }

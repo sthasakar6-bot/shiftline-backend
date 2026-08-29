@@ -96,42 +96,39 @@ describe("Shifts", () => {
     expect(create.body.userId).toBe(managerId);
   });
 
-  it("lets a manager set a break window within the shift", async () => {
+  it("lets a manager set a break duration within the shift", async () => {
     const create = await request(app)
       .post(`/api/users/${reportId}/shifts`)
       .set("Authorization", `Bearer ${managerToken}`)
       .send({
         startsAt: "2026-09-03T09:00:00Z",
         endsAt: "2026-09-03T17:00:00Z",
-        breakStart: "2026-09-03T12:00:00Z",
-        breakEnd: "2026-09-03T12:30:00Z",
+        breakMinutes: 30,
       });
     expect(create.status).toBe(201);
-    expect(create.body.breakStart).toBeTruthy();
-    expect(create.body.breakEnd).toBeTruthy();
+    expect(create.body.breakMinutes).toBe(30);
   });
 
-  it("rejects a break window outside the shift", async () => {
+  it("rejects a break longer than the shift", async () => {
     const res = await request(app)
       .post(`/api/users/${reportId}/shifts`)
       .set("Authorization", `Bearer ${managerToken}`)
       .send({
         startsAt: "2026-09-04T09:00:00Z",
-        endsAt: "2026-09-04T17:00:00Z",
-        breakStart: "2026-09-04T18:00:00Z",
-        breakEnd: "2026-09-04T18:30:00Z",
+        endsAt: "2026-09-04T09:10:00Z",
+        breakMinutes: 60,
       });
     expect(res.status).toBe(400);
   });
 
-  it("rejects a lone breakStart without breakEnd", async () => {
+  it("rejects a break duration outside the 15/30/45/60 options", async () => {
     const res = await request(app)
       .post(`/api/users/${reportId}/shifts`)
       .set("Authorization", `Bearer ${managerToken}`)
       .send({
         startsAt: "2026-09-05T09:00:00Z",
         endsAt: "2026-09-05T17:00:00Z",
-        breakStart: "2026-09-05T12:00:00Z",
+        breakMinutes: 20,
       });
     expect(res.status).toBe(400);
   });

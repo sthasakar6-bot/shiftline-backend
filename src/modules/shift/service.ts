@@ -10,23 +10,13 @@ import {
 import { AppError } from "../../errors/AppError";
 import { notify } from "../notifications/service";
 
-function validateBreakWindow(
-  startsAt: string,
-  endsAt: string,
-  breakStart?: string,
-  breakEnd?: string,
-) {
-  if (!breakStart && !breakEnd) {
+function validateBreakMinutes(startsAt: string, endsAt: string, breakMinutes?: number) {
+  if (!breakMinutes) {
     return;
   }
-  if (!breakStart || !breakEnd) {
-    throw new AppError(400, "breakStart and breakEnd must be set together");
-  }
-  if (new Date(breakEnd) <= new Date(breakStart)) {
-    throw new AppError(400, "breakEnd must be after breakStart");
-  }
-  if (new Date(breakStart) < new Date(startsAt) || new Date(breakEnd) > new Date(endsAt)) {
-    throw new AppError(400, "Break time must fall within the shift");
+  const shiftMinutes = (new Date(endsAt).getTime() - new Date(startsAt).getTime()) / 60000;
+  if (breakMinutes > shiftMinutes) {
+    throw new AppError(400, "Break can't be longer than the shift");
   }
 }
 
@@ -46,7 +36,7 @@ export async function addShift(userId: number, input: Omit<CreateShiftInput, "us
   if (new Date(input.endsAt) <= new Date(input.startsAt)) {
     throw new AppError(400, "endsAt must be after startsAt");
   }
-  validateBreakWindow(input.startsAt, input.endsAt, input.breakStart, input.breakEnd);
+  validateBreakMinutes(input.startsAt, input.endsAt, input.breakMinutes);
   const shift = await createShift({ ...input, userId });
   // The exact clock time is left for the app to display (it renders in the
   // viewer's own local timezone); baking a formatted time into the message
@@ -67,9 +57,8 @@ export async function editShift(id: number, userId: number, input: UpdateShiftIn
   }
   const startsAt = input.startsAt ?? existing.startsAt;
   const endsAt = input.endsAt ?? existing.endsAt;
-  const breakStart = input.breakStart ?? existing.breakStart ?? undefined;
-  const breakEnd = input.breakEnd ?? existing.breakEnd ?? undefined;
-  validateBreakWindow(startsAt, endsAt, breakStart, breakEnd);
+  const breakMinutes = input.breakMinutes ?? existing.breakMinutes ?? undefined;
+  validateBreakMinutes(startsAt, endsAt, breakMinutes);
   const updated = await updateShiftForUser(id, userId, input);
   if (!updated) {
     throw new AppError(404, "Shift not found");

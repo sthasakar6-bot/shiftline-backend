@@ -5,8 +5,7 @@ export interface Shift {
   userId: number;
   startsAt: string;
   endsAt: string;
-  breakStart: string | null;
-  breakEnd: string | null;
+  breakMinutes: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -15,15 +14,13 @@ export interface CreateShiftInput {
   userId: number;
   startsAt: string;
   endsAt: string;
-  breakStart?: string;
-  breakEnd?: string;
+  breakMinutes?: number;
 }
 
 export interface UpdateShiftInput {
   startsAt?: string;
   endsAt?: string;
-  breakStart?: string;
-  breakEnd?: string;
+  breakMinutes?: number;
 }
 
 export async function findShiftsByUser(userId: number): Promise<Shift[]> {
