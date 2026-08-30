@@ -59,7 +59,7 @@ export async function uploadContractPdf(
     userId,
     `Your ${existing.role} contract document is ready to view.`,
     "Contract Ready",
-    "/?tab=contracts",
+    "/profile",
   );
   return updated;
 }
