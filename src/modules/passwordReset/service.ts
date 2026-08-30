@@ -34,7 +34,7 @@ export async function requestReset(email: string) {
       user.managerId,
       `${user.name} requested a password reset.`,
       "Password Reset Requested",
-      "/admin?tab=passwordResets",
+      "/admin?tab=invite",
     );
   }
 
