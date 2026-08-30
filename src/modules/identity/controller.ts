@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { register, login, getCurrentUser } from "./service";
+import { register, login, getCurrentUser, changePassword } from "./service";
 
 export async function registerController(req: Request, res: Response) {
   const { name, email, password, token } = req.body;
@@ -16,4 +16,10 @@ export async function loginController(req: Request, res: Response) {
 export async function meController(req: Request, res: Response) {
   const user = await getCurrentUser(req.user!.sub);
   res.json(user);
+}
+
+export async function changePasswordController(req: Request, res: Response) {
+  const { currentPassword, newPassword } = req.body;
+  await changePassword(req.user!.sub, currentPassword, newPassword);
+  res.status(204).send();
 }

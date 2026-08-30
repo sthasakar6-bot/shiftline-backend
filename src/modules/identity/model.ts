@@ -27,3 +27,7 @@ export async function createUser(data: {
 }): Promise<AuthUser> {
   return db.orm.public.User.create(data);
 }
+
+export async function setUserPassword(userId: number, passwordHash: string): Promise<void> {
+  await db.orm.public.User.where({ id: userId }).update({ passwordHash });
+}

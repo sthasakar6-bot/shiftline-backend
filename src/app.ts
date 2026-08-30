@@ -9,6 +9,7 @@ import notificationRoutes from "./modules/notifications/routes";
 import leaveRoutes from "./modules/leave/routes";
 import inviteRoutes from "./modules/invite/routes";
 import pushRoutes from "./modules/push/routes";
+import passwordResetRoutes from "./modules/passwordReset/routes";
 import { notFoundHandler, errorHandler } from "./middleware/errorHandler";
 import { env } from "./config/env";
 
@@ -29,6 +30,7 @@ app.use("/api", notificationRoutes);
 app.use("/api", leaveRoutes);
 app.use("/api", inviteRoutes);
 app.use("/api", pushRoutes);
+app.use("/api", passwordResetRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

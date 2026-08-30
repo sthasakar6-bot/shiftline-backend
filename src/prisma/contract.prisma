@@ -16,6 +16,7 @@ model User {
   leaveRequests LeaveRequest[]
   invitesSent   Invite[]
   pushSubscriptions PushSubscription[]
+  passwordResetRequests PasswordResetRequest[]
 }
 
 model Contract {
@@ -90,6 +91,17 @@ model PushSubscription {
   endpoint  String            @unique
   p256dh    String
   auth      String
+
+  createdAt TimestamptzString @default(now())
+}
+
+model PasswordResetRequest {
+  id        Int               @id @default(autoincrement())
+  userId    Int
+  user      User              @relation(fields: [userId], references: [id])
+  token     String            @unique
+  status    String            @default("pending")
+  expiresAt TimestamptzString
 
   createdAt TimestamptzString @default(now())
 }

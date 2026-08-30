@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:types": "tsc --noEmit --project tsconfig.test.json",
     "contract:emit": "prisma contract emit",
-    "make-manager": "node dist/scripts/make-manager.js"
+    "make-manager": "node dist/scripts/make-manager.js",
+    "reset-password": "node dist/scripts/reset-password.js"
   },
   "keywords": [],
   "author": "",

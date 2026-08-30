@@ -11,3 +11,8 @@ export const loginSchema = z.object({
   email: z.string().email("invalid email"),
   password: z.string().min(1, "password is required"),
 });
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "currentPassword is required"),
+  newPassword: z.string().min(8, "newPassword must be at least 8 characters"),
+});
