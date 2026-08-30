@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { env } from "../config/env";
 import { AppError } from "../errors/AppError";
+import { touchLastSeen } from "../modules/identity/model";
 
 export interface AuthPayload {
   sub: number;
@@ -17,7 +18,7 @@ declare global {
   }
 }
 
-export function requireAuth(req: Request, res: Response, next: NextFunction) {
+export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   const header = req.headers.authorization;
   if (!header || !header.startsWith("Bearer ")) {
     throw new AppError(401, "Missing or invalid Authorization header");
@@ -27,8 +28,10 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
 
   try {
     req.user = jwt.verify(token, env.jwtSecret) as unknown as AuthPayload;
-    next();
   } catch {
     throw new AppError(401, "Invalid or expired token");
   }
+
+  await touchLastSeen(req.user.sub).catch(() => {});
+  next();
 }

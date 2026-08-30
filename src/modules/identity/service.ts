@@ -2,7 +2,7 @@ import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import { env } from "../../config/env";
 import { AppError } from "../../errors/AppError";
-import { findUserByEmail, findUserById, createUser, setUserPassword } from "./model";
+import { findUserByEmail, findUserById, createUser, setUserPassword, setUserPhone } from "./model";
 import { validateInviteToken, consumeInvite } from "../invite/service";
 
 export async function register(name: string, email: string, password: string, token: string) {
@@ -53,6 +53,7 @@ export async function login(email: string, password: string) {
       email: user.email,
       role: user.role,
       hasAvatar: Boolean(user.avatarBase64),
+      phone: user.phone,
     },
   };
 }
@@ -68,7 +69,16 @@ export async function getCurrentUser(userId: number) {
     email: user.email,
     role: user.role,
     hasAvatar: Boolean(user.avatarBase64),
+    phone: user.phone,
   };
+}
+
+export async function updatePhone(userId: number, phone: string) {
+  const user = await findUserById(userId);
+  if (!user) {
+    throw new AppError(404, "User not found");
+  }
+  await setUserPhone(userId, phone.trim() || null);
 }
 
 export async function changePassword(

@@ -6,6 +6,8 @@ model User {
   role          String         @default("employee")
   avatarBase64  String?
   avatarMimeType String?
+  phone         String?
+  lastSeenAt    TimestamptzString?
   managerId     Int?
   manager       User?          @relation("ManagerReports", fields: [managerId], references: [id])
   reports       User[]         @relation("ManagerReports")

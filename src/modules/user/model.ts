@@ -13,9 +13,22 @@ export interface UserSummary {
   role: string;
   managerId: number | null;
   hasAvatar: boolean;
+  phone: string | null;
+  online: boolean;
 }
 
-const SUMMARY_FIELDS = ["id", "name", "email", "role", "managerId", "avatarBase64"] as const;
+const ONLINE_THRESHOLD_MS = 90 * 1000;
+
+const SUMMARY_FIELDS = [
+  "id",
+  "name",
+  "email",
+  "role",
+  "managerId",
+  "avatarBase64",
+  "phone",
+  "lastSeenAt",
+] as const;
 
 function toUserSummary(row: {
   id: number;
@@ -24,6 +37,8 @@ function toUserSummary(row: {
   role: string;
   managerId: number | null;
   avatarBase64: string | null;
+  phone: string | null;
+  lastSeenAt: string | null;
 }): UserSummary {
   return {
     id: row.id,
@@ -32,6 +47,8 @@ function toUserSummary(row: {
     role: row.role,
     managerId: row.managerId,
     hasAvatar: Boolean(row.avatarBase64),
+    phone: row.phone,
+    online: row.lastSeenAt !== null && Date.now() - new Date(row.lastSeenAt).getTime() < ONLINE_THRESHOLD_MS,
   };
 }
 

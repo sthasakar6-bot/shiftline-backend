@@ -931,6 +931,13 @@
                   "kind": "scalar"
                 }
               },
+              "lastSeenAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
               "managerId": {
                 "nullable": true,
                 "type": {
@@ -947,6 +954,13 @@
               },
               "passwordHash": {
                 "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "phone": {
+                "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
@@ -1126,6 +1140,9 @@
                 "id": {
                   "column": "id"
                 },
+                "lastSeenAt": {
+                  "column": "lastSeenAt"
+                },
                 "managerId": {
                   "column": "managerId"
                 },
@@ -1134,6 +1151,9 @@
                 },
                 "passwordHash": {
                   "column": "passwordHash"
+                },
+                "phone": {
+                  "column": "phone"
                 },
                 "role": {
                   "column": "role"
@@ -1925,6 +1945,11 @@
                   "nativeType": "int4",
                   "nullable": false
                 },
+                "lastSeenAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
                 "managerId": {
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
@@ -1939,6 +1964,11 @@
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
+                },
+                "phone": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
                 },
                 "role": {
                   "codecId": "pg/text@1",
@@ -1997,7 +2027,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "0c46283279320168b75068dec7f91e81743e6488ca06ff120d901b17f572b014"
+    "storageHash": "9a5c736eb5729dd1696e0024616facc1bfe49c9a8322b994c2a23a58786ad552"
   },
   "capabilities": {
     "postgres": {

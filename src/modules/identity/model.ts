@@ -8,6 +8,8 @@ export interface AuthUser {
   role: string;
   managerId: number | null;
   avatarBase64: string | null;
+  phone: string | null;
+  lastSeenAt: string | null;
 }
 
 export async function findUserByEmail(email: string): Promise<AuthUser | null> {
@@ -30,4 +32,14 @@ export async function createUser(data: {
 
 export async function setUserPassword(userId: number, passwordHash: string): Promise<void> {
   await db.orm.public.User.where({ id: userId }).update({ passwordHash });
+}
+
+export async function setUserPhone(userId: number, phone: string | null): Promise<void> {
+  await db.orm.public.User.where({ id: userId }).update({ phone });
+}
+
+export async function touchLastSeen(userId: number): Promise<void> {
+  await db.orm.public.User.where({ id: userId }).update({
+    lastSeenAt: new Date().toISOString(),
+  });
 }

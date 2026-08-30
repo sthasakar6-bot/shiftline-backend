@@ -16,3 +16,7 @@ export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "currentPassword is required"),
   newPassword: z.string().min(8, "newPassword must be at least 8 characters"),
 });
+
+export const updatePhoneSchema = z.object({
+  phone: z.string().max(30, "phone must be at most 30 characters"),
+});
