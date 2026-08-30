@@ -10,6 +10,7 @@ export interface Attendance {
   clockInLng: number | null;
   clockOutLat: number | null;
   clockOutLng: number | null;
+  missedClockOutNotifiedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -54,5 +55,18 @@ export async function setClockOut(
     clockOutLat,
     clockOutLng,
     updatedAt: new Date().toISOString(),
+  });
+}
+
+export async function findOpenAttendancePendingClockOutCheck(): Promise<Attendance[]> {
+  return db.orm.public.Attendance.where({
+    clockOut: null,
+    missedClockOutNotifiedAt: null,
+  }).all();
+}
+
+export async function markMissedClockOutNotified(id: number): Promise<void> {
+  await db.orm.public.Attendance.where({ id }).update({
+    missedClockOutNotifiedAt: new Date().toISOString(),
   });
 }

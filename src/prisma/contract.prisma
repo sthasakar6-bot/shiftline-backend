@@ -46,20 +46,21 @@ model Shift {
 }
 
 model Attendance {
-  id          Int                @id @default(autoincrement())
-  userId      Int
-  user        User               @relation(fields: [userId], references: [id])
-  shiftId     Int
-  shift       Shift              @relation(fields: [shiftId], references: [id])
-  clockIn     TimestamptzString?
-  clockOut    TimestamptzString?
-  clockInLat  Float?
-  clockInLng  Float?
-  clockOutLat Float?
-  clockOutLng Float?
+  id                        Int                @id @default(autoincrement())
+  userId                    Int
+  user                      User               @relation(fields: [userId], references: [id])
+  shiftId                   Int
+  shift                     Shift              @relation(fields: [shiftId], references: [id])
+  clockIn                   TimestamptzString?
+  clockOut                  TimestamptzString?
+  clockInLat                Float?
+  clockInLng                Float?
+  clockOutLat               Float?
+  clockOutLng               Float?
+  missedClockOutNotifiedAt  TimestamptzString?
 
-  createdAt   TimestamptzString  @default(now())
-  updatedAt   TimestamptzString  @default(now())
+  createdAt                 TimestamptzString  @default(now())
+  updatedAt                 TimestamptzString  @default(now())
 }
 
 model Notification {

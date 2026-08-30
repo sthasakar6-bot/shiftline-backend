@@ -103,6 +103,13 @@
                   "kind": "scalar"
                 }
               },
+              "missedClockOutNotifiedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
               "shiftId": {
                 "nullable": false,
                 "type": {
@@ -182,6 +189,9 @@
                 },
                 "id": {
                   "column": "id"
+                },
+                "missedClockOutNotifiedAt": {
+                  "column": "missedClockOutNotifiedAt"
                 },
                 "shiftId": {
                   "column": "shiftId"
@@ -1192,6 +1202,11 @@
                   "nativeType": "int4",
                   "nullable": false
                 },
+                "missedClockOutNotifiedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
                 "shiftId": {
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
@@ -1982,7 +1997,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "55ca57a31b2704e2c0d2f07c9dd7d3547dd70505cff1db3d1d4151bdab880096"
+    "storageHash": "0c46283279320168b75068dec7f91e81743e6488ca06ff120d901b17f572b014"
   },
   "capabilities": {
     "postgres": {
