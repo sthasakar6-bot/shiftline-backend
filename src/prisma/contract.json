@@ -792,6 +792,20 @@
           },
           "User": {
             "fields": {
+              "avatarBase64": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "avatarMimeType": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "email": {
                 "nullable": false,
                 "type": {
@@ -974,6 +988,12 @@
             },
             "storage": {
               "fields": {
+                "avatarBase64": {
+                  "column": "avatarBase64"
+                },
+                "avatarMimeType": {
+                  "column": "avatarMimeType"
+                },
                 "email": {
                   "column": "email"
                 },
@@ -1659,6 +1679,16 @@
             },
             "user": {
               "columns": {
+                "avatarBase64": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "avatarMimeType": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "email": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -1745,7 +1775,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "fd457f7ebb9f7088255b11f1a286c9027fe4e1a82b982f9b043f00bb3ee9337a"
+    "storageHash": "d979e1836d0e548d8e6af2482e10f08c22bdd268082b74d7f21c83d1da5a74ae"
   },
   "capabilities": {
     "postgres": {

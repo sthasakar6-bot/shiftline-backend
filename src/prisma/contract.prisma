@@ -4,6 +4,8 @@ model User {
   email         String         @unique
   passwordHash  String
   role          String         @default("employee")
+  avatarBase64  String?
+  avatarMimeType String?
   managerId     Int?
   manager       User?          @relation("ManagerReports", fields: [managerId], references: [id])
   reports       User[]         @relation("ManagerReports")

@@ -7,6 +7,7 @@ export interface AuthUser {
   passwordHash: string;
   role: string;
   managerId: number | null;
+  avatarBase64: string | null;
 }
 
 export async function findUserByEmail(email: string): Promise<AuthUser | null> {

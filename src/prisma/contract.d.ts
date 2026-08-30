@@ -33,7 +33,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'fd457f7ebb9f7088255b11f1a286c9027fe4e1a82b982f9b043f00bb3ee9337a'>;
+  StorageHashBase<'d979e1836d0e548d8e6af2482e10f08c22bdd268082b74d7f21c83d1da5a74ae'>;
 export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
@@ -313,6 +313,8 @@ export type FieldOutputTypes = {
       readonly email: CodecTypes['pg/text@1']['output'];
       readonly passwordHash: CodecTypes['pg/text@1']['output'];
       readonly role: CodecTypes['pg/text@1']['output'];
+      readonly avatarBase64: CodecTypes['pg/text@1']['output'] | null;
+      readonly avatarMimeType: CodecTypes['pg/text@1']['output'] | null;
       readonly managerId: CodecTypes['pg/int4@1']['output'] | null;
     };
   };
@@ -392,6 +394,8 @@ export type FieldInputTypes = {
       readonly email: CodecTypes['pg/text@1']['input'];
       readonly passwordHash: CodecTypes['pg/text@1']['input'];
       readonly role: CodecTypes['pg/text@1']['input'];
+      readonly avatarBase64: CodecTypes['pg/text@1']['input'] | null;
+      readonly avatarMimeType: CodecTypes['pg/text@1']['input'] | null;
       readonly managerId: CodecTypes['pg/int4@1']['input'] | null;
     };
   };
@@ -466,6 +470,8 @@ export type StorageColumnTypes = {
       readonly userId: CodecTypes['pg/int4@1']['output'];
     };
     readonly user: {
+      readonly avatarBase64: CodecTypes['pg/text@1']['output'] | null;
+      readonly avatarMimeType: CodecTypes['pg/text@1']['output'] | null;
       readonly email: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly managerId: CodecTypes['pg/int4@1']['output'] | null;
@@ -545,6 +551,8 @@ export type StorageColumnInputTypes = {
       readonly userId: CodecTypes['pg/int4@1']['input'];
     };
     readonly user: {
+      readonly avatarBase64: CodecTypes['pg/text@1']['input'] | null;
+      readonly avatarMimeType: CodecTypes['pg/text@1']['input'] | null;
       readonly email: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly managerId: CodecTypes['pg/int4@1']['input'] | null;
@@ -1137,6 +1145,16 @@ type ContractBase = Omit<
                     readonly value: DefaultLiteralValue<'pg/text@1', 'employee'>;
                   };
                 };
+                readonly avatarBase64: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
+                readonly avatarMimeType: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
                 readonly managerId: {
                   readonly nativeType: 'int4';
                   readonly codecId: 'pg/int4@1';
@@ -1707,6 +1725,14 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly avatarBase64: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly avatarMimeType: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly managerId: {
                 readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
@@ -1816,6 +1842,8 @@ type ContractBase = Omit<
                 readonly email: { readonly column: 'email' };
                 readonly passwordHash: { readonly column: 'passwordHash' };
                 readonly role: { readonly column: 'role' };
+                readonly avatarBase64: { readonly column: 'avatarBase64' };
+                readonly avatarMimeType: { readonly column: 'avatarMimeType' };
                 readonly managerId: { readonly column: 'managerId' };
               };
             };

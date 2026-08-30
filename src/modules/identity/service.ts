@@ -47,7 +47,13 @@ export async function login(email: string, password: string) {
 
   return {
     token,
-    user: { id: user.id, name: user.name, email: user.email, role: user.role },
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      hasAvatar: Boolean(user.avatarBase64),
+    },
   };
 }
 
@@ -56,5 +62,11 @@ export async function getCurrentUser(userId: number) {
   if (!user) {
     throw new AppError(404, "User not found");
   }
-  return { id: user.id, name: user.name, email: user.email, role: user.role };
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    hasAvatar: Boolean(user.avatarBase64),
+  };
 }

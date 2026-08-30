@@ -48,3 +48,22 @@ export async function promoteUserToManager(id: number): Promise<UserSummary | nu
     .select("id", "name", "email", "role", "managerId")
     .update({ role: "manager" });
 }
+
+export async function setUserAvatar(
+  id: number,
+  avatarBase64: string,
+  avatarMimeType: string,
+): Promise<void> {
+  await db.orm.public.User.where({ id }).update({ avatarBase64, avatarMimeType });
+}
+
+export interface UserAvatar {
+  avatarBase64: string;
+  avatarMimeType: string;
+}
+
+export async function findUserAvatarById(id: number): Promise<UserAvatar | null> {
+  const user = await db.orm.public.User.select("avatarBase64", "avatarMimeType").first({ id });
+  if (!user?.avatarBase64 || !user.avatarMimeType) return null;
+  return { avatarBase64: user.avatarBase64, avatarMimeType: user.avatarMimeType };
+}

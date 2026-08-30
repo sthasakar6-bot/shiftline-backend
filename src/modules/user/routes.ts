@@ -1,15 +1,31 @@
 import { Router } from "express";
+import multer from "multer";
 import {
   assignManagerController,
+  getAvatarController,
   getEmployeesController,
   getUsersController,
   getReportsController,
   promoteController,
   removeManagerController,
+  uploadAvatarController,
 } from "./controller";
 import { requireAuth } from "../../middleware/requireAuth";
 import { requireRole } from "../../middleware/requireRole";
 import { requireManagesTarget } from "../../middleware/requireManagesTarget";
+import { AppError } from "../../errors/AppError";
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 3 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (!file.mimetype.startsWith("image/")) {
+      cb(new AppError(400, "Only image files are allowed"));
+      return;
+    }
+    cb(null, true);
+  },
+});
 
 const router = Router();
 
@@ -36,5 +52,7 @@ router.delete(
   requireManagesTarget,
   removeManagerController,
 );
+router.post("/users/me/avatar", requireAuth, upload.single("avatar"), uploadAvatarController);
+router.get("/users/:id/avatar", requireAuth, getAvatarController);
 
 export default router;

@@ -3,8 +3,10 @@ import {
   findAllEmployees,
   findDirectReports,
   findUserSummaryById,
+  findUserAvatarById,
   promoteUserToManager,
   setUserManager,
+  setUserAvatar,
 } from "./model";
 import { AppError } from "../../errors/AppError";
 
@@ -49,4 +51,16 @@ export const removeFromTeam = async (targetId: number) => {
     throw new AppError(404, "User not found");
   }
   return updated;
+};
+
+export const uploadAvatar = async (userId: number, buffer: Buffer, mimeType: string) => {
+  await setUserAvatar(userId, buffer.toString("base64"), mimeType);
+};
+
+export const getAvatar = async (id: number) => {
+  const avatar = await findUserAvatarById(id);
+  if (!avatar) {
+    throw new AppError(404, "No profile picture set");
+  }
+  return avatar;
 };
