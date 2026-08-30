@@ -12,6 +12,27 @@ export interface UserSummary {
   email: string;
   role: string;
   managerId: number | null;
+  hasAvatar: boolean;
+}
+
+const SUMMARY_FIELDS = ["id", "name", "email", "role", "managerId", "avatarBase64"] as const;
+
+function toUserSummary(row: {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  managerId: number | null;
+  avatarBase64: string | null;
+}): UserSummary {
+  return {
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    role: row.role,
+    managerId: row.managerId,
+    hasAvatar: Boolean(row.avatarBase64),
+  };
 }
 
 export async function findAllUsers(): Promise<User[]> {
@@ -19,34 +40,37 @@ export async function findAllUsers(): Promise<User[]> {
 }
 
 export async function findUserSummaryById(id: number): Promise<UserSummary | null> {
-  return db.orm.public.User.select("id", "name", "email", "role", "managerId").first({ id });
+  const row = await db.orm.public.User.select(...SUMMARY_FIELDS).first({ id });
+  return row ? toUserSummary(row) : null;
 }
 
 export async function findDirectReports(managerId: number): Promise<UserSummary[]> {
-  return db.orm.public.User.select("id", "name", "email", "role", "managerId")
-    .where({ managerId })
-    .all();
+  const rows = await db.orm.public.User.select(...SUMMARY_FIELDS).where({ managerId }).all();
+  return rows.map(toUserSummary);
 }
 
 export async function findAllEmployees(): Promise<UserSummary[]> {
-  return db.orm.public.User.select("id", "name", "email", "role", "managerId")
+  const rows = await db.orm.public.User.select(...SUMMARY_FIELDS)
     .where({ role: "employee" })
     .all();
+  return rows.map(toUserSummary);
 }
 
 export async function setUserManager(
   id: number,
   managerId: number | null,
 ): Promise<UserSummary | null> {
-  return db.orm.public.User.where({ id })
-    .select("id", "name", "email", "role", "managerId")
+  const row = await db.orm.public.User.where({ id })
+    .select(...SUMMARY_FIELDS)
     .update({ managerId });
+  return row ? toUserSummary(row) : null;
 }
 
 export async function promoteUserToManager(id: number): Promise<UserSummary | null> {
-  return db.orm.public.User.where({ id })
-    .select("id", "name", "email", "role", "managerId")
+  const row = await db.orm.public.User.where({ id })
+    .select(...SUMMARY_FIELDS)
     .update({ role: "manager" });
+  return row ? toUserSummary(row) : null;
 }
 
 export async function setUserAvatar(
