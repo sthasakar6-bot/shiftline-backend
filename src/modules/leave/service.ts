@@ -8,6 +8,7 @@ import {
 } from "./model";
 import { AppError } from "../../errors/AppError";
 import { notify } from "../notifications/service";
+import { findUserById } from "../identity/model";
 
 const VALID_TYPES = ["vacation", "sick"];
 
@@ -25,7 +26,18 @@ export async function requestLeave(
   if (new Date(input.endDate) < new Date(input.startDate)) {
     throw new AppError(400, "endDate must be on or after startDate");
   }
-  return createLeaveRequest({ ...input, userId });
+  const created = await createLeaveRequest({ ...input, userId });
+  const user = await findUserById(userId);
+  if (user?.managerId) {
+    const label = input.type === "sick" ? "sick leave" : "vacation";
+    await notify(
+      user.managerId,
+      `${user.name} requested ${label} from ${input.startDate.slice(0, 10)} to ${input.endDate.slice(0, 10)}.`,
+      "Leave Request",
+      "/admin?tab=leave",
+    );
+  }
+  return created;
 }
 
 export async function cancelLeaveRequest(id: number, userId: number) {
