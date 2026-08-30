@@ -6,6 +6,7 @@ export interface Shift {
   startsAt: string;
   endsAt: string;
   breakMinutes: number | null;
+  noShowCheckedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -48,4 +49,14 @@ export async function updateShiftForUser(
 
 export async function deleteShiftForUser(id: number, userId: number): Promise<void> {
   await db.orm.public.Shift.where({ id, userId }).delete();
+}
+
+export async function findShiftsPendingNoShowCheck(): Promise<Shift[]> {
+  return db.orm.public.Shift.where({ noShowCheckedAt: null }).all();
+}
+
+export async function markShiftNoShowChecked(id: number): Promise<void> {
+  await db.orm.public.Shift.where({ id }).update({
+    noShowCheckedAt: new Date().toISOString(),
+  });
 }

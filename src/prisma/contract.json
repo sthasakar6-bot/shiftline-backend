@@ -799,6 +799,13 @@
                   "kind": "scalar"
                 }
               },
+              "noShowCheckedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
               "startsAt": {
                 "nullable": false,
                 "type": {
@@ -866,6 +873,9 @@
                 },
                 "id": {
                   "column": "id"
+                },
+                "noShowCheckedAt": {
+                  "column": "noShowCheckedAt"
                 },
                 "startsAt": {
                   "column": "startsAt"
@@ -1814,6 +1824,11 @@
                   "nativeType": "int4",
                   "nullable": false
                 },
+                "noShowCheckedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
                 "startsAt": {
                   "codecId": "pg/timestamptz-string@1",
                   "nativeType": "timestamptz",
@@ -1967,7 +1982,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "919991b77e0065859cd29e40203f76281cf0c467c6cc4f45ee605fffbc19dcef"
+    "storageHash": "55ca57a31b2704e2c0d2f07c9dd7d3547dd70505cff1db3d1d4151bdab880096"
   },
   "capabilities": {
     "postgres": {

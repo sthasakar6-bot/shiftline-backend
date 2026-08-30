@@ -32,16 +32,17 @@ model Contract {
 }
 
 model Shift {
-  id           Int                @id @default(autoincrement())
-  userId       Int
-  user         User               @relation(fields: [userId], references: [id])
-  startsAt     TimestamptzString
-  endsAt       TimestamptzString
-  breakMinutes Int?
-  attendance   Attendance[]
+  id               Int                @id @default(autoincrement())
+  userId           Int
+  user             User               @relation(fields: [userId], references: [id])
+  startsAt         TimestamptzString
+  endsAt           TimestamptzString
+  breakMinutes     Int?
+  attendance       Attendance[]
+  noShowCheckedAt  TimestamptzString?
 
-  createdAt    TimestamptzString  @default(now())
-  updatedAt    TimestamptzString  @default(now())
+  createdAt        TimestamptzString  @default(now())
+  updatedAt        TimestamptzString  @default(now())
 }
 
 model Attendance {
