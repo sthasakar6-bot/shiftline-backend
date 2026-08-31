@@ -11,6 +11,30 @@ import { notify } from "../notifications/service";
 import { findUserById } from "../identity/model";
 
 const VALID_TYPES = ["vacation", "sick"];
+const ACTIVE_STATUSES = ["pending", "approved"];
+
+function rangesOverlap(aStart: number, aEnd: number, bStart: number, bEnd: number): boolean {
+  return aStart < bEnd && bStart < aEnd;
+}
+
+async function assertNoLeaveOverlap(userId: number, startDate: string, endDate: string) {
+  const existing = await findLeaveRequestsByUser(userId);
+  const newStart = new Date(startDate).getTime();
+  const newEnd = new Date(endDate).getTime() + 24 * 60 * 60 * 1000;
+  const conflict = existing.find((l) => {
+    if (!ACTIVE_STATUSES.includes(l.status)) return false;
+    const leaveStart = new Date(l.startDate).getTime();
+    const leaveEnd = new Date(l.endDate).getTime() + 24 * 60 * 60 * 1000;
+    return rangesOverlap(newStart, newEnd, leaveStart, leaveEnd);
+  });
+  if (conflict) {
+    const label = conflict.type === "sick" ? "sick leave" : "vacation";
+    throw new AppError(
+      409,
+      `This overlaps your ${conflict.status} ${label} request from ${conflict.startDate.slice(0, 10)} to ${conflict.endDate.slice(0, 10)}`,
+    );
+  }
+}
 
 export async function listLeaveRequests(userId: number) {
   return findLeaveRequestsByUser(userId);
@@ -26,6 +50,7 @@ export async function requestLeave(
   if (new Date(input.endDate) < new Date(input.startDate)) {
     throw new AppError(400, "endDate must be on or after startDate");
   }
+  await assertNoLeaveOverlap(userId, input.startDate, input.endDate);
   const created = await createLeaveRequest({ ...input, userId });
   const user = await findUserById(userId);
   if (user?.managerId) {

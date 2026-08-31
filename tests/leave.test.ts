@@ -221,4 +221,66 @@ describe("Leave requests", () => {
       .send({ startsAt: "2027-03-02T09:00:00Z", endsAt: "2027-03-02T17:00:00Z" });
     expect(allowed.status).toBe(201);
   });
+
+  it("rejects a new leave request that overlaps an existing pending one", async () => {
+    const first = await request(app)
+      .post("/api/leave-requests")
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ type: "vacation", startDate: "2027-04-01", endDate: "2027-04-10" });
+    expect(first.status).toBe(201);
+
+    const overlapping = await request(app)
+      .post("/api/leave-requests")
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ type: "sick", startDate: "2027-04-05", endDate: "2027-04-06" });
+    expect(overlapping.status).toBe(409);
+  });
+
+  it("rejects a new leave request that overlaps an approved one", async () => {
+    const first = await request(app)
+      .post("/api/leave-requests")
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ type: "vacation", startDate: "2027-05-01", endDate: "2027-05-05" });
+    await request(app)
+      .patch(`/api/users/${reportId}/leave-requests/${first.body.id}`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ status: "approved" });
+
+    const overlapping = await request(app)
+      .post("/api/leave-requests")
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ type: "vacation", startDate: "2027-05-05", endDate: "2027-05-08" });
+    expect(overlapping.status).toBe(409);
+  });
+
+  it("allows a new leave request on dates that only overlap a rejected request", async () => {
+    const first = await request(app)
+      .post("/api/leave-requests")
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ type: "vacation", startDate: "2027-06-01", endDate: "2027-06-05" });
+    await request(app)
+      .patch(`/api/users/${reportId}/leave-requests/${first.body.id}`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ status: "rejected" });
+
+    const res = await request(app)
+      .post("/api/leave-requests")
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ type: "vacation", startDate: "2027-06-02", endDate: "2027-06-03" });
+    expect(res.status).toBe(201);
+  });
+
+  it("allows back-to-back leave requests that touch but don't overlap", async () => {
+    const first = await request(app)
+      .post("/api/leave-requests")
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ type: "vacation", startDate: "2027-07-01", endDate: "2027-07-05" });
+    expect(first.status).toBe(201);
+
+    const res = await request(app)
+      .post("/api/leave-requests")
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ type: "sick", startDate: "2027-07-06", endDate: "2027-07-06" });
+    expect(res.status).toBe(201);
+  });
 });
