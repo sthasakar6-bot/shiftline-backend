@@ -283,4 +283,41 @@ describe("Leave requests", () => {
       .send({ type: "sick", startDate: "2027-07-06", endDate: "2027-07-06" });
     expect(res.status).toBe(201);
   });
+
+  it("blocks approving a leave request when the employee already has a shift that day", async () => {
+    await request(app)
+      .post(`/api/users/${reportId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ startsAt: "2027-08-15T09:00:00Z", endsAt: "2027-08-15T17:00:00Z" });
+
+    const leaveReq = await request(app)
+      .post("/api/leave-requests")
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ type: "vacation", startDate: "2027-08-14", endDate: "2027-08-16" });
+    expect(leaveReq.status).toBe(201);
+
+    const approve = await request(app)
+      .patch(`/api/users/${reportId}/leave-requests/${leaveReq.body.id}`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ status: "approved" });
+    expect(approve.status).toBe(409);
+  });
+
+  it("still allows rejecting a leave request even when a conflicting shift exists", async () => {
+    await request(app)
+      .post(`/api/users/${reportId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ startsAt: "2027-09-15T09:00:00Z", endsAt: "2027-09-15T17:00:00Z" });
+
+    const leaveReq = await request(app)
+      .post("/api/leave-requests")
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ type: "sick", startDate: "2027-09-15", endDate: "2027-09-15" });
+
+    const reject = await request(app)
+      .patch(`/api/users/${reportId}/leave-requests/${leaveReq.body.id}`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ status: "rejected" });
+    expect(reject.status).toBe(200);
+  });
 });

@@ -6,6 +6,7 @@ import {
   deleteLeaveRequestForUser,
   CreateLeaveRequestInput,
 } from "./model";
+import { findShiftsByUser } from "../shift/model";
 import { AppError } from "../../errors/AppError";
 import { notify } from "../notifications/service";
 import { findUserById } from "../identity/model";
@@ -76,6 +77,21 @@ export async function cancelLeaveRequest(id: number, userId: number) {
   await deleteLeaveRequestForUser(id, userId);
 }
 
+async function assertNoShiftConflict(userId: number, startDate: string, endDate: string) {
+  const shifts = await findShiftsByUser(userId);
+  const leaveStart = new Date(startDate).getTime();
+  const leaveEnd = new Date(endDate).getTime() + 24 * 60 * 60 * 1000;
+  const conflict = shifts.find((s) =>
+    rangesOverlap(leaveStart, leaveEnd, new Date(s.startsAt).getTime(), new Date(s.endsAt).getTime()),
+  );
+  if (conflict) {
+    throw new AppError(
+      409,
+      `Can't approve: this employee already has a shift scheduled on ${new Date(conflict.startsAt).toISOString().slice(0, 10)} during this period. Remove or reschedule that shift first.`,
+    );
+  }
+}
+
 export async function decideLeaveRequest(id: number, userId: number, decision: string) {
   if (decision !== "approved" && decision !== "rejected") {
     throw new AppError(400, "status must be 'approved' or 'rejected'");
@@ -86,6 +102,9 @@ export async function decideLeaveRequest(id: number, userId: number, decision: s
   }
   if (existing.status !== "pending") {
     throw new AppError(409, "This request has already been decided");
+  }
+  if (decision === "approved") {
+    await assertNoShiftConflict(userId, existing.startDate, existing.endDate);
   }
   const updated = await updateLeaveRequestStatus(id, userId, decision);
   if (!updated) {
