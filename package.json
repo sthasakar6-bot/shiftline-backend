@@ -12,7 +12,8 @@
     "contract:emit": "prisma contract emit",
     "make-manager": "node dist/scripts/make-manager.js",
     "reset-password": "node dist/scripts/reset-password.js",
-    "cleanup-shift-conflicts": "node dist/scripts/cleanup-shift-conflicts.js"
+    "cleanup-shift-conflicts": "node dist/scripts/cleanup-shift-conflicts.js",
+    "clear-leave-requests": "node dist/scripts/clear-leave-requests.js"
   },
   "keywords": [],
   "author": "",
