@@ -1,5 +1,11 @@
 import { Request, Response } from "express";
-import { listLeaveRequests, requestLeave, cancelLeaveRequest, decideLeaveRequest } from "./service";
+import {
+  listLeaveRequests,
+  requestLeave,
+  cancelLeaveRequest,
+  decideLeaveRequest,
+  revokeApprovedLeave,
+} from "./service";
 
 export async function listLeaveRequestsController(req: Request, res: Response) {
   const requests = await listLeaveRequests(req.user!.sub);
@@ -29,5 +35,10 @@ export async function decideLeaveRequestController(req: Request, res: Response) 
     Number(req.params.id),
     status,
   );
+  res.json(request);
+}
+
+export async function revokeApprovedLeaveController(req: Request, res: Response) {
+  const request = await revokeApprovedLeave(Number(req.params.requestId), Number(req.params.id));
   res.json(request);
 }

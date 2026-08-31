@@ -5,6 +5,7 @@ import {
   cancelLeaveRequestController,
   listLeaveRequestsForReportController,
   decideLeaveRequestController,
+  revokeApprovedLeaveController,
 } from "./controller";
 import { requireAuth } from "../../middleware/requireAuth";
 import { requireRole } from "../../middleware/requireRole";
@@ -37,6 +38,13 @@ router.patch(
   requireManagesTargetOrSelf,
   validate(decideLeaveRequestSchema),
   decideLeaveRequestController,
+);
+router.delete(
+  "/users/:id/leave-requests/:requestId",
+  requireAuth,
+  requireRole("manager"),
+  requireManagesTargetOrSelf,
+  revokeApprovedLeaveController,
 );
 
 export default router;

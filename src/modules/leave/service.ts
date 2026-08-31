@@ -74,3 +74,25 @@ export async function decideLeaveRequest(id: number, userId: number, decision: s
   );
   return updated;
 }
+
+export async function revokeApprovedLeave(id: number, userId: number) {
+  const existing = await findLeaveRequestByIdForUser(id, userId);
+  if (!existing) {
+    throw new AppError(404, "Leave request not found");
+  }
+  if (existing.status !== "approved") {
+    throw new AppError(409, "Only approved leave can be cancelled this way");
+  }
+  const updated = await updateLeaveRequestStatus(id, userId, "cancelled");
+  if (!updated) {
+    throw new AppError(404, "Leave request not found");
+  }
+  const label = existing.type === "sick" ? "sick leave" : "vacation";
+  await notify(
+    userId,
+    `Your approved ${label} has been cancelled.`,
+    "Leave Cancelled",
+    "/?tab=leave",
+  );
+  return updated;
+}

@@ -153,4 +153,72 @@ describe("Leave requests", () => {
     expect(approve.status).toBe(200);
     expect(approve.body.status).toBe("approved");
   });
+
+  it("lets a manager revoke an approved leave request", async () => {
+    const create = await request(app)
+      .post("/api/leave-requests")
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ type: "vacation", startDate: "2027-01-01", endDate: "2027-01-05" });
+    const requestId = create.body.id;
+
+    await request(app)
+      .patch(`/api/users/${reportId}/leave-requests/${requestId}`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ status: "approved" });
+
+    const revoke = await request(app)
+      .delete(`/api/users/${reportId}/leave-requests/${requestId}`)
+      .set("Authorization", `Bearer ${managerToken}`);
+    expect(revoke.status).toBe(200);
+    expect(revoke.body.status).toBe("cancelled");
+
+    const notifications = await request(app)
+      .get("/api/notifications")
+      .set("Authorization", `Bearer ${employeeToken}`);
+    expect(
+      notifications.body.some((n: { message: string }) => n.message.includes("cancelled")),
+    ).toBe(true);
+  });
+
+  it("blocks revoking a leave request that isn't approved", async () => {
+    const create = await request(app)
+      .post("/api/leave-requests")
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ type: "vacation", startDate: "2027-02-01", endDate: "2027-02-05" });
+    const requestId = create.body.id;
+
+    const revoke = await request(app)
+      .delete(`/api/users/${reportId}/leave-requests/${requestId}`)
+      .set("Authorization", `Bearer ${managerToken}`);
+    expect(revoke.status).toBe(409);
+  });
+
+  it("no longer blocks scheduling a shift once the conflicting approved leave is revoked", async () => {
+    const create = await request(app)
+      .post("/api/leave-requests")
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ type: "vacation", startDate: "2027-03-01", endDate: "2027-03-05" });
+    const requestId = create.body.id;
+
+    await request(app)
+      .patch(`/api/users/${reportId}/leave-requests/${requestId}`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ status: "approved" });
+
+    const blocked = await request(app)
+      .post(`/api/users/${reportId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ startsAt: "2027-03-02T09:00:00Z", endsAt: "2027-03-02T17:00:00Z" });
+    expect(blocked.status).toBe(409);
+
+    await request(app)
+      .delete(`/api/users/${reportId}/leave-requests/${requestId}`)
+      .set("Authorization", `Bearer ${managerToken}`);
+
+    const allowed = await request(app)
+      .post(`/api/users/${reportId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ startsAt: "2027-03-02T09:00:00Z", endsAt: "2027-03-02T17:00:00Z" });
+    expect(allowed.status).toBe(201);
+  });
 });
