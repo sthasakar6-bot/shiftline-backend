@@ -99,14 +99,21 @@ describe("Invites", () => {
 
     const registerRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Full Flow", email, password: "password123", token: created.body.token });
+      .send({
+        firstName: "Full",
+        lastName: "Flow",
+        email,
+        password: "password123",
+        token: created.body.token,
+      });
     expect(registerRes.status).toBe(201);
     expect(registerRes.body.role).toBe("employee");
 
     const reuseRes = await request(app)
       .post("/api/auth/register")
       .send({
-        name: "Reuse",
+        firstName: "Reuse",
+        lastName: "User",
         email: uniqueEmail("fullflow2"),
         password: "password123",
         token: created.body.token,

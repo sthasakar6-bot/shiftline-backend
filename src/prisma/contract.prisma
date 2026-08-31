@@ -1,12 +1,15 @@
 model User {
   id            Int            @id @default(autoincrement())
   name          String
+  firstName     String?
+  lastName      String?
   email         String         @unique
   passwordHash  String
   role          String         @default("employee")
   avatarBase64  String?
   avatarMimeType String?
   phone         String?
+  address       String?
   lastSeenAt    TimestamptzString?
   managerId     Int?
   manager       User?          @relation("ManagerReports", fields: [managerId], references: [id])

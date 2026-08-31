@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import { register, login, getCurrentUser, changePassword, updatePhone } from "./service";
 
 export async function registerController(req: Request, res: Response) {
-  const { name, email, password, token } = req.body;
-  const user = await register(name, email, password, token);
+  const { firstName, lastName, email, password, token, phone, address } = req.body;
+  const user = await register(firstName, lastName, email, password, token, phone, address);
   res.status(201).json(user);
 }
 

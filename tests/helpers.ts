@@ -20,11 +20,16 @@ export async function registerUser(
   const email = overrides.email ?? uniqueEmail("user");
   const password = overrides.password ?? "password123";
   const name = overrides.name ?? "Test User";
+  const spaceIdx = name.indexOf(" ");
+  const firstName = spaceIdx === -1 ? name : name.slice(0, spaceIdx);
+  const lastName = spaceIdx === -1 ? "User" : name.slice(spaceIdx + 1);
 
   if (overrides.managerId === undefined) {
     const passwordHash = await argon2.hash(password);
     const user = await db.orm.public.User.create({
       name,
+      firstName,
+      lastName,
       email,
       passwordHash,
       role: "employee",
@@ -40,7 +45,9 @@ export async function registerUser(
     expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
   });
 
-  const res = await request(app).post("/api/auth/register").send({ name, email, password, token });
+  const res = await request(app)
+    .post("/api/auth/register")
+    .send({ firstName, lastName, email, password, token });
   return { ...res.body, email, password };
 }
 

@@ -5,7 +5,15 @@ import { AppError } from "../../errors/AppError";
 import { findUserByEmail, findUserById, createUser, setUserPassword, setUserPhone } from "./model";
 import { validateInviteToken, consumeInvite } from "../invite/service";
 
-export async function register(name: string, email: string, password: string, token: string) {
+export async function register(
+  firstName: string,
+  lastName: string,
+  email: string,
+  password: string,
+  token: string,
+  phone?: string,
+  address?: string,
+) {
   const existing = await findUserByEmail(email);
   if (existing) {
     throw new AppError(400, "Email already registered");
@@ -16,13 +24,19 @@ export async function register(name: string, email: string, password: string, to
     throw new AppError(400, "This invite was issued for a different email address");
   }
 
+  const trimmedFirst = firstName.trim();
+  const trimmedLast = lastName.trim();
   const passwordHash = await argon2.hash(password);
   const user = await createUser({
-    name,
+    name: `${trimmedFirst} ${trimmedLast}`.trim(),
+    firstName: trimmedFirst,
+    lastName: trimmedLast,
     email,
     passwordHash,
     role: "employee",
     managerId: invite.managerId,
+    phone: phone?.trim() || undefined,
+    address: address?.trim() || undefined,
   });
 
   await consumeInvite(invite.id);
@@ -54,6 +68,7 @@ export async function login(email: string, password: string) {
       role: user.role,
       hasAvatar: Boolean(user.avatarBase64),
       phone: user.phone,
+      address: user.address,
     },
   };
 }
@@ -70,6 +85,7 @@ export async function getCurrentUser(userId: number) {
     role: user.role,
     hasAvatar: Boolean(user.avatarBase64),
     phone: user.phone,
+    address: user.address,
   };
 }
 

@@ -21,7 +21,12 @@ describe("Auth", () => {
   it("rejects registration without an invite token", async () => {
     const res = await request(app)
       .post("/api/auth/register")
-      .send({ name: "No Invite", email: uniqueEmail("noinvite"), password: "password123" });
+      .send({
+        firstName: "No",
+        lastName: "Invite",
+        email: uniqueEmail("noinvite"),
+        password: "password123",
+      });
     expect(res.status).toBe(400);
   });
 
@@ -29,7 +34,8 @@ describe("Auth", () => {
     const res = await request(app)
       .post("/api/auth/register")
       .send({
-        name: "Bad Token",
+        firstName: "Bad",
+        lastName: "Token",
         email: uniqueEmail("badtoken"),
         password: "password123",
         token: "not-a-real-token",
@@ -45,7 +51,7 @@ describe("Auth", () => {
     });
     const res = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Expired", email, password: "password123", token });
+      .send({ firstName: "Expired", lastName: "User", email, password: "password123", token });
     expect(res.status).toBe(400);
   });
 
@@ -54,7 +60,13 @@ describe("Auth", () => {
     const token = await seedInvite(uniqueEmail("invited"), manager.id);
     const res = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Mismatch", email: uniqueEmail("different"), password: "password123", token });
+      .send({
+        firstName: "Mismatch",
+        lastName: "User",
+        email: uniqueEmail("different"),
+        password: "password123",
+        token,
+      });
     expect(res.status).toBe(400);
   });
 
@@ -64,7 +76,14 @@ describe("Auth", () => {
     const token = await seedInvite(email, manager.id);
     const res = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Sneaky", email, password: "password123", role: "manager", token });
+      .send({
+        firstName: "Sneaky",
+        lastName: "User",
+        email,
+        password: "password123",
+        role: "manager",
+        token,
+      });
     expect(res.status).toBe(201);
     expect(res.body.role).toBe("employee");
   });
@@ -75,10 +94,16 @@ describe("Auth", () => {
     const token = await seedInvite(email, manager.id);
     await request(app)
       .post("/api/auth/register")
-      .send({ name: "First", email, password: "password123", token });
+      .send({ firstName: "First", lastName: "User", email, password: "password123", token });
     const res = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Second", email: uniqueEmail("reuse2"), password: "password123", token });
+      .send({
+        firstName: "Second",
+        lastName: "User",
+        email: uniqueEmail("reuse2"),
+        password: "password123",
+        token,
+      });
     expect(res.status).toBe(400);
   });
 
@@ -86,12 +111,14 @@ describe("Auth", () => {
     const manager = await registerUser({ email: uniqueEmail("auth-dupmgr") });
     const email = uniqueEmail("dup");
     const token1 = await seedInvite(email, manager.id);
-    await request(app).post("/api/auth/register").send({ name: "Dup", email, password: "password123", token: token1 });
+    await request(app)
+      .post("/api/auth/register")
+      .send({ firstName: "Dup", lastName: "User", email, password: "password123", token: token1 });
 
     const token2 = await seedInvite(email, manager.id);
     const res = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Dup2", email, password: "password123", token: token2 });
+      .send({ firstName: "Dup2", lastName: "User", email, password: "password123", token: token2 });
     expect(res.status).toBe(400);
   });
 
@@ -100,7 +127,7 @@ describe("Auth", () => {
       .post("/api/auth/register")
       .send({ email: "not-an-email", password: "123" });
     expect(res.status).toBe(400);
-    expect(res.body.error).toMatch(/name/);
+    expect(res.body.error).toMatch(/firstName/);
   });
 
   it("logs in with correct credentials", async () => {
@@ -109,7 +136,7 @@ describe("Auth", () => {
     const token = await seedInvite(email, manager.id);
     await request(app)
       .post("/api/auth/register")
-      .send({ name: "Login User", email, password: "password123", token });
+      .send({ firstName: "Login", lastName: "User", email, password: "password123", token });
     const res = await request(app).post("/api/auth/login").send({ email, password: "password123" });
     expect(res.status).toBe(200);
     expect(res.body.token).toBeTruthy();
@@ -121,7 +148,7 @@ describe("Auth", () => {
     const inviteToken = await seedInvite(email, manager.id);
     await request(app)
       .post("/api/auth/register")
-      .send({ name: "Wrong", email, password: "password123", token: inviteToken });
+      .send({ firstName: "Wrong", lastName: "User", email, password: "password123", token: inviteToken });
     const res = await request(app).post("/api/auth/login").send({ email, password: "wrongpass" });
     expect(res.status).toBe(401);
   });
@@ -137,12 +164,51 @@ describe("Auth", () => {
     const inviteToken = await seedInvite(email, manager.id);
     await request(app)
       .post("/api/auth/register")
-      .send({ name: "Me User", email, password: "password123", token: inviteToken });
+      .send({ firstName: "Me", lastName: "User", email, password: "password123", token: inviteToken });
     const login = await request(app).post("/api/auth/login").send({ email, password: "password123" });
     const res = await request(app)
       .get("/api/auth/me")
       .set("Authorization", `Bearer ${login.body.token}`);
     expect(res.status).toBe(200);
     expect(res.body.email).toBe(email);
+  });
+
+  it("combines firstName and lastName into name", async () => {
+    const manager = await registerUser({ email: uniqueEmail("auth-namemgr") });
+    const email = uniqueEmail("combined-name");
+    const token = await seedInvite(email, manager.id);
+    const res = await request(app)
+      .post("/api/auth/register")
+      .send({ firstName: "Jane", lastName: "Doe", email, password: "password123", token });
+    expect(res.status).toBe(201);
+    expect(res.body.name).toBe("Jane Doe");
+  });
+
+  it("stores phone and address supplied at registration", async () => {
+    const manager = await registerUser({ email: uniqueEmail("auth-contactmgr") });
+    const email = uniqueEmail("with-contact");
+    const token = await seedInvite(email, manager.id);
+    await request(app).post("/api/auth/register").send({
+      firstName: "Contact",
+      lastName: "Info",
+      email,
+      password: "password123",
+      token,
+      phone: "+1 555 987 6543",
+      address: "123 Main St, Springfield",
+    });
+    const login = await request(app).post("/api/auth/login").send({ email, password: "password123" });
+    expect(login.body.user.phone).toBe("+1 555 987 6543");
+    expect(login.body.user.address).toBe("123 Main St, Springfield");
+  });
+
+  it("registers successfully without optional phone or address", async () => {
+    const manager = await registerUser({ email: uniqueEmail("auth-nocontactmgr") });
+    const email = uniqueEmail("no-contact");
+    const token = await seedInvite(email, manager.id);
+    const res = await request(app)
+      .post("/api/auth/register")
+      .send({ firstName: "No", lastName: "Contact", email, password: "password123", token });
+    expect(res.status).toBe(201);
   });
 });

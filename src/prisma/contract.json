@@ -903,6 +903,13 @@
           },
           "User": {
             "fields": {
+              "address": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "avatarBase64": {
                 "nullable": true,
                 "type": {
@@ -924,10 +931,24 @@
                   "kind": "scalar"
                 }
               },
+              "firstName": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "id": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "lastName": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
@@ -1128,6 +1149,9 @@
             },
             "storage": {
               "fields": {
+                "address": {
+                  "column": "address"
+                },
                 "avatarBase64": {
                   "column": "avatarBase64"
                 },
@@ -1137,8 +1161,14 @@
                 "email": {
                   "column": "email"
                 },
+                "firstName": {
+                  "column": "firstName"
+                },
                 "id": {
                   "column": "id"
+                },
+                "lastName": {
+                  "column": "lastName"
                 },
                 "lastSeenAt": {
                   "column": "lastSeenAt"
@@ -1921,6 +1951,11 @@
             },
             "user": {
               "columns": {
+                "address": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "avatarBase64": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -1936,6 +1971,11 @@
                   "nativeType": "text",
                   "nullable": false
                 },
+                "firstName": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "id": {
                   "codecId": "pg/int4@1",
                   "default": {
@@ -1944,6 +1984,11 @@
                   },
                   "nativeType": "int4",
                   "nullable": false
+                },
+                "lastName": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
                 },
                 "lastSeenAt": {
                   "codecId": "pg/timestamptz-string@1",
@@ -2027,7 +2072,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "9a5c736eb5729dd1696e0024616facc1bfe49c9a8322b994c2a23a58786ad552"
+    "storageHash": "9f0711f433d163ee67711c9177ea2d7eb8dbb0400adfeb7361789d66974a945c"
   },
   "capabilities": {
     "postgres": {
