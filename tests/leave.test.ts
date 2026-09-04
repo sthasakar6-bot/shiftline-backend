@@ -115,7 +115,7 @@ describe("Leave requests", () => {
     expect(cancel.status).toBe(204);
   });
 
-  it("blocks cancelling a request that's already been decided", async () => {
+  it("lets an employee delete a rejected request from their history", async () => {
     const create = await request(app)
       .post("/api/leave-requests")
       .set("Authorization", `Bearer ${employeeToken}`)
@@ -127,10 +127,28 @@ describe("Leave requests", () => {
       .set("Authorization", `Bearer ${managerToken}`)
       .send({ status: "rejected" });
 
-    const cancel = await request(app)
+    const del = await request(app)
       .delete(`/api/leave-requests/${requestId}`)
       .set("Authorization", `Bearer ${employeeToken}`);
-    expect(cancel.status).toBe(409);
+    expect(del.status).toBe(204);
+  });
+
+  it("blocks an employee from deleting an approved request", async () => {
+    const create = await request(app)
+      .post("/api/leave-requests")
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ type: "sick", startDate: "2026-11-05", endDate: "2026-11-06" });
+    const requestId = create.body.id;
+
+    await request(app)
+      .patch(`/api/users/${reportId}/leave-requests/${requestId}`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ status: "approved" });
+
+    const del = await request(app)
+      .delete(`/api/leave-requests/${requestId}`)
+      .set("Authorization", `Bearer ${employeeToken}`);
+    expect(del.status).toBe(409);
   });
 
   it("lets a manager view and approve their own leave request", async () => {

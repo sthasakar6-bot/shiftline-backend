@@ -66,13 +66,15 @@ export async function requestLeave(
   return created;
 }
 
+const SELF_DELETABLE_STATUSES = ["pending", "rejected", "cancelled"];
+
 export async function cancelLeaveRequest(id: number, userId: number) {
   const existing = await findLeaveRequestByIdForUser(id, userId);
   if (!existing) {
     throw new AppError(404, "Leave request not found");
   }
-  if (existing.status !== "pending") {
-    throw new AppError(409, "Only pending requests can be cancelled");
+  if (!SELF_DELETABLE_STATUSES.includes(existing.status)) {
+    throw new AppError(409, "Approved leave must be cancelled by your manager first");
   }
   await deleteLeaveRequestForUser(id, userId);
 }
