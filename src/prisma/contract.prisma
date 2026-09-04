@@ -15,6 +15,7 @@ model User {
   manager       User?          @relation("ManagerReports", fields: [managerId], references: [id])
   reports       User[]         @relation("ManagerReports")
   contracts     Contract[]
+  payslips      Payslip[]
   shifts        Shift[]
   attendances   Attendance[]
   notifications Notification[]
@@ -27,6 +28,18 @@ model User {
 model Contract {
   id          Int                @id @default(autoincrement())
   role        String
+  pdfBase64   String?
+  pdfFilename String?
+  userId      Int
+  user        User               @relation(fields: [userId], references: [id])
+
+  createdAt   TimestamptzString  @default(now())
+  updatedAt   TimestamptzString  @default(now())
+}
+
+model Payslip {
+  id          Int                @id @default(autoincrement())
+  period      String
   pdfBase64   String?
   pdfFilename String?
   userId      Int
