@@ -33,6 +33,14 @@ export async function findOpenAttendanceForShift(
   return db.orm.public.Attendance.where({ shiftId, userId }).first();
 }
 
+export async function deleteAttendanceByShiftId(shiftId: number): Promise<void> {
+  // .delete() on a multi-row predicate only touches the first matching row,
+  // so fetch the ids first and delete each -- a shift can in principle have
+  // more than one attendance row (e.g. a corrected re-clock-in).
+  const records = await db.orm.public.Attendance.select("id").where({ shiftId }).all();
+  await Promise.all(records.map((r) => db.orm.public.Attendance.where({ id: r.id }).delete()));
+}
+
 export async function createAttendance(
   userId: number,
   shiftId: number,

@@ -80,6 +80,28 @@ describe("Shifts", () => {
     expect(managerDelete.status).toBe(204);
   });
 
+  it("lets a manager delete a shift that already has attendance clocked against it", async () => {
+    const create = await request(app)
+      .post(`/api/users/${reportId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ startsAt: "2026-09-02T09:00:00Z", endsAt: "2026-09-02T17:00:00Z" });
+    const shiftId = create.body.id;
+
+    const clockIn = await request(app)
+      .post("/api/attendance/clock-in")
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ shiftId });
+    expect(clockIn.status).toBe(201);
+
+    const managerDelete = await request(app)
+      .delete(`/api/users/${reportId}/shifts/${shiftId}`)
+      .set("Authorization", `Bearer ${managerToken}`);
+    expect(managerDelete.status).toBe(204);
+
+    const remainingAttendance = await db.orm.public.Attendance.where({ shiftId }).all();
+    expect(remainingAttendance.length).toBe(0);
+  });
+
   it("returns 404 for a nonexistent shift", async () => {
     const res = await request(app)
       .get("/api/shifts/999999999")

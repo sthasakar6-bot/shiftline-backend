@@ -8,6 +8,7 @@ import {
   UpdateShiftInput,
 } from "./model";
 import { findLeaveRequestsByUser } from "../leave/model";
+import { deleteAttendanceByShiftId } from "../attendance/model";
 import { AppError } from "../../errors/AppError";
 import { notify } from "../notifications/service";
 
@@ -117,5 +118,9 @@ export async function removeShift(id: number, userId: number) {
   if (!existing) {
     throw new AppError(404, "Shift not found");
   }
+  // Clock-in/out records reference the shift by id, so they'd otherwise block
+  // the delete with a foreign key error -- removing a shift is expected to
+  // also clear any attendance recorded against it.
+  await deleteAttendanceByShiftId(id);
   await deleteShiftForUser(id, userId);
 }
