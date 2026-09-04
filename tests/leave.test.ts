@@ -58,6 +58,16 @@ describe("Leave requests", () => {
     expect(res.body.status).toBe("pending");
   });
 
+  it("notifies the manager when an employee requests leave", async () => {
+    const notifications = await request(app)
+      .get("/api/notifications")
+      .set("Authorization", `Bearer ${managerToken}`);
+    expect(notifications.status).toBe(200);
+    expect(
+      notifications.body.some((n: { message: string }) => n.message.includes("requested vacation")),
+    ).toBe(true);
+  });
+
   it("shows up in the employee's own list", async () => {
     const res = await request(app)
       .get("/api/leave-requests")
