@@ -31,7 +31,10 @@ describe("Attendance", () => {
     const shift = await request(app)
       .post(`/api/users/${reportId}/shifts`)
       .set("Authorization", `Bearer ${managerToken}`)
-      .send({ startsAt: "2026-10-01T09:00:00Z", endsAt: "2026-10-01T17:00:00Z" });
+      .send({
+        startsAt: new Date(Date.now() - 8 * 60 * 1000).toISOString(),
+        endsAt: new Date(Date.now() - 7 * 60 * 1000).toISOString(),
+      });
     shiftId = shift.body.id;
   });
 
@@ -78,12 +81,15 @@ describe("Attendance", () => {
   });
 
   it("accepts a client-supplied clockedAt within the offline window", async () => {
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
     const shift = await request(app)
       .post(`/api/users/${reportId}/shifts`)
       .set("Authorization", `Bearer ${managerToken}`)
-      .send({ startsAt: "2026-10-06T09:00:00Z", endsAt: "2026-10-06T17:00:00Z" });
+      .send({
+        startsAt: twoHoursAgo,
+        endsAt: new Date(new Date(twoHoursAgo).getTime() + 10 * 60 * 1000).toISOString(),
+      });
 
-    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
     const in1 = await request(app)
       .post("/api/attendance/clock-in")
       .set("Authorization", `Bearer ${token}`)
@@ -132,7 +138,10 @@ describe("Attendance", () => {
     const shift = await request(app)
       .post(`/api/users/${reportId}/shifts`)
       .set("Authorization", `Bearer ${managerToken}`)
-      .send({ startsAt: "2026-10-09T09:00:00Z", endsAt: "2026-10-09T17:00:00Z" });
+      .send({
+        startsAt: new Date(Date.now() - 6 * 60 * 1000).toISOString(),
+        endsAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+      });
 
     const in1 = await request(app)
       .post("/api/attendance/clock-in")
@@ -148,12 +157,12 @@ describe("Attendance", () => {
   });
 
   it("rejects a clock-in more than 30 minutes after the shift started", async () => {
-    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const threeHoursAgo = new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString();
+    const twoHoursThirtyAgo = new Date(Date.now() - 150 * 60 * 1000).toISOString();
     const shift = await request(app)
       .post(`/api/users/${reportId}/shifts`)
       .set("Authorization", `Bearer ${managerToken}`)
-      .send({ startsAt: twoHoursAgo, endsAt: oneHourAgo });
+      .send({ startsAt: threeHoursAgo, endsAt: twoHoursThirtyAgo });
 
     const res = await request(app)
       .post("/api/attendance/clock-in")
@@ -162,13 +171,46 @@ describe("Attendance", () => {
     expect(res.status).toBe(409);
   });
 
-  it("allows a clock-in within 30 minutes of the shift starting", async () => {
-    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
-    const eightHoursFromNow = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString();
+  it("rejects a clock-in more than 5 minutes before the shift starts", async () => {
     const shift = await request(app)
       .post(`/api/users/${reportId}/shifts`)
       .set("Authorization", `Bearer ${managerToken}`)
-      .send({ startsAt: tenMinutesAgo, endsAt: eightHoursFromNow });
+      .send({
+        startsAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        endsAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+      });
+
+    const res = await request(app)
+      .post("/api/attendance/clock-in")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ shiftId: shift.body.id });
+    expect(res.status).toBe(409);
+  });
+
+  it("allows a clock-in within 5 minutes of the shift starting", async () => {
+    const shift = await request(app)
+      .post(`/api/users/${reportId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({
+        startsAt: new Date(Date.now() + 4 * 60 * 1000).toISOString(),
+        endsAt: new Date(Date.now() + 55 * 60 * 1000).toISOString(),
+      });
+
+    const res = await request(app)
+      .post("/api/attendance/clock-in")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ shiftId: shift.body.id });
+    expect(res.status).toBe(201);
+  });
+
+  it("allows a clock-in within 30 minutes of the shift starting", async () => {
+    const shift = await request(app)
+      .post(`/api/users/${reportId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({
+        startsAt: new Date(Date.now() - 4 * 60 * 1000).toISOString(),
+        endsAt: new Date(Date.now() - 3 * 60 * 1000).toISOString(),
+      });
 
     const res = await request(app)
       .post("/api/attendance/clock-in")
@@ -289,7 +331,10 @@ describe("Attendance", () => {
     const shift = await request(app)
       .post(`/api/users/${reportId}/shifts`)
       .set("Authorization", `Bearer ${managerToken}`)
-      .send({ startsAt: "2026-10-02T09:00:00Z", endsAt: "2026-10-02T17:00:00Z" });
+      .send({
+        startsAt: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
+        endsAt: new Date(Date.now() - 1 * 60 * 1000).toISOString(),
+      });
 
     const in1 = await request(app)
       .post("/api/attendance/clock-in")
@@ -320,7 +365,10 @@ describe("Attendance", () => {
     const shift = await request(app)
       .post(`/api/users/${managerId}/shifts`)
       .set("Authorization", `Bearer ${managerToken}`)
-      .send({ startsAt: "2026-10-03T09:00:00Z", endsAt: "2026-10-03T17:00:00Z" });
+      .send({
+        startsAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+        endsAt: new Date(Date.now() + 55 * 60 * 1000).toISOString(),
+      });
 
     await request(app)
       .post("/api/attendance/clock-in")

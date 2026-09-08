@@ -21,6 +21,10 @@ const FUTURE_TOLERANCE_MS = 5 * 60 * 1000;
 // has to add the record manually (see createManualAttendanceEntry below).
 const CLOCK_IN_WINDOW_MS = 30 * 60 * 1000;
 
+// ...and no more than this long before it starts, so a future shift can't be
+// clocked into hours or days ahead of time.
+const EARLY_CLOCK_IN_MS = 5 * 60 * 1000;
+
 function resolveClockedAt(clockedAt?: string): string {
   if (!clockedAt) {
     return new Date().toISOString();
@@ -61,8 +65,16 @@ export async function clockIn(
   }
 
   const resolved = resolveClockedAt(clockedAt);
-  const windowClosesAt = new Date(shift.startsAt).getTime() + CLOCK_IN_WINDOW_MS;
-  if (new Date(resolved).getTime() > windowClosesAt) {
+  const resolvedMs = new Date(resolved).getTime();
+  const shiftStartMs = new Date(shift.startsAt).getTime();
+
+  if (resolvedMs < shiftStartMs - EARLY_CLOCK_IN_MS) {
+    throw new AppError(
+      409,
+      "This shift hasn't started yet -- you can clock in up to 5 minutes before it begins.",
+    );
+  }
+  if (resolvedMs > shiftStartMs + CLOCK_IN_WINDOW_MS) {
     throw new AppError(
       409,
       "The clock-in window for this shift has closed (more than 30 minutes after it started). Ask your manager to add this attendance manually.",
