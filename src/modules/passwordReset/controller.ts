@@ -7,8 +7,8 @@ import {
 } from "./service";
 
 export async function requestResetController(req: Request, res: Response) {
-  const { email } = req.body;
-  await requestReset(email);
+  const { email, companyId } = req.body;
+  await requestReset(email, Number(companyId));
   res.status(201).json({ ok: true });
 }
 

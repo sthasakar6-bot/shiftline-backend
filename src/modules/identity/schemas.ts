@@ -13,6 +13,7 @@ export const registerSchema = z.object({
 export const loginSchema = z.object({
   email: z.string().email("invalid email"),
   password: z.string().min(1, "password is required"),
+  companyId: z.coerce.number().int().positive("companyId must be a positive integer"),
 });
 
 export const changePasswordSchema = z.object({

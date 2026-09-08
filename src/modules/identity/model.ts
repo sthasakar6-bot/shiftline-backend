@@ -9,14 +9,18 @@ export interface AuthUser {
   passwordHash: string;
   role: string;
   managerId: number | null;
+  companyId: number;
   avatarBase64: string | null;
   phone: string | null;
   address: string | null;
   lastSeenAt: string | null;
 }
 
-export async function findUserByEmail(email: string): Promise<AuthUser | null> {
-  return db.orm.public.User.first({ email });
+export async function findUserByEmailInCompany(
+  email: string,
+  companyId: number,
+): Promise<AuthUser | null> {
+  return db.orm.public.User.first({ email, companyId });
 }
 
 export async function findUserById(id: number): Promise<AuthUser | null> {
@@ -31,6 +35,7 @@ export async function createUser(data: {
   passwordHash: string;
   role: string;
   managerId?: number;
+  companyId: number;
   phone?: string;
   address?: string;
 }): Promise<AuthUser> {

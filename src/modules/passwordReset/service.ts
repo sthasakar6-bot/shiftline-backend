@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import argon2 from "argon2";
 import { AppError } from "../../errors/AppError";
-import { findUserByEmail, findUserById, setUserPassword } from "../identity/model";
+import { findUserByEmailInCompany, findUserById, setUserPassword } from "../identity/model";
 import { findDirectReports } from "../user/model";
 import { notify } from "../notifications/service";
 import {
@@ -14,8 +14,8 @@ import {
 
 const REQUEST_TTL_MS = 24 * 60 * 60 * 1000;
 
-export async function requestReset(email: string) {
-  const user = await findUserByEmail(email);
+export async function requestReset(email: string, companyId: number) {
+  const user = await findUserByEmailInCompany(email, companyId);
   if (!user) {
     throw new AppError(404, "No account with that email");
   }

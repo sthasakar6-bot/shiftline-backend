@@ -1,6 +1,6 @@
 import {
-  findAllUsers,
-  findAllEmployees,
+  findAllUsersInCompany,
+  findAllEmployeesInCompany,
   findDirectReports,
   findUserSummaryById,
   findUserAvatarById,
@@ -10,16 +10,16 @@ import {
 } from "./model";
 import { AppError } from "../../errors/AppError";
 
-export const getAllUsers = async () => {
-  return findAllUsers();
+export const getAllUsers = async (companyId: number) => {
+  return findAllUsersInCompany(companyId);
 };
 
 export const getDirectReports = async (managerId: number) => {
   return findDirectReports(managerId);
 };
 
-export const getAllEmployees = async () => {
-  return findAllEmployees();
+export const getAllEmployees = async (companyId: number) => {
+  return findAllEmployeesInCompany(companyId);
 };
 
 export const promoteToManager = async (id: number) => {
@@ -30,9 +30,12 @@ export const promoteToManager = async (id: number) => {
   return updated;
 };
 
-export const assignManager = async (targetId: number, managerId: number) => {
+export const assignManager = async (targetId: number, managerId: number, companyId: number) => {
   const target = await findUserSummaryById(targetId);
   if (!target) {
+    throw new AppError(404, "User not found");
+  }
+  if (target.companyId !== companyId) {
     throw new AppError(404, "User not found");
   }
   if (target.role !== "employee") {

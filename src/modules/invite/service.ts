@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { AppError } from "../../errors/AppError";
-import { findUserByEmail, findUserById } from "../identity/model";
+import { findUserByEmailInCompany, findUserById } from "../identity/model";
 import {
   createInvite as createInviteRecord,
   findInviteByToken,
@@ -12,25 +12,25 @@ import {
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 export async function createInvite(managerId: number, email: string) {
-  const existingUser = await findUserByEmail(email);
-  if (existingUser) {
-    throw new AppError(400, "A user with that email already exists");
-  }
-
-  const existingInvite = await findPendingInviteByEmail(email);
-  if (existingInvite) {
-    throw new AppError(400, "There is already a pending invite for that email");
-  }
-
   const manager = await findUserById(managerId);
   if (!manager) {
     throw new AppError(404, "Manager not found");
   }
 
+  const existingUser = await findUserByEmailInCompany(email, manager.companyId);
+  if (existingUser) {
+    throw new AppError(400, "A user with that email already exists");
+  }
+
+  const existingInvite = await findPendingInviteByEmail(email, manager.companyId);
+  if (existingInvite) {
+    throw new AppError(400, "There is already a pending invite for that email");
+  }
+
   const token = crypto.randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + INVITE_TTL_MS).toISOString();
 
-  return createInviteRecord({ email, token, managerId, expiresAt });
+  return createInviteRecord({ email, token, managerId, companyId: manager.companyId, expiresAt });
 }
 
 export async function listInvites(managerId: number) {

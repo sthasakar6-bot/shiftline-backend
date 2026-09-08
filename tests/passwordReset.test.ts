@@ -8,11 +8,13 @@ describe("Password reset", () => {
   let managerToken: string;
   let employeeEmail: string;
   let employeePassword: string;
+  let companyId: number;
 
   beforeAll(async () => {
     const managerUser = await registerUser({ email: uniqueEmail("pwreset-manager") });
     await db.orm.public.User.where({ id: managerUser.id }).update({ role: "manager" });
-    managerToken = await loginUser(managerUser.email, managerUser.password);
+    companyId = managerUser.companyId;
+    managerToken = await loginUser(managerUser.email, managerUser.password, companyId);
 
     const { user } = await registerAndLogin({
       email: uniqueEmail("pwreset-employee"),
@@ -25,19 +27,19 @@ describe("Password reset", () => {
   it("404s requesting a reset for an unknown email", async () => {
     const res = await request(app)
       .post("/api/password-reset-requests")
-      .send({ email: uniqueEmail("nobody-here") });
+      .send({ email: uniqueEmail("nobody-here"), companyId });
     expect(res.status).toBe(404);
   });
 
   it("blocks a second pending request for the same account", async () => {
     const first = await request(app)
       .post("/api/password-reset-requests")
-      .send({ email: employeeEmail });
+      .send({ email: employeeEmail, companyId });
     expect(first.status).toBe(201);
 
     const second = await request(app)
       .post("/api/password-reset-requests")
-      .send({ email: employeeEmail });
+      .send({ email: employeeEmail, companyId });
     expect(second.status).toBe(400);
   });
 
@@ -72,12 +74,12 @@ describe("Password reset", () => {
 
     const oldLogin = await request(app)
       .post("/api/auth/login")
-      .send({ email: employeeEmail, password: employeePassword });
+      .send({ email: employeeEmail, password: employeePassword, companyId });
     expect(oldLogin.status).toBe(401);
 
     const newLogin = await request(app)
       .post("/api/auth/login")
-      .send({ email: employeeEmail, password: "brandNewPassword1" });
+      .send({ email: employeeEmail, password: "brandNewPassword1", companyId });
     expect(newLogin.status).toBe(200);
 
     const reuse = await request(app)
@@ -99,12 +101,12 @@ describe("Change password", () => {
 
     const oldLogin = await request(app)
       .post("/api/auth/login")
-      .send({ email: user.email, password: "password123" });
+      .send({ email: user.email, password: "password123", companyId: user.companyId });
     expect(oldLogin.status).toBe(401);
 
     const newLogin = await request(app)
       .post("/api/auth/login")
-      .send({ email: user.email, password: "freshPassword1" });
+      .send({ email: user.email, password: "freshPassword1", companyId: user.companyId });
     expect(newLogin.status).toBe(200);
   });
 

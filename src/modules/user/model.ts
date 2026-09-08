@@ -12,6 +12,7 @@ export interface UserSummary {
   email: string;
   role: string;
   managerId: number | null;
+  companyId: number;
   hasAvatar: boolean;
   phone: string | null;
   address: string | null;
@@ -26,6 +27,7 @@ const SUMMARY_FIELDS = [
   "email",
   "role",
   "managerId",
+  "companyId",
   "avatarBase64",
   "phone",
   "address",
@@ -38,6 +40,7 @@ function toUserSummary(row: {
   email: string;
   role: string;
   managerId: number | null;
+  companyId: number;
   avatarBase64: string | null;
   phone: string | null;
   address: string | null;
@@ -49,6 +52,7 @@ function toUserSummary(row: {
     email: row.email,
     role: row.role,
     managerId: row.managerId,
+    companyId: row.companyId,
     hasAvatar: Boolean(row.avatarBase64),
     phone: row.phone,
     address: row.address,
@@ -56,8 +60,8 @@ function toUserSummary(row: {
   };
 }
 
-export async function findAllUsers(): Promise<User[]> {
-  return db.orm.public.User.select("id", "name", "email").all();
+export async function findAllUsersInCompany(companyId: number): Promise<User[]> {
+  return db.orm.public.User.select("id", "name", "email").where({ companyId }).all();
 }
 
 export async function findUserSummaryById(id: number): Promise<UserSummary | null> {
@@ -70,9 +74,9 @@ export async function findDirectReports(managerId: number): Promise<UserSummary[
   return rows.map(toUserSummary);
 }
 
-export async function findAllEmployees(): Promise<UserSummary[]> {
+export async function findAllEmployeesInCompany(companyId: number): Promise<UserSummary[]> {
   const rows = await db.orm.public.User.select(...SUMMARY_FIELDS)
-    .where({ role: "employee" })
+    .where({ role: "employee", companyId })
     .all();
   return rows.map(toUserSummary);
 }

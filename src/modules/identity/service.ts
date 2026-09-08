@@ -2,8 +2,15 @@ import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import { env } from "../../config/env";
 import { AppError } from "../../errors/AppError";
-import { findUserByEmail, findUserById, createUser, setUserPassword, setUserPhone } from "./model";
+import {
+  findUserByEmailInCompany,
+  findUserById,
+  createUser,
+  setUserPassword,
+  setUserPhone,
+} from "./model";
 import { validateInviteToken, consumeInvite } from "../invite/service";
+import { findCompanyById } from "../company/model";
 
 export async function register(
   firstName: string,
@@ -14,14 +21,14 @@ export async function register(
   phone?: string,
   address?: string,
 ) {
-  const existing = await findUserByEmail(email);
-  if (existing) {
-    throw new AppError(400, "Email already registered");
-  }
-
   const invite = await validateInviteToken(token);
   if (invite.email.toLowerCase() !== email.toLowerCase()) {
     throw new AppError(400, "This invite was issued for a different email address");
+  }
+
+  const existing = await findUserByEmailInCompany(email, invite.companyId);
+  if (existing) {
+    throw new AppError(400, "Email already registered");
   }
 
   const trimmedFirst = firstName.trim();
@@ -35,17 +42,26 @@ export async function register(
     passwordHash,
     role: "employee",
     managerId: invite.managerId,
+    companyId: invite.companyId,
     phone: phone?.trim() || undefined,
     address: address?.trim() || undefined,
   });
 
   await consumeInvite(invite.id);
 
-  return { id: user.id, name: user.name, email: user.email, role: user.role };
+  const company = await findCompanyById(user.companyId);
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    companyId: user.companyId,
+    companyName: company?.name ?? "",
+  };
 }
 
-export async function login(email: string, password: string) {
-  const user = await findUserByEmail(email);
+export async function login(email: string, password: string, companyId: number) {
+  const user = await findUserByEmailInCompany(email, companyId);
   if (!user) {
     throw new AppError(401, "Invalid email or password");
   }
@@ -55,9 +71,13 @@ export async function login(email: string, password: string) {
     throw new AppError(401, "Invalid email or password");
   }
 
-  const token = jwt.sign({ sub: user.id, email: user.email, role: user.role }, env.jwtSecret, {
-    expiresIn: "7d",
-  });
+  const token = jwt.sign(
+    { sub: user.id, email: user.email, role: user.role, companyId: user.companyId },
+    env.jwtSecret,
+    { expiresIn: "7d" },
+  );
+
+  const company = await findCompanyById(user.companyId);
 
   return {
     token,
@@ -69,6 +89,8 @@ export async function login(email: string, password: string) {
       hasAvatar: Boolean(user.avatarBase64),
       phone: user.phone,
       address: user.address,
+      companyId: user.companyId,
+      companyName: company?.name ?? "",
     },
   };
 }
@@ -78,6 +100,7 @@ export async function getCurrentUser(userId: number) {
   if (!user) {
     throw new AppError(404, "User not found");
   }
+  const company = await findCompanyById(user.companyId);
   return {
     id: user.id,
     name: user.name,
@@ -86,6 +109,8 @@ export async function getCurrentUser(userId: number) {
     hasAvatar: Boolean(user.avatarBase64),
     phone: user.phone,
     address: user.address,
+    companyId: user.companyId,
+    companyName: company?.name ?? "",
   };
 }
 

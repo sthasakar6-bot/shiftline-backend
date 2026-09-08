@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { createInvite, listInvites, validateInviteToken } from "./service";
+import { findCompanyById } from "../company/model";
 
 export const createInviteController = async (req: Request, res: Response) => {
   const invite = await createInvite(req.user!.sub, req.body.email);
@@ -13,5 +14,6 @@ export const listInvitesController = async (req: Request, res: Response) => {
 
 export const getInviteByTokenController = async (req: Request, res: Response) => {
   const invite = await validateInviteToken(String(req.params.token));
-  res.json({ email: invite.email });
+  const company = await findCompanyById(invite.companyId);
+  res.json({ email: invite.email, companyName: company?.name ?? "" });
 };

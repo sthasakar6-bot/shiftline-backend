@@ -1,9 +1,19 @@
+model Company {
+  id        Int               @id @default(autoincrement())
+  name      String
+  slug      String            @unique
+  users     User[]
+  invites   Invite[]
+
+  createdAt TimestamptzString @default(now())
+}
+
 model User {
   id            Int            @id @default(autoincrement())
   name          String
   firstName     String?
   lastName      String?
-  email         String         @unique
+  email         String
   passwordHash  String
   role          String         @default("employee")
   avatarBase64  String?
@@ -14,6 +24,8 @@ model User {
   managerId     Int?
   manager       User?          @relation("ManagerReports", fields: [managerId], references: [id])
   reports       User[]         @relation("ManagerReports")
+  companyId     Int
+  company       Company        @relation(fields: [companyId], references: [id])
   contracts     Contract[]
   payslips      Payslip[]
   shifts        Shift[]
@@ -25,6 +37,8 @@ model User {
   passwordResetRequests PasswordResetRequest[]
   backupToken   BackupToken?
   backupSnapshots BackupSnapshot[]
+
+  @@unique([email, companyId])
 }
 
 model Contract {
@@ -102,6 +116,8 @@ model Invite {
   status    String            @default("pending")
   managerId Int
   manager   User              @relation(fields: [managerId], references: [id])
+  companyId Int
+  company   Company           @relation(fields: [companyId], references: [id])
   expiresAt TimestamptzString
 
   createdAt TimestamptzString @default(now())

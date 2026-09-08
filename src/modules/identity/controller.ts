@@ -8,8 +8,8 @@ export async function registerController(req: Request, res: Response) {
 }
 
 export async function loginController(req: Request, res: Response) {
-  const { email, password } = req.body;
-  const result = await login(email, password);
+  const { email, password, companyId } = req.body;
+  const result = await login(email, password, Number(companyId));
   res.json(result);
 }
 

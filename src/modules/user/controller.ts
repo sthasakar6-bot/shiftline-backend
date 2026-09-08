@@ -12,7 +12,7 @@ import {
 import { AppError } from "../../errors/AppError";
 
 export const getUsersController = async (req: Request, res: Response) => {
-  const users = await getAllUsers();
+  const users = await getAllUsers(req.user!.companyId);
   res.json(users);
 };
 
@@ -22,7 +22,7 @@ export const getReportsController = async (req: Request, res: Response) => {
 };
 
 export const getEmployeesController = async (req: Request, res: Response) => {
-  const employees = await getAllEmployees();
+  const employees = await getAllEmployees(req.user!.companyId);
   res.json(employees);
 };
 
@@ -32,7 +32,7 @@ export const promoteController = async (req: Request, res: Response) => {
 };
 
 export const assignManagerController = async (req: Request, res: Response) => {
-  const user = await assignManager(Number(req.params.id), req.user!.sub);
+  const user = await assignManager(Number(req.params.id), req.user!.sub, req.user!.companyId);
   res.json(user);
 };
 

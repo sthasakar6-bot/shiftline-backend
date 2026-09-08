@@ -16,6 +16,10 @@
       "model": "BackupToken",
       "namespace": "public"
     },
+    "company": {
+      "model": "Company",
+      "namespace": "public"
+    },
     "contract": {
       "model": "Contract",
       "namespace": "public"
@@ -373,6 +377,88 @@
               "table": "backupToken"
             }
           },
+          "Company": {
+            "fields": {
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "name": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "slug": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "invites": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "companyId"
+                  ]
+                },
+                "to": {
+                  "model": "Invite",
+                  "namespace": "public"
+                }
+              },
+              "users": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "companyId"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "name": {
+                  "column": "name"
+                },
+                "slug": {
+                  "column": "slug"
+                }
+              },
+              "namespaceId": "public",
+              "table": "company"
+            }
+          },
           "Contract": {
             "fields": {
               "createdAt": {
@@ -472,6 +558,13 @@
           },
           "Invite": {
             "fields": {
+              "companyId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
               "createdAt": {
                 "nullable": false,
                 "type": {
@@ -523,6 +616,21 @@
               }
             },
             "relations": {
+              "company": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "companyId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Company",
+                  "namespace": "public"
+                }
+              },
               "manager": {
                 "cardinality": "N:1",
                 "on": {
@@ -541,6 +649,9 @@
             },
             "storage": {
               "fields": {
+                "companyId": {
+                  "column": "companyId"
+                },
                 "createdAt": {
                   "column": "createdAt"
                 },
@@ -1187,6 +1298,13 @@
                   "kind": "scalar"
                 }
               },
+              "companyId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
               "email": {
                 "nullable": false,
                 "type": {
@@ -1301,6 +1419,21 @@
                 },
                 "to": {
                   "model": "BackupToken",
+                  "namespace": "public"
+                }
+              },
+              "company": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "companyId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Company",
                   "namespace": "public"
                 }
               },
@@ -1465,6 +1598,9 @@
                 },
                 "avatarMimeType": {
                   "column": "avatarMimeType"
+                },
+                "companyId": {
+                  "column": "companyId"
                 },
                 "email": {
                   "column": "email"
@@ -1792,6 +1928,52 @@
                 }
               ]
             },
+            "company": {
+              "columns": {
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "name": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "slug": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "slug"
+                  ]
+                }
+              ]
+            },
             "contract": {
               "columns": {
                 "createdAt": {
@@ -1879,6 +2061,11 @@
             },
             "invite": {
               "columns": {
+                "companyId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
                 "createdAt": {
                   "codecId": "pg/timestamptz-string@1",
                   "default": {
@@ -1943,9 +2130,33 @@
                     "namespaceId": "public",
                     "tableName": "user"
                   }
+                },
+                {
+                  "source": {
+                    "columns": [
+                      "companyId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "invite"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "company"
+                  }
                 }
               ],
               "indexes": [
+                {
+                  "columns": [
+                    "companyId"
+                  ],
+                  "name": "invite_companyId_idx_33acc5ed",
+                  "prefix": "invite_companyId_idx",
+                  "unique": false
+                },
                 {
                   "columns": [
                     "managerId"
@@ -2507,6 +2718,11 @@
                   "nativeType": "text",
                   "nullable": true
                 },
+                "companyId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
                 "email": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -2582,9 +2798,33 @@
                     "namespaceId": "public",
                     "tableName": "user"
                   }
+                },
+                {
+                  "source": {
+                    "columns": [
+                      "companyId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "user"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "company"
+                  }
                 }
               ],
               "indexes": [
+                {
+                  "columns": [
+                    "companyId"
+                  ],
+                  "name": "user_companyId_idx_33acc5ed",
+                  "prefix": "user_companyId_idx",
+                  "unique": false
+                },
                 {
                   "columns": [
                     "managerId"
@@ -2602,7 +2842,8 @@
               "uniques": [
                 {
                   "columns": [
-                    "email"
+                    "email",
+                    "companyId"
                   ]
                 }
               ]
@@ -2613,7 +2854,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "31d7aa1547bd67eead020115c6d552d0ea83cd03c46bd78e9b942439a023853c"
+    "storageHash": "284770cf8039a88fe75858ba859e35f19ee78c37e924a475ff94f94c7bf0d0ea"
   },
   "capabilities": {
     "postgres": {
