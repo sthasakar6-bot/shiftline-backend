@@ -8,6 +8,10 @@
       "model": "Attendance",
       "namespace": "public"
     },
+    "backupSnapshot": {
+      "model": "BackupSnapshot",
+      "namespace": "public"
+    },
     "backupToken": {
       "model": "BackupToken",
       "namespace": "public"
@@ -213,6 +217,73 @@
               },
               "namespaceId": "public",
               "table": "attendance"
+            }
+          },
+          "BackupSnapshot": {
+            "fields": {
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "csv": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "user": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "userId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "csv": {
+                  "column": "csv"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "userId": {
+                  "column": "userId"
+                }
+              },
+              "namespaceId": "public",
+              "table": "backupSnapshot"
             }
           },
           "BackupToken": {
@@ -1193,6 +1264,21 @@
                   "namespace": "public"
                 }
               },
+              "backupSnapshots": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "userId"
+                  ]
+                },
+                "to": {
+                  "model": "BackupSnapshot",
+                  "namespace": "public"
+                }
+              },
               "backupToken": {
                 "cardinality": "1:1",
                 "on": {
@@ -1538,6 +1624,72 @@
                   ],
                   "name": "attendance_userId_idx_a489d58a",
                   "prefix": "attendance_userId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": []
+            },
+            "backupSnapshot": {
+              "columns": {
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "csv": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "userId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "source": {
+                    "columns": [
+                      "userId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "backupSnapshot"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "user"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "userId"
+                  ],
+                  "name": "backupSnapshot_userId_idx_a489d58a",
+                  "prefix": "backupSnapshot_userId_idx",
                   "unique": false
                 }
               ],
@@ -2442,7 +2594,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "97104e11af45f4e3ceb3498a0ed7c9df389595b57ae1f8eb8cd09ad36033f607"
+    "storageHash": "c418b74671c1600fa0cb7ab7a5691e6661401a025e68d901eecdfb70690c8f05"
   },
   "capabilities": {
     "postgres": {

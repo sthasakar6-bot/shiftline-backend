@@ -5,6 +5,11 @@ import {
   createBackupToken,
   deleteBackupTokenForUser,
   touchBackupTokenUsage,
+  findAllManagerIds,
+  createBackupSnapshot,
+  findBackupSnapshotsByUser,
+  findBackupSnapshotByIdForUser,
+  deleteBackupSnapshotsOlderThan,
 } from "./model";
 import { findUserById } from "../identity/model";
 import { findDirectReports } from "../user/model";
@@ -96,4 +101,33 @@ export async function generateBackupCsv(managerId: number): Promise<string> {
   }
 
   return lines.join("\n");
+}
+
+export async function listBackupSnapshots(userId: number) {
+  return findBackupSnapshotsByUser(userId);
+}
+
+export async function getBackupSnapshotCsv(id: number, userId: number): Promise<string> {
+  const snapshot = await findBackupSnapshotByIdForUser(id, userId);
+  if (!snapshot) {
+    throw new AppError(404, "Backup snapshot not found");
+  }
+  return snapshot.csv;
+}
+
+const SNAPSHOT_RETENTION_DAYS = 30;
+
+// Runs on a server-side interval (see server.ts) so backups keep happening
+// even when no manager's own computer is on -- one snapshot per manager,
+// each only seeing their own team's data, with old snapshots pruned so the
+// table doesn't grow unbounded.
+export async function runScheduledBackups(): Promise<void> {
+  const managerIds = await findAllManagerIds();
+  for (const managerId of managerIds) {
+    const csv = await generateBackupCsv(managerId);
+    await createBackupSnapshot(managerId, csv);
+  }
+
+  const cutoff = new Date(Date.now() - SNAPSHOT_RETENTION_DAYS * 24 * 60 * 60 * 1000).toISOString();
+  await deleteBackupSnapshotsOlderThan(cutoff);
 }

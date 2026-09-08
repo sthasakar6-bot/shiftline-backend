@@ -24,6 +24,7 @@ model User {
   pushSubscriptions PushSubscription[]
   passwordResetRequests PasswordResetRequest[]
   backupToken   BackupToken?
+  backupSnapshots BackupSnapshot[]
 }
 
 model Contract {
@@ -134,6 +135,14 @@ model BackupToken {
   token      String             @unique
   createdAt  TimestamptzString  @default(now())
   lastUsedAt TimestamptzString?
+}
+
+model BackupSnapshot {
+  id        Int                @id @default(autoincrement())
+  userId    Int
+  user      User               @relation(fields: [userId], references: [id])
+  csv       String
+  createdAt TimestamptzString  @default(now())
 }
 
 model LeaveRequest {
