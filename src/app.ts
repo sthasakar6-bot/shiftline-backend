@@ -11,6 +11,7 @@ import leaveRoutes from "./modules/leave/routes";
 import inviteRoutes from "./modules/invite/routes";
 import pushRoutes from "./modules/push/routes";
 import passwordResetRoutes from "./modules/passwordReset/routes";
+import backupRoutes from "./modules/backup/routes";
 import { notFoundHandler, errorHandler } from "./middleware/errorHandler";
 import { env } from "./config/env";
 
@@ -33,6 +34,7 @@ app.use("/api", leaveRoutes);
 app.use("/api", inviteRoutes);
 app.use("/api", pushRoutes);
 app.use("/api", passwordResetRoutes);
+app.use("/api", backupRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

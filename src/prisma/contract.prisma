@@ -23,6 +23,7 @@ model User {
   invitesSent   Invite[]
   pushSubscriptions PushSubscription[]
   passwordResetRequests PasswordResetRequest[]
+  backupToken   BackupToken?
 }
 
 model Contract {
@@ -124,6 +125,15 @@ model PasswordResetRequest {
   expiresAt TimestamptzString
 
   createdAt TimestamptzString @default(now())
+}
+
+model BackupToken {
+  id         Int                @id @default(autoincrement())
+  userId     Int                @unique
+  user       User               @relation(fields: [userId], references: [id])
+  token      String             @unique
+  createdAt  TimestamptzString  @default(now())
+  lastUsedAt TimestamptzString?
 }
 
 model LeaveRequest {
