@@ -57,6 +57,7 @@ export async function register(
     role: user.role,
     companyId: user.companyId,
     companyName: company?.name ?? "",
+    companySlug: company?.slug ?? "",
   };
 }
 
@@ -91,6 +92,7 @@ export async function login(email: string, password: string, companyId: number) 
       address: user.address,
       companyId: user.companyId,
       companyName: company?.name ?? "",
+      companySlug: company?.slug ?? "",
     },
   };
 }
@@ -111,6 +113,7 @@ export async function getCurrentUser(userId: number) {
     address: user.address,
     companyId: user.companyId,
     companyName: company?.name ?? "",
+    companySlug: company?.slug ?? "",
   };
 }
 
