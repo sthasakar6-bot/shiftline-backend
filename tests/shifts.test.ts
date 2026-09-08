@@ -81,10 +81,12 @@ describe("Shifts", () => {
   });
 
   it("lets a manager delete a shift that already has attendance clocked against it", async () => {
+    const startsAt = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    const endsAt = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString();
     const create = await request(app)
       .post(`/api/users/${reportId}/shifts`)
       .set("Authorization", `Bearer ${managerToken}`)
-      .send({ startsAt: "2026-09-02T09:00:00Z", endsAt: "2026-09-02T17:00:00Z" });
+      .send({ startsAt, endsAt });
     const shiftId = create.body.id;
 
     const clockIn = await request(app)

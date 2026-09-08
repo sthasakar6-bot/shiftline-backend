@@ -78,6 +78,7 @@ model Attendance {
   clockOutLat               Float?
   clockOutLng               Float?
   missedClockOutNotifiedAt  TimestamptzString?
+  manualEntry               Boolean            @default(false)
 
   createdAt                 TimestamptzString  @default(now())
   updatedAt                 TimestamptzString  @default(now())

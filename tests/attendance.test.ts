@@ -147,6 +147,129 @@ describe("Attendance", () => {
     expect(res.status).toBe(400);
   });
 
+  it("rejects a clock-in more than 30 minutes after the shift started", async () => {
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const shift = await request(app)
+      .post(`/api/users/${reportId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ startsAt: twoHoursAgo, endsAt: oneHourAgo });
+
+    const res = await request(app)
+      .post("/api/attendance/clock-in")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ shiftId: shift.body.id });
+    expect(res.status).toBe(409);
+  });
+
+  it("allows a clock-in within 30 minutes of the shift starting", async () => {
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+    const eightHoursFromNow = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString();
+    const shift = await request(app)
+      .post(`/api/users/${reportId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ startsAt: tenMinutesAgo, endsAt: eightHoursFromNow });
+
+    const res = await request(app)
+      .post("/api/attendance/clock-in")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ shiftId: shift.body.id });
+    expect(res.status).toBe(201);
+  });
+
+  it("blocks a non-manager from creating a manual attendance entry", async () => {
+    const shift = await request(app)
+      .post(`/api/users/${reportId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ startsAt: "2026-10-10T09:00:00Z", endsAt: "2026-10-10T17:00:00Z" });
+
+    const res = await request(app)
+      .post(`/api/users/${reportId}/attendance`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        shiftId: shift.body.id,
+        clockIn: "2026-10-10T09:05:00Z",
+        clockOut: "2026-10-10T17:00:00Z",
+      });
+    expect(res.status).toBe(403);
+  });
+
+  it("lets a manager manually add a missed attendance entry, bypassing the clock-in window", async () => {
+    const shift = await request(app)
+      .post(`/api/users/${reportId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ startsAt: "2026-10-11T09:00:00Z", endsAt: "2026-10-11T17:00:00Z" });
+
+    const create = await request(app)
+      .post(`/api/users/${reportId}/attendance`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({
+        shiftId: shift.body.id,
+        clockIn: "2026-10-11T09:10:00Z",
+        clockOut: "2026-10-11T17:05:00Z",
+      });
+    expect(create.status).toBe(201);
+    expect(create.body.manualEntry).toBe(true);
+    expect(create.body.clockOut).toBeTruthy();
+  });
+
+  it("rejects creating a manual entry for a shift that already has an attendance record", async () => {
+    const shift = await request(app)
+      .post(`/api/users/${reportId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ startsAt: "2026-10-12T09:00:00Z", endsAt: "2026-10-12T17:00:00Z" });
+
+    await request(app)
+      .post(`/api/users/${reportId}/attendance`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ shiftId: shift.body.id, clockIn: "2026-10-12T09:00:00Z" });
+
+    const dup = await request(app)
+      .post(`/api/users/${reportId}/attendance`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ shiftId: shift.body.id, clockIn: "2026-10-12T09:05:00Z" });
+    expect(dup.status).toBe(409);
+  });
+
+  it("lets a manager edit an existing attendance entry's times", async () => {
+    const shift = await request(app)
+      .post(`/api/users/${reportId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ startsAt: "2026-10-13T09:00:00Z", endsAt: "2026-10-13T17:00:00Z" });
+
+    const create = await request(app)
+      .post(`/api/users/${reportId}/attendance`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ shiftId: shift.body.id, clockIn: "2026-10-13T09:00:00Z" });
+    expect(create.status).toBe(201);
+    expect(create.body.clockOut).toBeNull();
+
+    const edit = await request(app)
+      .patch(`/api/users/${reportId}/attendance/${create.body.id}`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ clockIn: "2026-10-13T08:55:00Z", clockOut: "2026-10-13T17:10:00Z" });
+    expect(edit.status).toBe(200);
+    expect(edit.body.manualEntry).toBe(true);
+    expect(edit.body.clockOut).toBeTruthy();
+  });
+
+  it("rejects a manual entry where clockOut is before clockIn", async () => {
+    const shift = await request(app)
+      .post(`/api/users/${reportId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ startsAt: "2026-10-14T09:00:00Z", endsAt: "2026-10-14T17:00:00Z" });
+
+    const res = await request(app)
+      .post(`/api/users/${reportId}/attendance`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({
+        shiftId: shift.body.id,
+        clockIn: "2026-10-14T17:00:00Z",
+        clockOut: "2026-10-14T09:00:00Z",
+      });
+    expect(res.status).toBe(400);
+  });
+
   it("lets a manager view their report's attendance records", async () => {
     const res = await request(app)
       .get(`/api/users/${reportId}/attendance`)

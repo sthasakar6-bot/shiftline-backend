@@ -19,3 +19,14 @@ export const clockOutSchema = z.object({
   lng,
   clockedAt,
 });
+
+export const createManualAttendanceSchema = z.object({
+  shiftId: z.coerce.number().int().positive("shiftId must be a positive integer"),
+  clockIn: z.string().min(1, "clockIn is required"),
+  clockOut: z.string().optional(),
+});
+
+export const editManualAttendanceSchema = z.object({
+  clockIn: z.string().min(1, "clockIn is required"),
+  clockOut: z.string().optional(),
+});
