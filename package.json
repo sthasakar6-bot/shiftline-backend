@@ -14,7 +14,8 @@
     "create-company": "node dist/scripts/create-company.js",
     "reset-password": "node dist/scripts/reset-password.js",
     "cleanup-shift-conflicts": "node dist/scripts/cleanup-shift-conflicts.js",
-    "clear-leave-requests": "node dist/scripts/clear-leave-requests.js"
+    "clear-leave-requests": "node dist/scripts/clear-leave-requests.js",
+    "clear-schedule-data": "node dist/scripts/clear-schedule-data.js"
   },
   "keywords": [],
   "author": "",
