@@ -7,6 +7,7 @@ import {
   CreateLeaveRequestInput,
 } from "./model";
 import { findShiftsByUser } from "../shift/model";
+import { removeShift } from "../shift/service";
 import { AppError } from "../../errors/AppError";
 import { notify } from "../notifications/service";
 import { findUserById } from "../identity/model";
@@ -79,19 +80,26 @@ export async function cancelLeaveRequest(id: number, userId: number) {
   await deleteLeaveRequestForUser(id, userId);
 }
 
-async function assertNoShiftConflict(userId: number, startDate: string, endDate: string) {
+// Approving leave for a day the employee is already scheduled to work
+// (e.g. calling in sick on a shift day) shouldn't be blocked -- the whole
+// point is to cover a shift they can no longer work. Any shift(s) already
+// on the books for the leave period are removed as part of approval instead
+// of forcing the manager to go delete them first.
+async function removeConflictingShifts(
+  userId: number,
+  startDate: string,
+  endDate: string,
+): Promise<number> {
   const shifts = await findShiftsByUser(userId);
   const leaveStart = new Date(startDate).getTime();
   const leaveEnd = new Date(endDate).getTime() + 24 * 60 * 60 * 1000;
-  const conflict = shifts.find((s) =>
+  const conflicting = shifts.filter((s) =>
     rangesOverlap(leaveStart, leaveEnd, new Date(s.startsAt).getTime(), new Date(s.endsAt).getTime()),
   );
-  if (conflict) {
-    throw new AppError(
-      409,
-      `Can't approve: this employee already has a shift scheduled on ${new Date(conflict.startsAt).toISOString().slice(0, 10)} during this period. Remove or reschedule that shift first.`,
-    );
+  for (const shift of conflicting) {
+    await removeShift(shift.id, userId);
   }
+  return conflicting.length;
 }
 
 export async function decideLeaveRequest(id: number, userId: number, decision: string) {
@@ -105,16 +113,21 @@ export async function decideLeaveRequest(id: number, userId: number, decision: s
   if (existing.status !== "pending") {
     throw new AppError(409, "This request has already been decided");
   }
+  let removedShiftCount = 0;
   if (decision === "approved") {
-    await assertNoShiftConflict(userId, existing.startDate, existing.endDate);
+    removedShiftCount = await removeConflictingShifts(userId, existing.startDate, existing.endDate);
   }
   const updated = await updateLeaveRequestStatus(id, userId, decision);
   if (!updated) {
     throw new AppError(404, "Leave request not found");
   }
+  const shiftNote =
+    removedShiftCount > 0
+      ? ` Any shifts scheduled during that time have been removed from your roster.`
+      : "";
   await notify(
     userId,
-    `Your ${existing.type} leave request has been ${decision}.`,
+    `Your ${existing.type} leave request has been ${decision}.${shiftNote}`,
     "Leave Request Update",
     "/?tab=leave",
   );
