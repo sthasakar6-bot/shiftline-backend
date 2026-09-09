@@ -2,7 +2,13 @@ import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import { env } from "../../config/env";
 import { AppError } from "../../errors/AppError";
-import { findUserByEmailInCompany, findUserById, setUserPassword, setUserPhone } from "./model";
+import {
+  findUserByEmailInCompany,
+  findUserById,
+  setUserPassword,
+  setUserPhone,
+  markOnboardingComplete,
+} from "./model";
 import { findCompanyById } from "../company/model";
 
 export async function login(email: string, password: string, companyId: number) {
@@ -34,6 +40,7 @@ export async function login(email: string, password: string, companyId: number) 
       hasAvatar: Boolean(user.avatarBase64),
       phone: user.phone,
       address: user.address,
+      needsOnboarding: user.needsOnboarding,
       companyId: user.companyId,
       companyName: company?.name ?? "",
       companySlug: company?.slug ?? "",
@@ -55,6 +62,7 @@ export async function getCurrentUser(userId: number) {
     hasAvatar: Boolean(user.avatarBase64),
     phone: user.phone,
     address: user.address,
+    needsOnboarding: user.needsOnboarding,
     companyId: user.companyId,
     companyName: company?.name ?? "",
     companySlug: company?.slug ?? "",
@@ -84,4 +92,26 @@ export async function changePassword(
   }
   const passwordHash = await argon2.hash(newPassword);
   await setUserPassword(userId, passwordHash);
+}
+
+// The one-time step a manager-created employee goes through on first login:
+// they arrive with a temporary password the manager chose for them, so this
+// replaces it with one only they know and lets them fill in contact details
+// the manager may not have collected up front.
+export async function completeOnboarding(
+  userId: number,
+  newPassword: string,
+  phone?: string,
+  address?: string,
+) {
+  const user = await findUserById(userId);
+  if (!user) {
+    throw new AppError(404, "User not found");
+  }
+  const passwordHash = await argon2.hash(newPassword);
+  await markOnboardingComplete(userId, {
+    passwordHash,
+    phone: phone?.trim() || null,
+    address: address?.trim() || null,
+  });
 }

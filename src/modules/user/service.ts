@@ -47,6 +47,7 @@ export const createEmployee = async (
     role: "employee",
     managerId: manager.id,
     companyId: manager.companyId,
+    needsOnboarding: true,
   });
   return { id: user.id, name: user.name, email: user.email };
 };

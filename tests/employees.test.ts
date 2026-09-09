@@ -28,6 +28,7 @@ describe("Create employee", () => {
       .send({ email, password: "password123", companyId: manager.companyId });
     expect(login.status).toBe(200);
     expect(login.body.user.role).toBe("employee");
+    expect(login.body.user.needsOnboarding).toBe(true);
   });
 
   it("scopes the new employee to the creating manager's company and team", async () => {

@@ -20,6 +20,7 @@ model User {
   avatarMimeType String?
   phone         String?
   address       String?
+  needsOnboarding Boolean       @default(false)
   lastSeenAt    TimestamptzString?
   managerId     Int?
   manager       User?          @relation("ManagerReports", fields: [managerId], references: [id])

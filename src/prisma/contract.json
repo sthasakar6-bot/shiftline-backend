@@ -1354,6 +1354,13 @@
                   "kind": "scalar"
                 }
               },
+              "needsOnboarding": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
               "passwordHash": {
                 "nullable": false,
                 "type": {
@@ -1622,6 +1629,9 @@
                 },
                 "name": {
                   "column": "name"
+                },
+                "needsOnboarding": {
+                  "column": "needsOnboarding"
                 },
                 "passwordHash": {
                   "column": "passwordHash"
@@ -2762,6 +2772,15 @@
                   "nativeType": "text",
                   "nullable": false
                 },
+                "needsOnboarding": {
+                  "codecId": "pg/bool@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nativeType": "bool",
+                  "nullable": false
+                },
                 "passwordHash": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -2854,7 +2873,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "284770cf8039a88fe75858ba859e35f19ee78c37e924a475ff94f94c7bf0d0ea"
+    "storageHash": "4bf7515104ed0ba4636df9f6bd76695924b43c8adeffcf51f9d32275bd8153f8"
   },
   "capabilities": {
     "postgres": {

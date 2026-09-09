@@ -13,6 +13,7 @@ export interface AuthUser {
   avatarBase64: string | null;
   phone: string | null;
   address: string | null;
+  needsOnboarding: boolean;
   lastSeenAt: string | null;
 }
 
@@ -38,6 +39,7 @@ export async function createUser(data: {
   companyId: number;
   phone?: string;
   address?: string;
+  needsOnboarding?: boolean;
 }): Promise<AuthUser> {
   return db.orm.public.User.create(data);
 }
@@ -48,6 +50,18 @@ export async function setUserPassword(userId: number, passwordHash: string): Pro
 
 export async function setUserPhone(userId: number, phone: string | null): Promise<void> {
   await db.orm.public.User.where({ id: userId }).update({ phone });
+}
+
+export async function markOnboardingComplete(
+  userId: number,
+  data: { passwordHash: string; phone: string | null; address: string | null },
+): Promise<void> {
+  await db.orm.public.User.where({ id: userId }).update({
+    passwordHash: data.passwordHash,
+    phone: data.phone,
+    address: data.address,
+    needsOnboarding: false,
+  });
 }
 
 export async function touchLastSeen(userId: number): Promise<void> {

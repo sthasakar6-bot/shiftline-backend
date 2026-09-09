@@ -14,3 +14,9 @@ export const changePasswordSchema = z.object({
 export const updatePhoneSchema = z.object({
   phone: z.string().max(30, "phone must be at most 30 characters"),
 });
+
+export const completeOnboardingSchema = z.object({
+  password: z.string().min(8, "password must be at least 8 characters"),
+  phone: z.string().max(30, "phone must be at most 30 characters").optional(),
+  address: z.string().max(200, "address must be at most 200 characters").optional(),
+});

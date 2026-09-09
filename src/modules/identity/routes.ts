@@ -4,10 +4,16 @@ import {
   meController,
   changePasswordController,
   updatePhoneController,
+  completeOnboardingController,
 } from "./controller";
 import { requireAuth } from "../../middleware/requireAuth";
 import { validate } from "../../middleware/validate";
-import { loginSchema, changePasswordSchema, updatePhoneSchema } from "./schemas";
+import {
+  loginSchema,
+  changePasswordSchema,
+  updatePhoneSchema,
+  completeOnboardingSchema,
+} from "./schemas";
 
 const router = Router();
 
@@ -20,5 +26,11 @@ router.patch(
   changePasswordController,
 );
 router.patch("/auth/phone", requireAuth, validate(updatePhoneSchema), updatePhoneController);
+router.patch(
+  "/auth/complete-onboarding",
+  requireAuth,
+  validate(completeOnboardingSchema),
+  completeOnboardingController,
+);
 
 export default router;

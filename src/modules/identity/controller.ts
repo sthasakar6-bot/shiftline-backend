@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { login, getCurrentUser, changePassword, updatePhone } from "./service";
+import { login, getCurrentUser, changePassword, updatePhone, completeOnboarding } from "./service";
 
 export async function loginController(req: Request, res: Response) {
   const { email, password, companyId } = req.body;
@@ -21,5 +21,11 @@ export async function changePasswordController(req: Request, res: Response) {
 export async function updatePhoneController(req: Request, res: Response) {
   const { phone } = req.body;
   await updatePhone(req.user!.sub, phone);
+  res.status(204).send();
+}
+
+export async function completeOnboardingController(req: Request, res: Response) {
+  const { password, phone, address } = req.body;
+  await completeOnboarding(req.user!.sub, password, phone, address);
   res.status(204).send();
 }
