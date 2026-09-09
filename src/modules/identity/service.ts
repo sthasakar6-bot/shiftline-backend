@@ -108,6 +108,9 @@ export async function completeOnboarding(
   if (!user) {
     throw new AppError(404, "User not found");
   }
+  if (!user.avatarBase64) {
+    throw new AppError(400, "A profile picture is required before you can continue");
+  }
   const passwordHash = await argon2.hash(newPassword);
   await markOnboardingComplete(userId, {
     passwordHash,

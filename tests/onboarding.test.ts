@@ -3,6 +3,18 @@ import request from "supertest";
 import app from "../src/app";
 import { registerUser, loginUser, uniqueEmail } from "./helpers";
 
+const MIN_PNG = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+  "base64",
+);
+
+async function uploadAvatar(token: string) {
+  await request(app)
+    .post("/api/users/me/avatar")
+    .set("Authorization", `Bearer ${token}`)
+    .attach("avatar", MIN_PNG, { filename: "avatar.png", contentType: "image/png" });
+}
+
 async function makeManager(prefix: string) {
   const manager = await registerUser({ email: uniqueEmail(prefix) });
   const { db } = await import("../src/prisma/db");
@@ -27,6 +39,7 @@ describe("Complete onboarding", () => {
   it("sets a new password and contact details, and clears needsOnboarding", async () => {
     const manager = await makeManager("onboard-mgr");
     const employee = await createEmployee(manager.token, manager.companyId);
+    await uploadAvatar(employee.token);
 
     const res = await request(app)
       .patch("/api/auth/complete-onboarding")
@@ -51,6 +64,7 @@ describe("Complete onboarding", () => {
   it("allows completing onboarding without phone or address", async () => {
     const manager = await makeManager("onboard-nocontact-mgr");
     const employee = await createEmployee(manager.token, manager.companyId);
+    await uploadAvatar(employee.token);
 
     const res = await request(app)
       .patch("/api/auth/complete-onboarding")
@@ -67,12 +81,30 @@ describe("Complete onboarding", () => {
   it("rejects a short password", async () => {
     const manager = await makeManager("onboard-shortpw-mgr");
     const employee = await createEmployee(manager.token, manager.companyId);
+    await uploadAvatar(employee.token);
 
     const res = await request(app)
       .patch("/api/auth/complete-onboarding")
       .set("Authorization", `Bearer ${employee.token}`)
       .send({ password: "short" });
     expect(res.status).toBe(400);
+  });
+
+  it("rejects completing onboarding without a profile picture", async () => {
+    const manager = await makeManager("onboard-nophoto-mgr");
+    const employee = await createEmployee(manager.token, manager.companyId);
+
+    const res = await request(app)
+      .patch("/api/auth/complete-onboarding")
+      .set("Authorization", `Bearer ${employee.token}`)
+      .send({ password: "newpassword123" });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/profile picture/i);
+
+    const login = await request(app)
+      .post("/api/auth/login")
+      .send({ email: employee.email, password: "temp12345", companyId: employee.companyId });
+    expect(login.body.user.needsOnboarding).toBe(true);
   });
 
   it("requires auth", async () => {
