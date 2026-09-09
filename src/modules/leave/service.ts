@@ -53,16 +53,29 @@ export async function requestLeave(
     throw new AppError(400, "endDate must be on or after startDate");
   }
   await assertNoLeaveOverlap(userId, input.startDate, input.endDate);
-  const created = await createLeaveRequest({ ...input, userId });
+
+  // Sick leave is self-certified -- it doesn't wait on a manager's decision,
+  // it's approved the moment the employee reports it. The manager is just
+  // notified, and any shift that day is cleared automatically the same way
+  // a manager-approved conflict is. Vacation still goes through the normal
+  // pending -> approved/rejected flow.
+  const isSick = input.type === "sick";
+  const created = await createLeaveRequest({
+    ...input,
+    userId,
+    status: isSick ? "approved" : "pending",
+  });
+  if (isSick) {
+    await removeConflictingShifts(userId, input.startDate, input.endDate);
+  }
+
   const user = await findUserById(userId);
   if (user?.managerId) {
-    const label = input.type === "sick" ? "sick leave" : "vacation";
-    await notify(
-      user.managerId,
-      `${user.name} requested ${label} from ${input.startDate.slice(0, 10)} to ${input.endDate.slice(0, 10)}.`,
-      "Leave Request",
-      "/admin?tab=leave",
-    );
+    const range = `${input.startDate.slice(0, 10)} to ${input.endDate.slice(0, 10)}`;
+    const message = isSick
+      ? `${user.name} called in sick from ${range}. Any scheduled shifts during that time have been removed.`
+      : `${user.name} requested vacation from ${range}.`;
+    await notify(user.managerId, message, isSick ? "Sick Leave" : "Leave Request", "/admin?tab=leave");
   }
   return created;
 }

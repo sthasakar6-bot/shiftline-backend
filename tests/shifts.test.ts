@@ -227,7 +227,7 @@ describe("Shifts", () => {
     const leaveReq = await request(app)
       .post("/api/leave-requests")
       .set("Authorization", `Bearer ${employeeToken}`)
-      .send({ type: "sick", startDate: "2026-09-25", endDate: "2026-09-25" });
+      .send({ type: "vacation", startDate: "2026-09-25", endDate: "2026-09-25" });
     expect(leaveReq.status).toBe(201);
 
     const res = await request(app)

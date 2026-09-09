@@ -116,7 +116,7 @@ describe("Leave requests", () => {
     const create = await request(app)
       .post("/api/leave-requests")
       .set("Authorization", `Bearer ${employeeToken}`)
-      .send({ type: "sick", startDate: "2026-10-01", endDate: "2026-10-02" });
+      .send({ type: "vacation", startDate: "2026-10-01", endDate: "2026-10-02" });
     const requestId = create.body.id;
 
     const cancel = await request(app)
@@ -129,7 +129,7 @@ describe("Leave requests", () => {
     const create = await request(app)
       .post("/api/leave-requests")
       .set("Authorization", `Bearer ${employeeToken}`)
-      .send({ type: "sick", startDate: "2026-11-01", endDate: "2026-11-02" });
+      .send({ type: "vacation", startDate: "2026-11-01", endDate: "2026-11-02" });
     const requestId = create.body.id;
 
     await request(app)
@@ -147,7 +147,7 @@ describe("Leave requests", () => {
     const create = await request(app)
       .post("/api/leave-requests")
       .set("Authorization", `Bearer ${employeeToken}`)
-      .send({ type: "sick", startDate: "2026-11-05", endDate: "2026-11-06" });
+      .send({ type: "vacation", startDate: "2026-11-05", endDate: "2026-11-06" });
     const requestId = create.body.id;
 
     await request(app)
@@ -165,7 +165,7 @@ describe("Leave requests", () => {
     const create = await request(app)
       .post("/api/leave-requests")
       .set("Authorization", `Bearer ${managerToken}`)
-      .send({ type: "sick", startDate: "2026-12-01", endDate: "2026-12-02" });
+      .send({ type: "vacation", startDate: "2026-12-01", endDate: "2026-12-02" });
     expect(create.status).toBe(201);
 
     const list = await request(app)
@@ -312,7 +312,7 @@ describe("Leave requests", () => {
     expect(res.status).toBe(201);
   });
 
-  it("approving a leave request removes any shift already scheduled that day (e.g. calling in sick)", async () => {
+  it("approving a vacation request removes any shift already scheduled that day", async () => {
     const shift = await request(app)
       .post(`/api/users/${reportId}/shifts`)
       .set("Authorization", `Bearer ${managerToken}`)
@@ -322,7 +322,7 @@ describe("Leave requests", () => {
     const leaveReq = await request(app)
       .post("/api/leave-requests")
       .set("Authorization", `Bearer ${employeeToken}`)
-      .send({ type: "sick", startDate: "2027-08-14", endDate: "2027-08-16" });
+      .send({ type: "vacation", startDate: "2027-08-14", endDate: "2027-08-16" });
     expect(leaveReq.status).toBe(201);
 
     const approve = await request(app)
@@ -338,7 +338,7 @@ describe("Leave requests", () => {
     expect(shiftCheck.status).toBe(404);
   });
 
-  it("still allows rejecting a leave request even when a conflicting shift exists", async () => {
+  it("still allows rejecting a vacation request even when a conflicting shift exists", async () => {
     await request(app)
       .post(`/api/users/${reportId}/shifts`)
       .set("Authorization", `Bearer ${managerToken}`)
@@ -347,12 +347,68 @@ describe("Leave requests", () => {
     const leaveReq = await request(app)
       .post("/api/leave-requests")
       .set("Authorization", `Bearer ${employeeToken}`)
-      .send({ type: "sick", startDate: "2027-09-15", endDate: "2027-09-15" });
+      .send({ type: "vacation", startDate: "2027-09-15", endDate: "2027-09-15" });
 
     const reject = await request(app)
       .patch(`/api/users/${reportId}/leave-requests/${leaveReq.body.id}`)
       .set("Authorization", `Bearer ${managerToken}`)
       .send({ status: "rejected" });
     expect(reject.status).toBe(200);
+  });
+
+  it("approves sick leave immediately, without a manager decision", async () => {
+    const res = await request(app)
+      .post("/api/leave-requests")
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ type: "sick", startDate: "2027-10-01", endDate: "2027-10-01" });
+    expect(res.status).toBe(201);
+    expect(res.body.status).toBe("approved");
+  });
+
+  it("notifies the manager that the employee called in sick", async () => {
+    await request(app)
+      .post("/api/leave-requests")
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ type: "sick", startDate: "2027-10-05", endDate: "2027-10-05" });
+
+    const notifications = await request(app)
+      .get("/api/notifications")
+      .set("Authorization", `Bearer ${managerToken}`);
+    expect(
+      notifications.body.some((n: { message: string }) => n.message.includes("called in sick")),
+    ).toBe(true);
+  });
+
+  it("reporting sick for a day with an existing shift removes that shift immediately", async () => {
+    const shift = await request(app)
+      .post(`/api/users/${reportId}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ startsAt: "2027-10-10T09:00:00Z", endsAt: "2027-10-10T17:00:00Z" });
+    expect(shift.status).toBe(201);
+
+    const leaveReq = await request(app)
+      .post("/api/leave-requests")
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ type: "sick", startDate: "2027-10-10", endDate: "2027-10-10" });
+    expect(leaveReq.status).toBe(201);
+    expect(leaveReq.body.status).toBe("approved");
+
+    const shiftCheck = await request(app)
+      .get(`/api/shifts/${shift.body.id}`)
+      .set("Authorization", `Bearer ${employeeToken}`);
+    expect(shiftCheck.status).toBe(404);
+  });
+
+  it("blocks an employee from self-cancelling an auto-approved sick leave", async () => {
+    const create = await request(app)
+      .post("/api/leave-requests")
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ type: "sick", startDate: "2027-10-15", endDate: "2027-10-15" });
+    expect(create.body.status).toBe("approved");
+
+    const cancel = await request(app)
+      .delete(`/api/leave-requests/${create.body.id}`)
+      .set("Authorization", `Bearer ${employeeToken}`);
+    expect(cancel.status).toBe(409);
   });
 });

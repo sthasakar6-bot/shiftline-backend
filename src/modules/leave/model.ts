@@ -18,6 +18,7 @@ export interface CreateLeaveRequestInput {
   startDate: string;
   endDate: string;
   reason?: string;
+  status?: string;
 }
 
 export async function findLeaveRequestsByUser(userId: number): Promise<LeaveRequest[]> {
