@@ -1,3 +1,4 @@
+import argon2 from "argon2";
 import {
   findAllUsersInCompany,
   findAllEmployeesInCompany,
@@ -8,10 +9,46 @@ import {
   setUserManager,
   setUserAvatar,
 } from "./model";
+import { createUser, findUserByEmailInCompany, findUserById } from "../identity/model";
 import { AppError } from "../../errors/AppError";
 
 export const getAllUsers = async (companyId: number) => {
   return findAllUsersInCompany(companyId);
+};
+
+// The manager sets the employee's initial password directly and hands it to
+// them -- there's no email sending in this app, so a self-serve invite link
+// would just be another link the manager has to copy and deliver by hand
+// anyway. This skips that step and creates the account in one action.
+export const createEmployee = async (
+  managerId: number,
+  firstName: string,
+  lastName: string,
+  email: string,
+  password: string,
+) => {
+  const manager = await findUserById(managerId);
+  if (!manager) {
+    throw new AppError(404, "Manager not found");
+  }
+  const existing = await findUserByEmailInCompany(email, manager.companyId);
+  if (existing) {
+    throw new AppError(400, "A user with that email already exists");
+  }
+  const trimmedFirst = firstName.trim();
+  const trimmedLast = lastName.trim();
+  const passwordHash = await argon2.hash(password);
+  const user = await createUser({
+    name: `${trimmedFirst} ${trimmedLast}`.trim(),
+    firstName: trimmedFirst,
+    lastName: trimmedLast,
+    email,
+    passwordHash,
+    role: "employee",
+    managerId: manager.id,
+    companyId: manager.companyId,
+  });
+  return { id: user.id, name: user.name, email: user.email };
 };
 
 export const getDirectReports = async (managerId: number) => {

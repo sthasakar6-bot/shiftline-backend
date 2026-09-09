@@ -2,64 +2,8 @@ import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import { env } from "../../config/env";
 import { AppError } from "../../errors/AppError";
-import {
-  findUserByEmailInCompany,
-  findUserById,
-  createUser,
-  setUserPassword,
-  setUserPhone,
-} from "./model";
-import { validateInviteToken, consumeInvite } from "../invite/service";
+import { findUserByEmailInCompany, findUserById, setUserPassword, setUserPhone } from "./model";
 import { findCompanyById } from "../company/model";
-
-export async function register(
-  firstName: string,
-  lastName: string,
-  email: string,
-  password: string,
-  token: string,
-  phone?: string,
-  address?: string,
-) {
-  const invite = await validateInviteToken(token);
-  if (invite.email.toLowerCase() !== email.toLowerCase()) {
-    throw new AppError(400, "This invite was issued for a different email address");
-  }
-
-  const existing = await findUserByEmailInCompany(email, invite.companyId);
-  if (existing) {
-    throw new AppError(400, "Email already registered");
-  }
-
-  const trimmedFirst = firstName.trim();
-  const trimmedLast = lastName.trim();
-  const passwordHash = await argon2.hash(password);
-  const user = await createUser({
-    name: `${trimmedFirst} ${trimmedLast}`.trim(),
-    firstName: trimmedFirst,
-    lastName: trimmedLast,
-    email,
-    passwordHash,
-    role: "employee",
-    managerId: invite.managerId,
-    companyId: invite.companyId,
-    phone: phone?.trim() || undefined,
-    address: address?.trim() || undefined,
-  });
-
-  await consumeInvite(invite.id);
-
-  const company = await findCompanyById(user.companyId);
-  return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    role: user.role,
-    companyId: user.companyId,
-    companyName: company?.name ?? "",
-    companySlug: company?.slug ?? "",
-  };
-}
 
 export async function login(email: string, password: string, companyId: number) {
   const user = await findUserByEmailInCompany(email, companyId);

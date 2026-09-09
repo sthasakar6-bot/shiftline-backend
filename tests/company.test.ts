@@ -80,23 +80,16 @@ describe("Multi-company isolation", () => {
     expect(res.status).toBe(404);
   });
 
-  it("scopes an invite (and the account it creates) to the inviting manager's company", async () => {
-    const email = uniqueEmail("mtenant-invited");
-    const createInvite = await request(app)
-      .post("/api/invites")
+  it("scopes an employee created by a manager to that manager's own company", async () => {
+    const email = uniqueEmail("mtenant-created");
+    const create = await request(app)
+      .post("/api/users")
       .set("Authorization", `Bearer ${managerAToken}`)
-      .send({ email });
-    expect(createInvite.status).toBe(201);
+      .send({ firstName: "Created", lastName: "Employee", email, password: "password123" });
+    expect(create.status).toBe(201);
 
-    const register = await request(app).post("/api/auth/register").send({
-      firstName: "Invited",
-      lastName: "Employee",
-      email,
-      password: "password123",
-      token: createInvite.body.token,
-    });
-    expect(register.status).toBe(201);
-    expect(register.body.companyId).toBe(companyAId);
+    const created = await db.orm.public.User.first({ id: create.body.id });
+    expect(created?.companyId).toBe(companyAId);
 
     const loginWrongCompany = await request(app)
       .post("/api/auth/login")

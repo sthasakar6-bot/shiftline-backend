@@ -2,6 +2,7 @@ import { Router } from "express";
 import multer from "multer";
 import {
   assignManagerController,
+  createEmployeeController,
   getAvatarController,
   getEmployeesController,
   getUsersController,
@@ -13,6 +14,8 @@ import {
 import { requireAuth } from "../../middleware/requireAuth";
 import { requireRole } from "../../middleware/requireRole";
 import { requireManagesTarget } from "../../middleware/requireManagesTarget";
+import { validate } from "../../middleware/validate";
+import { createEmployeeSchema } from "./schemas";
 import { AppError } from "../../errors/AppError";
 
 const upload = multer({
@@ -30,6 +33,13 @@ const upload = multer({
 const router = Router();
 
 router.get("/users", requireAuth, getUsersController);
+router.post(
+  "/users",
+  requireAuth,
+  requireRole("manager"),
+  validate(createEmployeeSchema),
+  createEmployeeController,
+);
 router.get("/users/reports", requireAuth, requireRole("manager"), getReportsController);
 router.get("/users/employees", requireAuth, requireRole("manager"), getEmployeesController);
 router.post(

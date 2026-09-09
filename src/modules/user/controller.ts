@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import {
   assignManager,
+  createEmployee,
   getAllEmployees,
   getAllUsers,
   getAvatar,
@@ -14,6 +15,12 @@ import { AppError } from "../../errors/AppError";
 export const getUsersController = async (req: Request, res: Response) => {
   const users = await getAllUsers(req.user!.companyId);
   res.json(users);
+};
+
+export const createEmployeeController = async (req: Request, res: Response) => {
+  const { firstName, lastName, email, password } = req.body;
+  const user = await createEmployee(req.user!.sub, firstName, lastName, email, password);
+  res.status(201).json(user);
 };
 
 export const getReportsController = async (req: Request, res: Response) => {
