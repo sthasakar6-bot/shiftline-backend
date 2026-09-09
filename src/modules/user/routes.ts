@@ -3,11 +3,14 @@ import multer from "multer";
 import {
   assignManagerController,
   createEmployeeController,
+  deactivateEmployeeController,
   getAvatarController,
   getEmployeesController,
+  getFormerEmployeesController,
   getUsersController,
   getReportsController,
   promoteController,
+  reactivateEmployeeController,
   removeManagerController,
   uploadAvatarController,
 } from "./controller";
@@ -42,6 +45,12 @@ router.post(
 );
 router.get("/users/reports", requireAuth, requireRole("manager"), getReportsController);
 router.get("/users/employees", requireAuth, requireRole("manager"), getEmployeesController);
+router.get(
+  "/users/former-employees",
+  requireAuth,
+  requireRole("manager"),
+  getFormerEmployeesController,
+);
 router.post(
   "/users/:id/promote",
   requireAuth,
@@ -61,6 +70,18 @@ router.delete(
   requireRole("manager"),
   requireManagesTarget,
   removeManagerController,
+);
+router.post(
+  "/users/:id/deactivate",
+  requireAuth,
+  requireRole("manager"),
+  deactivateEmployeeController,
+);
+router.post(
+  "/users/:id/reactivate",
+  requireAuth,
+  requireRole("manager"),
+  reactivateEmployeeController,
 );
 router.post("/users/me/avatar", requireAuth, upload.single("avatar"), uploadAvatarController);
 router.get("/users/:id/avatar", requireAuth, getAvatarController);

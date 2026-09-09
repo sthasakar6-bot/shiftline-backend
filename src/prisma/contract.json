@@ -1277,6 +1277,13 @@
           },
           "User": {
             "fields": {
+              "active": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
               "address": {
                 "nullable": true,
                 "type": {
@@ -1597,6 +1604,9 @@
             },
             "storage": {
               "fields": {
+                "active": {
+                  "column": "active"
+                },
                 "address": {
                   "column": "address"
                 },
@@ -2713,6 +2723,15 @@
             },
             "user": {
               "columns": {
+                "active": {
+                  "codecId": "pg/bool@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": true
+                  },
+                  "nativeType": "bool",
+                  "nullable": false
+                },
                 "address": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -2873,7 +2892,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "4bf7515104ed0ba4636df9f6bd76695924b43c8adeffcf51f9d32275bd8153f8"
+    "storageHash": "4aadbeb7cb3e308ec861ff9fed0072b27437534ada5f58a7cf19f7d5169156ee"
   },
   "capabilities": {
     "postgres": {

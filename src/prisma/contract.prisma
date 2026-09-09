@@ -21,6 +21,7 @@ model User {
   phone         String?
   address       String?
   needsOnboarding Boolean       @default(false)
+  active        Boolean        @default(true)
   lastSeenAt    TimestamptzString?
   managerId     Int?
   manager       User?          @relation("ManagerReports", fields: [managerId], references: [id])

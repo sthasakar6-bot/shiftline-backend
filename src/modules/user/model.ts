@@ -16,6 +16,7 @@ export interface UserSummary {
   hasAvatar: boolean;
   phone: string | null;
   address: string | null;
+  active: boolean;
   online: boolean;
 }
 
@@ -31,6 +32,7 @@ const SUMMARY_FIELDS = [
   "avatarBase64",
   "phone",
   "address",
+  "active",
   "lastSeenAt",
 ] as const;
 
@@ -44,6 +46,7 @@ function toUserSummary(row: {
   avatarBase64: string | null;
   phone: string | null;
   address: string | null;
+  active: boolean;
   lastSeenAt: string | null;
 }): UserSummary {
   return {
@@ -56,6 +59,7 @@ function toUserSummary(row: {
     hasAvatar: Boolean(row.avatarBase64),
     phone: row.phone,
     address: row.address,
+    active: row.active,
     online: row.lastSeenAt !== null && Date.now() - new Date(row.lastSeenAt).getTime() < ONLINE_THRESHOLD_MS,
   };
 }
@@ -76,9 +80,29 @@ export async function findDirectReports(managerId: number): Promise<UserSummary[
 
 export async function findAllEmployeesInCompany(companyId: number): Promise<UserSummary[]> {
   const rows = await db.orm.public.User.select(...SUMMARY_FIELDS)
-    .where({ role: "employee", companyId })
+    .where({ role: "employee", companyId, active: true })
     .all();
   return rows.map(toUserSummary);
+}
+
+export async function findFormerEmployeesInCompany(companyId: number): Promise<UserSummary[]> {
+  const rows = await db.orm.public.User.select(...SUMMARY_FIELDS)
+    .where({ role: "employee", companyId, active: false })
+    .all();
+  return rows.map(toUserSummary);
+}
+
+export async function setUserActive(
+  id: number,
+  active: boolean,
+): Promise<UserSummary | null> {
+  const row = await db.orm.public.User.where({ id })
+    .select(...SUMMARY_FIELDS)
+    // Deactivating also drops the manager link -- an ex-employee shouldn't
+    // still show up as someone's direct report. Reactivating leaves it
+    // unset; the manager adds them back to a team explicitly.
+    .update(active ? { active } : { active, managerId: null });
+  return row ? toUserSummary(row) : null;
 }
 
 export async function setUserManager(

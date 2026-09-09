@@ -2,11 +2,14 @@ import { Request, Response } from "express";
 import {
   assignManager,
   createEmployee,
+  deactivateEmployee,
   getAllEmployees,
   getAllUsers,
   getAvatar,
   getDirectReports,
+  getFormerEmployees,
   promoteToManager,
+  reactivateEmployee,
   removeFromTeam,
   uploadAvatar,
 } from "./service";
@@ -45,6 +48,21 @@ export const assignManagerController = async (req: Request, res: Response) => {
 
 export const removeManagerController = async (req: Request, res: Response) => {
   const user = await removeFromTeam(Number(req.params.id));
+  res.json(user);
+};
+
+export const getFormerEmployeesController = async (req: Request, res: Response) => {
+  const employees = await getFormerEmployees(req.user!.companyId);
+  res.json(employees);
+};
+
+export const deactivateEmployeeController = async (req: Request, res: Response) => {
+  const user = await deactivateEmployee(Number(req.params.id), req.user!.companyId);
+  res.json(user);
+};
+
+export const reactivateEmployeeController = async (req: Request, res: Response) => {
+  const user = await reactivateEmployee(Number(req.params.id), req.user!.companyId);
   res.json(user);
 };
 

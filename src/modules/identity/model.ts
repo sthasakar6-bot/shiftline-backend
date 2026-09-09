@@ -14,6 +14,7 @@ export interface AuthUser {
   phone: string | null;
   address: string | null;
   needsOnboarding: boolean;
+  active: boolean;
   lastSeenAt: string | null;
 }
 

@@ -22,6 +22,10 @@ export async function login(email: string, password: string, companyId: number) 
     throw new AppError(401, "Invalid email or password");
   }
 
+  if (!user.active) {
+    throw new AppError(403, "This account has been deactivated. Contact your manager.");
+  }
+
   const token = jwt.sign(
     { sub: user.id, email: user.email, role: user.role, companyId: user.companyId },
     env.jwtSecret,
