@@ -15,7 +15,8 @@
     "reset-password": "node dist/scripts/reset-password.js",
     "cleanup-shift-conflicts": "node dist/scripts/cleanup-shift-conflicts.js",
     "clear-leave-requests": "node dist/scripts/clear-leave-requests.js",
-    "clear-schedule-data": "node dist/scripts/clear-schedule-data.js"
+    "clear-schedule-data": "node dist/scripts/clear-schedule-data.js",
+    "purge-employees-except": "node dist/scripts/purge-employees-except.js"
   },
   "keywords": [],
   "author": "",
