@@ -29,7 +29,7 @@ describe("Team directory", () => {
     expect(names).toContain(employee.name);
   });
 
-  it("does not include phone, address, or email", async () => {
+  it("does not include phone, address, email, or online status", async () => {
     const manager = await makeManager("teamdir-fieldsmgr");
     const employeeToken = await loginUser(manager.email, manager.password, manager.companyId);
     const res = await request(app)
@@ -39,6 +39,7 @@ describe("Team directory", () => {
       expect(member.phone).toBeUndefined();
       expect(member.address).toBeUndefined();
       expect(member.email).toBeUndefined();
+      expect(member.online).toBeUndefined();
     }
   });
 
