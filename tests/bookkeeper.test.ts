@@ -190,6 +190,53 @@ describe("Bookkeeper document access", () => {
     expect(res.status).toBe(404);
   });
 
+  it("lists managers alongside employees, since they need payroll documents too", async () => {
+    const manager = await makeManager("bk-mgrlist-mgr");
+    const bookkeeper = await makeBookkeeper(manager.token, manager.companyId, "bk-mgrlist-bk");
+
+    const res = await request(app)
+      .get("/api/bookkeeper/employees")
+      .set("Authorization", `Bearer ${bookkeeper.token}`);
+    expect(res.status).toBe(200);
+    expect(res.body.some((e: { id: number }) => e.id === manager.id)).toBe(true);
+  });
+
+  it("excludes other bookkeepers from the list", async () => {
+    const manager = await makeManager("bk-exclude-mgr");
+    const bookkeeper = await makeBookkeeper(manager.token, manager.companyId, "bk-exclude-bk1");
+    const otherBookkeeper = await makeBookkeeper(manager.token, manager.companyId, "bk-exclude-bk2");
+
+    const res = await request(app)
+      .get("/api/bookkeeper/employees")
+      .set("Authorization", `Bearer ${bookkeeper.token}`);
+    const login = await request(app)
+      .post("/api/auth/login")
+      .send({ email: otherBookkeeper.email, password: "password123", companyId: manager.companyId });
+    expect(res.body.some((e: { id: number }) => e.id === login.body.user.id)).toBe(false);
+  });
+
+  it("lets a bookkeeper create and upload a payslip for a manager", async () => {
+    const manager = await makeManager("bk-mgrpayslip-mgr");
+    const bookkeeper = await makeBookkeeper(manager.token, manager.companyId, "bk-mgrpayslip-bk");
+
+    const create = await request(app)
+      .post(`/api/bookkeeper/employees/${manager.id}/payslips`)
+      .set("Authorization", `Bearer ${bookkeeper.token}`)
+      .send({ period: "August 2026" });
+    expect(create.status).toBe(201);
+
+    const upload = await request(app)
+      .post(`/api/bookkeeper/employees/${manager.id}/payslips/${create.body.id}/pdf`)
+      .set("Authorization", `Bearer ${bookkeeper.token}`)
+      .attach("pdf", MIN_PDF, { filename: "payslip.pdf", contentType: "application/pdf" });
+    expect(upload.status).toBe(200);
+
+    const managerView = await request(app)
+      .get("/api/payslips")
+      .set("Authorization", `Bearer ${manager.token}`);
+    expect(managerView.body.some((p: { id: number }) => p.id === create.body.id)).toBe(true);
+  });
+
   it("blocks a manager from using bookkeeper-only routes", async () => {
     const manager = await makeManager("bk-mgraccess-mgr");
     const res = await request(app)

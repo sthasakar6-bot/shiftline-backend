@@ -1,17 +1,18 @@
 import { findUserById } from "../identity/model";
-import { findAllEmployeesInCompany } from "../user/model";
+import { findPayrollEligibleInCompany } from "../user/model";
 import { findAttendanceByUser } from "../attendance/model";
 import { AppError } from "../../errors/AppError";
 import { listContracts, getContractPdf, addContract, uploadContractPdf } from "../contract/service";
 import { listPayslips, getPayslipPdf, addPayslip, uploadPayslipPdf } from "../payslip/service";
 
-// A bookkeeper isn't anyone's manager -- they're scoped to "any employee in
-// my company", the same company-wide scope createEmployee/assignManager use,
-// rather than the manages-a-direct-report relationship most contract/payslip
-// routes require.
+// A bookkeeper isn't anyone's manager -- they're scoped to "anyone in my
+// company who needs payroll documents", the same company-wide scope
+// createEmployee/assignManager use, rather than the manages-a-direct-report
+// relationship most contract/payslip routes require. Managers need payslips
+// and contracts too; only other bookkeepers are excluded.
 async function assertEmployeeInCompany(targetId: number, companyId: number) {
   const target = await findUserById(targetId);
-  if (!target || target.companyId !== companyId || target.role !== "employee") {
+  if (!target || target.companyId !== companyId || target.role === "bookkeeper") {
     throw new AppError(404, "Employee not found");
   }
   return target;
@@ -34,7 +35,7 @@ function hoursWorkedThisMonth(attendance: { clockIn: string | null; clockOut: st
 }
 
 export async function listEmployeesWithDocuments(companyId: number) {
-  const employees = await findAllEmployeesInCompany(companyId);
+  const employees = await findPayrollEligibleInCompany(companyId);
   return Promise.all(
     employees.map(async (e) => ({
       id: e.id,

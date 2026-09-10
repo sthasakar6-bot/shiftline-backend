@@ -134,6 +134,15 @@ export async function findAllEmployeesInCompany(companyId: number): Promise<User
   return rows.map(toUserSummary);
 }
 
+// Managers need payslips, contracts, and documents too -- only bookkeepers
+// themselves are excluded, since there's no one to bill their own hours to.
+export async function findPayrollEligibleInCompany(companyId: number): Promise<UserSummary[]> {
+  const rows = await db.orm.public.User.select(...SUMMARY_FIELDS)
+    .where({ companyId, active: true })
+    .all();
+  return rows.filter((r) => r.role !== "bookkeeper").map(toUserSummary);
+}
+
 export async function findFormerEmployeesInCompany(companyId: number): Promise<UserSummary[]> {
   const rows = await db.orm.public.User.select(...SUMMARY_FIELDS)
     .where({ role: "employee", companyId, active: false })
