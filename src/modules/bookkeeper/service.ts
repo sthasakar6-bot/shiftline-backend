@@ -1,5 +1,6 @@
 import { findUserById } from "../identity/model";
 import { findAllEmployeesInCompany } from "../user/model";
+import { findAttendanceByUser } from "../attendance/model";
 import { AppError } from "../../errors/AppError";
 import { listContracts, getContractPdf, addContract, uploadContractPdf } from "../contract/service";
 import { listPayslips, getPayslipPdf, addPayslip, uploadPayslipPdf } from "../payslip/service";
@@ -16,6 +17,22 @@ async function assertEmployeeInCompany(targetId: number, companyId: number) {
   return target;
 }
 
+// Actual clocked time, not scheduled shift time -- this is what a bookkeeper
+// needs for payroll math, and matches the "hours worked" figure an employee
+// already sees on their own profile.
+function hoursWorkedThisMonth(attendance: { clockIn: string | null; clockOut: string | null }[]) {
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const ms = attendance.reduce((sum, a) => {
+    if (!a.clockIn || !a.clockOut) return sum;
+    const clockIn = new Date(a.clockIn);
+    if (clockIn < monthStart || clockIn >= monthEnd) return sum;
+    return sum + (new Date(a.clockOut).getTime() - clockIn.getTime());
+  }, 0);
+  return Math.round((ms / 3600000) * 100) / 100;
+}
+
 export async function listEmployeesWithDocuments(companyId: number) {
   const employees = await findAllEmployeesInCompany(companyId);
   return Promise.all(
@@ -23,6 +40,7 @@ export async function listEmployeesWithDocuments(companyId: number) {
       id: e.id,
       name: e.name,
       email: e.email,
+      hoursThisMonth: hoursWorkedThisMonth(await findAttendanceByUser(e.id)),
       contracts: await listContracts(e.id),
       payslips: await listPayslips(e.id),
     })),

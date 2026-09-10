@@ -74,6 +74,50 @@ describe("Bookkeeper document access", () => {
     expect(listed.payslips).toEqual([]);
   });
 
+  it("reports hours worked this month, from actual clock in/out times", async () => {
+    const manager = await makeManager("bk-hours-mgr");
+    const employee = await registerUser({
+      email: uniqueEmail("bk-hours-emp"),
+      managerId: manager.id,
+    });
+    const bookkeeper = await makeBookkeeper(manager.token, manager.companyId, "bk-hours-bk");
+
+    const now = new Date();
+    const shift = await db.orm.public.Shift.create({
+      userId: employee.id,
+      startsAt: new Date(now.getFullYear(), now.getMonth(), 5, 9, 0).toISOString(),
+      endsAt: new Date(now.getFullYear(), now.getMonth(), 5, 17, 0).toISOString(),
+    });
+    // 4 completed hours this month...
+    await db.orm.public.Attendance.create({
+      userId: employee.id,
+      shiftId: shift.id,
+      clockIn: new Date(now.getFullYear(), now.getMonth(), 5, 9, 0).toISOString(),
+      clockOut: new Date(now.getFullYear(), now.getMonth(), 5, 13, 0).toISOString(),
+    });
+    // ...plus an open (still clocked in) entry that shouldn't count...
+    await db.orm.public.Attendance.create({
+      userId: employee.id,
+      shiftId: shift.id,
+      clockIn: new Date(now.getFullYear(), now.getMonth(), 6, 9, 0).toISOString(),
+      clockOut: null,
+    });
+    // ...and 3 completed hours from last month, which also shouldn't count.
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 5);
+    await db.orm.public.Attendance.create({
+      userId: employee.id,
+      shiftId: shift.id,
+      clockIn: new Date(lastMonth.getFullYear(), lastMonth.getMonth(), 5, 9, 0).toISOString(),
+      clockOut: new Date(lastMonth.getFullYear(), lastMonth.getMonth(), 5, 12, 0).toISOString(),
+    });
+
+    const res = await request(app)
+      .get("/api/bookkeeper/employees")
+      .set("Authorization", `Bearer ${bookkeeper.token}`);
+    const listed = res.body.find((e: { id: number }) => e.id === employee.id);
+    expect(listed.hoursThisMonth).toBe(4);
+  });
+
   it("lets a bookkeeper create and upload a payslip for an employee", async () => {
     const manager = await makeManager("bk-payslip-mgr");
     const employee = await registerUser({
