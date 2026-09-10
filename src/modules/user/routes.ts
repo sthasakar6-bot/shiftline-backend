@@ -3,6 +3,7 @@ import multer from "multer";
 import {
   assignManagerController,
   createEmployeeController,
+  createManagerController,
   deactivateEmployeeController,
   getAvatarController,
   getEmployeesController,
@@ -42,6 +43,13 @@ router.post(
   requireRole("manager"),
   validate(createEmployeeSchema),
   createEmployeeController,
+);
+router.post(
+  "/users/managers",
+  requireAuth,
+  requireRole("manager"),
+  validate(createEmployeeSchema),
+  createManagerController,
 );
 router.get("/users/reports", requireAuth, requireRole("manager"), getReportsController);
 router.get("/users/employees", requireAuth, requireRole("manager"), getEmployeesController);

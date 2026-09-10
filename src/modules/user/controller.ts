@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import {
   assignManager,
   createEmployee,
+  createManagerAccount,
   deactivateEmployee,
   getAllEmployees,
   getAllUsers,
@@ -23,6 +24,12 @@ export const getUsersController = async (req: Request, res: Response) => {
 export const createEmployeeController = async (req: Request, res: Response) => {
   const { firstName, lastName, email, password } = req.body;
   const user = await createEmployee(req.user!.sub, firstName, lastName, email, password);
+  res.status(201).json(user);
+};
+
+export const createManagerController = async (req: Request, res: Response) => {
+  const { firstName, lastName, email, password } = req.body;
+  const user = await createManagerAccount(req.user!.sub, firstName, lastName, email, password);
   res.status(201).json(user);
 };
 

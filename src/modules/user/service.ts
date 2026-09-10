@@ -54,6 +54,40 @@ export const createEmployee = async (
   return { id: user.id, name: user.name, email: user.email };
 };
 
+// Same idea as createEmployee, but for bringing on another manager -- e.g.
+// handing full administration of a company over to someone else. Scoped to
+// the calling manager's own company, same as createEmployee.
+export const createManagerAccount = async (
+  callerId: number,
+  firstName: string,
+  lastName: string,
+  email: string,
+  password: string,
+) => {
+  const caller = await findUserById(callerId);
+  if (!caller) {
+    throw new AppError(404, "Manager not found");
+  }
+  const existing = await findUserByEmailInCompany(email, caller.companyId);
+  if (existing) {
+    throw new AppError(400, "A user with that email already exists");
+  }
+  const trimmedFirst = firstName.trim();
+  const trimmedLast = lastName.trim();
+  const passwordHash = await argon2.hash(password);
+  const user = await createUser({
+    name: `${trimmedFirst} ${trimmedLast}`.trim(),
+    firstName: trimmedFirst,
+    lastName: trimmedLast,
+    email,
+    passwordHash,
+    role: "manager",
+    companyId: caller.companyId,
+    needsOnboarding: true,
+  });
+  return { id: user.id, name: user.name, email: user.email };
+};
+
 export const getDirectReports = async (managerId: number) => {
   return findDirectReports(managerId);
 };
