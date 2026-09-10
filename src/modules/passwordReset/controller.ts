@@ -4,6 +4,7 @@ import {
   listPendingRequestsForManager,
   validateResetToken,
   completeReset,
+  resolveResetRequest,
 } from "./service";
 
 export async function requestResetController(req: Request, res: Response) {
@@ -25,5 +26,11 @@ export async function getResetTokenController(req: Request, res: Response) {
 export async function completeResetController(req: Request, res: Response) {
   const { password } = req.body;
   await completeReset(String(req.params.token), password);
+  res.status(204).send();
+}
+
+export async function resolveResetRequestController(req: Request, res: Response) {
+  const { password } = req.body;
+  await resolveResetRequest(req.user!.sub, Number(req.params.id), password);
   res.status(204).send();
 }

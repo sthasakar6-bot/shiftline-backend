@@ -23,6 +23,12 @@ export async function findResetRequestByToken(
   return db.orm.public.PasswordResetRequest.first({ token });
 }
 
+export async function findResetRequestById(
+  id: number,
+): Promise<PasswordResetRequest | null> {
+  return db.orm.public.PasswordResetRequest.first({ id });
+}
+
 export async function findPendingRequestForUser(
   userId: number,
 ): Promise<PasswordResetRequest | null> {

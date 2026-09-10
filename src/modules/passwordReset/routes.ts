@@ -4,6 +4,7 @@ import {
   listPendingRequestsController,
   getResetTokenController,
   completeResetController,
+  resolveResetRequestController,
 } from "./controller";
 import { requireAuth } from "../../middleware/requireAuth";
 import { requireRole } from "../../middleware/requireRole";
@@ -28,6 +29,13 @@ router.post(
   "/password-reset-requests/:token/complete",
   validate(completeResetSchema),
   completeResetController,
+);
+router.post(
+  "/password-reset-requests/:id/resolve",
+  requireAuth,
+  requireRole("manager"),
+  validate(completeResetSchema),
+  resolveResetRequestController,
 );
 
 export default router;

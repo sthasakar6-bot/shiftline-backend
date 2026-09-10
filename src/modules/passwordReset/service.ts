@@ -7,6 +7,7 @@ import { notify } from "../notifications/service";
 import {
   createResetRequest,
   findResetRequestByToken,
+  findResetRequestById,
   findPendingRequestForUser,
   findPendingRequests,
   markRequestCompleted,
@@ -72,6 +73,37 @@ export async function validateResetToken(token: string) {
 
 export async function completeReset(token: string, newPassword: string) {
   const { request } = await validateResetToken(token);
+  const passwordHash = await argon2.hash(newPassword);
+  await setUserPassword(request.userId, passwordHash);
+  await markRequestCompleted(request.id);
+}
+
+// Lets a manager set a new password directly for a pending request from one
+// of their own direct reports -- the employee can't be expected to click a
+// self-serve reset link if they're the one locked out. Scoped the same way
+// as leave approval: only the requester's own manager, not any manager in
+// the company.
+export async function resolveResetRequest(
+  managerId: number,
+  requestId: number,
+  newPassword: string,
+) {
+  const request = await findResetRequestById(requestId);
+  if (!request) {
+    throw new AppError(404, "Reset request not found");
+  }
+  if (request.status !== "pending") {
+    throw new AppError(400, "This reset request has already been resolved");
+  }
+
+  const user = await findUserById(request.userId);
+  if (!user) {
+    throw new AppError(404, "Account not found");
+  }
+  if (user.managerId !== managerId) {
+    throw new AppError(403, "Not your report");
+  }
+
   const passwordHash = await argon2.hash(newPassword);
   await setUserPassword(request.userId, passwordHash);
   await markRequestCompleted(request.id);

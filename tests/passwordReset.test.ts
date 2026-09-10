@@ -89,6 +89,79 @@ describe("Password reset", () => {
   });
 });
 
+describe("Manager resolves reset request", () => {
+  it("lets the employee's manager set a new password directly", async () => {
+    const managerUser = await registerUser({ email: uniqueEmail("pwresolve-manager") });
+    await db.orm.public.User.where({ id: managerUser.id }).update({ role: "manager" });
+    const managerToken = await loginUser(managerUser.email, managerUser.password, managerUser.companyId);
+
+    const { user } = await registerAndLogin({
+      email: uniqueEmail("pwresolve-employee"),
+      managerId: managerUser.id,
+    });
+
+    await request(app)
+      .post("/api/password-reset-requests")
+      .send({ email: user.email, companyId: managerUser.companyId });
+
+    const list = await request(app)
+      .get("/api/password-reset-requests")
+      .set("Authorization", `Bearer ${managerToken}`);
+    const pending = list.body.find((r: { userId: number }) => r.userId === user.id);
+
+    const resolve = await request(app)
+      .post(`/api/password-reset-requests/${pending.id}/resolve`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ password: "managerSetPassword1" });
+    expect(resolve.status).toBe(204);
+
+    const newLogin = await request(app)
+      .post("/api/auth/login")
+      .send({ email: user.email, password: "managerSetPassword1", companyId: managerUser.companyId });
+    expect(newLogin.status).toBe(200);
+
+    const reuse = await request(app)
+      .post(`/api/password-reset-requests/${pending.id}/resolve`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ password: "anotherPassword1" });
+    expect(reuse.status).toBe(400);
+  });
+
+  it("blocks a manager from resolving a request for someone else's report", async () => {
+    const managerUser = await registerUser({ email: uniqueEmail("pwresolve-owner") });
+    await db.orm.public.User.where({ id: managerUser.id }).update({ role: "manager" });
+    const managerToken = await loginUser(managerUser.email, managerUser.password, managerUser.companyId);
+
+    const otherManagerUser = await registerUser({ email: uniqueEmail("pwresolve-other") });
+    await db.orm.public.User.where({ id: otherManagerUser.id }).update({ role: "manager" });
+    const otherManagerToken = await loginUser(
+      otherManagerUser.email,
+      otherManagerUser.password,
+      otherManagerUser.companyId,
+    );
+
+    const { user } = await registerAndLogin({
+      email: uniqueEmail("pwresolve-victim"),
+      managerId: managerUser.id,
+    });
+
+    await request(app)
+      .post("/api/password-reset-requests")
+      .send({ email: user.email, companyId: managerUser.companyId });
+
+    const list = await request(app)
+      .get("/api/password-reset-requests")
+      .set("Authorization", `Bearer ${managerToken}`);
+    const pending = list.body.find((r: { userId: number }) => r.userId === user.id);
+
+    const resolve = await request(app)
+      .post(`/api/password-reset-requests/${pending.id}/resolve`)
+      .set("Authorization", `Bearer ${otherManagerToken}`)
+      .send({ password: "shouldNotWork1" });
+    expect(resolve.status).toBe(403);
+  });
+});
+
 describe("Change password", () => {
   it("lets a user change their own password with the correct current password", async () => {
     const { user, token } = await registerAndLogin({ email: uniqueEmail("changepw") });
