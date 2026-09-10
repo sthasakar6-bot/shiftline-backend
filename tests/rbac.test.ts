@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll } from "vitest";
 import request from "supertest";
 import app from "../src/app";
 import { db } from "../src/prisma/db";
-import { registerUser, loginUser, uniqueEmail } from "./helpers";
+import { registerUser, loginUser, uniqueEmail, createCompany } from "./helpers";
 
 describe("RBAC", () => {
   let managerToken: string;
@@ -54,11 +54,24 @@ describe("RBAC", () => {
     expect(res.body.userId).toBe(reportId);
   });
 
-  it("blocks a manager from assigning a shift to a non-report", async () => {
+  it("lets a manager assign a shift to anyone in their company, not just their reports", async () => {
     const res = await request(app)
       .post(`/api/users/${outsiderId}/shifts`)
       .set("Authorization", `Bearer ${managerToken}`)
       .send({ startsAt: "2026-12-02T09:00:00Z", endsAt: "2026-12-02T17:00:00Z" });
+    expect(res.status).toBe(201);
+    expect(res.body.userId).toBe(outsiderId);
+  });
+
+  it("blocks a manager from assigning a shift to someone in a different company", async () => {
+    const otherCompanyUser = await registerUser({
+      email: uniqueEmail("rbac-other-company"),
+      companyId: await createCompany("RBAC Other Co"),
+    });
+    const res = await request(app)
+      .post(`/api/users/${otherCompanyUser.id}/shifts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ startsAt: "2026-12-04T09:00:00Z", endsAt: "2026-12-04T17:00:00Z" });
     expect(res.status).toBe(403);
   });
 

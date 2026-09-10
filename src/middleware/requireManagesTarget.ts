@@ -34,3 +34,23 @@ export async function requireManagesTargetOrSelf(req: Request, res: Response, ne
   }
   next();
 }
+
+// For the roster: any manager should be able to set shifts for anyone in
+// their company -- including themselves and other managers -- not just
+// their own direct reports. Unlike requireManagesTargetOrSelf, this isn't
+// used anywhere self-approval would be a problem (e.g. leave requests).
+export async function requireSameCompanyOrSelf(req: Request, res: Response, next: NextFunction) {
+  const targetId = Number(req.params.id);
+  if (targetId === req.user!.sub) {
+    next();
+    return;
+  }
+  const target = await findUserSummaryById(targetId);
+  if (!target) {
+    throw new AppError(404, "User not found");
+  }
+  if (target.companyId !== req.user!.companyId) {
+    throw new AppError(403, "Not in your company");
+  }
+  next();
+}
