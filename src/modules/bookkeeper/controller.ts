@@ -7,6 +7,8 @@ import {
   createPayslipForEmployee,
   uploadPayslipPdfForEmployee,
   getPayslipPdfForEmployee,
+  deletePayslipForEmployee,
+  deleteContractForEmployee,
 } from "./service";
 import { AppError } from "../../errors/AppError";
 
@@ -78,4 +80,14 @@ export async function getPayslipPdfController(req: Request, res: Response) {
     Number(req.params.payslipId),
   );
   sendPdf(res, pdf.pdfBase64, pdf.pdfFilename);
+}
+
+export async function deletePayslipController(req: Request, res: Response) {
+  await deletePayslipForEmployee(req.user!.companyId, Number(req.params.id), Number(req.params.payslipId));
+  res.status(204).send();
+}
+
+export async function deleteContractController(req: Request, res: Response) {
+  await deleteContractForEmployee(req.user!.companyId, Number(req.params.id), Number(req.params.contractId));
+  res.status(204).send();
 }

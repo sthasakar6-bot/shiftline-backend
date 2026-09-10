@@ -173,6 +173,64 @@ describe("Bookkeeper document access", () => {
     expect(employeeView.body.some((c: { id: number }) => c.id === create.body.id)).toBe(true);
   });
 
+  it("lets a bookkeeper delete a payslip they uploaded by mistake", async () => {
+    const manager = await makeManager("bk-delpayslip-mgr");
+    const employee = await registerUser({
+      email: uniqueEmail("bk-delpayslip-emp"),
+      managerId: manager.id,
+    });
+    const employeeToken = await loginUser(employee.email, employee.password, employee.companyId);
+    const bookkeeper = await makeBookkeeper(manager.token, manager.companyId, "bk-delpayslip-bk");
+
+    const create = await request(app)
+      .post(`/api/bookkeeper/employees/${employee.id}/payslips`)
+      .set("Authorization", `Bearer ${bookkeeper.token}`)
+      .send({ period: "wrong period" });
+    await request(app)
+      .post(`/api/bookkeeper/employees/${employee.id}/payslips/${create.body.id}/pdf`)
+      .set("Authorization", `Bearer ${bookkeeper.token}`)
+      .attach("pdf", MIN_PDF, { filename: "wrong.pdf", contentType: "application/pdf" });
+
+    const del = await request(app)
+      .delete(`/api/bookkeeper/employees/${employee.id}/payslips/${create.body.id}`)
+      .set("Authorization", `Bearer ${bookkeeper.token}`);
+    expect(del.status).toBe(204);
+
+    const employeeView = await request(app)
+      .get("/api/payslips")
+      .set("Authorization", `Bearer ${employeeToken}`);
+    expect(employeeView.body.some((p: { id: number }) => p.id === create.body.id)).toBe(false);
+  });
+
+  it("lets a bookkeeper delete a contract they uploaded by mistake", async () => {
+    const manager = await makeManager("bk-delcontract-mgr");
+    const employee = await registerUser({
+      email: uniqueEmail("bk-delcontract-emp"),
+      managerId: manager.id,
+    });
+    const employeeToken = await loginUser(employee.email, employee.password, employee.companyId);
+    const bookkeeper = await makeBookkeeper(manager.token, manager.companyId, "bk-delcontract-bk");
+
+    const create = await request(app)
+      .post(`/api/bookkeeper/employees/${employee.id}/contracts`)
+      .set("Authorization", `Bearer ${bookkeeper.token}`)
+      .send({ role: "Wrong Role" });
+    await request(app)
+      .post(`/api/bookkeeper/employees/${employee.id}/contracts/${create.body.id}/pdf`)
+      .set("Authorization", `Bearer ${bookkeeper.token}`)
+      .attach("pdf", MIN_PDF, { filename: "wrong.pdf", contentType: "application/pdf" });
+
+    const del = await request(app)
+      .delete(`/api/bookkeeper/employees/${employee.id}/contracts/${create.body.id}`)
+      .set("Authorization", `Bearer ${bookkeeper.token}`);
+    expect(del.status).toBe(204);
+
+    const employeeView = await request(app)
+      .get("/api/contracts")
+      .set("Authorization", `Bearer ${employeeToken}`);
+    expect(employeeView.body.some((c: { id: number }) => c.id === create.body.id)).toBe(false);
+  });
+
   it("rejects uploading for an employee in a different company", async () => {
     const companyBId = await createCompany("Bookkeeper Co B");
     const managerA = await makeManager("bk-cross-mgrA");

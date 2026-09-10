@@ -8,6 +8,8 @@ import {
   createPayslipController,
   uploadPayslipPdfController,
   getPayslipPdfController,
+  deletePayslipController,
+  deleteContractController,
 } from "./controller";
 import { requireAuth } from "../../middleware/requireAuth";
 import { requireRole } from "../../middleware/requireRole";
@@ -74,6 +76,18 @@ router.get(
   requireAuth,
   requireRole("bookkeeper"),
   getPayslipPdfController,
+);
+router.delete(
+  "/bookkeeper/employees/:id/payslips/:payslipId",
+  requireAuth,
+  requireRole("bookkeeper"),
+  deletePayslipController,
+);
+router.delete(
+  "/bookkeeper/employees/:id/contracts/:contractId",
+  requireAuth,
+  requireRole("bookkeeper"),
+  deleteContractController,
 );
 
 export default router;

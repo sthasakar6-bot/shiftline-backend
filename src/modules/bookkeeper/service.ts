@@ -2,8 +2,14 @@ import { findUserById } from "../identity/model";
 import { findPayrollEligibleInCompany } from "../user/model";
 import { findAttendanceByUser } from "../attendance/model";
 import { AppError } from "../../errors/AppError";
-import { listContracts, getContractPdf, addContract, uploadContractPdf } from "../contract/service";
-import { listPayslips, getPayslipPdf, addPayslip, uploadPayslipPdf } from "../payslip/service";
+import {
+  listContracts,
+  getContractPdf,
+  addContract,
+  uploadContractPdf,
+  removeContract,
+} from "../contract/service";
+import { listPayslips, getPayslipPdf, addPayslip, uploadPayslipPdf, removePayslip } from "../payslip/service";
 
 // A bookkeeper isn't anyone's manager -- they're scoped to "anyone in my
 // company who needs payroll documents", the same company-wide scope
@@ -96,4 +102,22 @@ export async function getPayslipPdfForEmployee(
 ) {
   await assertEmployeeInCompany(targetId, companyId);
   return getPayslipPdf(payslipId, targetId);
+}
+
+export async function deletePayslipForEmployee(
+  companyId: number,
+  targetId: number,
+  payslipId: number,
+) {
+  await assertEmployeeInCompany(targetId, companyId);
+  return removePayslip(payslipId, targetId);
+}
+
+export async function deleteContractForEmployee(
+  companyId: number,
+  targetId: number,
+  contractId: number,
+) {
+  await assertEmployeeInCompany(targetId, companyId);
+  return removeContract(contractId, targetId);
 }
