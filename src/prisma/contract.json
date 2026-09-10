@@ -1347,6 +1347,13 @@
                   "kind": "scalar"
                 }
               },
+              "location": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "managerId": {
                 "nullable": true,
                 "type": {
@@ -1633,6 +1640,9 @@
                 },
                 "lastSeenAt": {
                   "column": "lastSeenAt"
+                },
+                "location": {
+                  "column": "location"
                 },
                 "managerId": {
                   "column": "managerId"
@@ -2781,6 +2791,11 @@
                   "nativeType": "timestamptz",
                   "nullable": true
                 },
+                "location": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "managerId": {
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
@@ -2892,7 +2907,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "4aadbeb7cb3e308ec861ff9fed0072b27437534ada5f58a7cf19f7d5169156ee"
+    "storageHash": "a86f061a8e0960c389a97622fe3423bfe6d7d4d744a960481b9aed057b435ca0"
   },
   "capabilities": {
     "postgres": {

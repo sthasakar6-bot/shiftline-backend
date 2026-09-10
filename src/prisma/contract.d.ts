@@ -33,7 +33,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'4aadbeb7cb3e308ec861ff9fed0072b27437534ada5f58a7cf19f7d5169156ee'>;
+  StorageHashBase<'a86f061a8e0960c389a97622fe3423bfe6d7d4d744a960481b9aed057b435ca0'>;
 export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
@@ -359,6 +359,7 @@ export type FieldOutputTypes = {
       readonly avatarMimeType: CodecTypes['pg/text@1']['output'] | null;
       readonly phone: CodecTypes['pg/text@1']['output'] | null;
       readonly address: CodecTypes['pg/text@1']['output'] | null;
+      readonly location: CodecTypes['pg/text@1']['output'] | null;
       readonly needsOnboarding: CodecTypes['pg/bool@1']['output'];
       readonly active: CodecTypes['pg/bool@1']['output'];
       readonly lastSeenAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
@@ -488,6 +489,7 @@ export type FieldInputTypes = {
       readonly avatarMimeType: CodecTypes['pg/text@1']['input'] | null;
       readonly phone: CodecTypes['pg/text@1']['input'] | null;
       readonly address: CodecTypes['pg/text@1']['input'] | null;
+      readonly location: CodecTypes['pg/text@1']['input'] | null;
       readonly needsOnboarding: CodecTypes['pg/bool@1']['input'];
       readonly active: CodecTypes['pg/bool@1']['input'];
       readonly lastSeenAt: CodecTypes['pg/timestamptz-string@1']['input'] | null;
@@ -616,6 +618,7 @@ export type StorageColumnTypes = {
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly lastName: CodecTypes['pg/text@1']['output'] | null;
       readonly lastSeenAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+      readonly location: CodecTypes['pg/text@1']['output'] | null;
       readonly managerId: CodecTypes['pg/int4@1']['output'] | null;
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly needsOnboarding: CodecTypes['pg/bool@1']['output'];
@@ -745,6 +748,7 @@ export type StorageColumnInputTypes = {
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly lastName: CodecTypes['pg/text@1']['input'] | null;
       readonly lastSeenAt: CodecTypes['pg/timestamptz-string@1']['input'] | null;
+      readonly location: CodecTypes['pg/text@1']['input'] | null;
       readonly managerId: CodecTypes['pg/int4@1']['input'] | null;
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly needsOnboarding: CodecTypes['pg/bool@1']['input'];
@@ -1681,6 +1685,11 @@ type ContractBase = Omit<
                   readonly nullable: true;
                 };
                 readonly address: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
+                readonly location: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: true;
@@ -2641,6 +2650,10 @@ type ContractBase = Omit<
                 readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly location: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly needsOnboarding: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
@@ -2830,6 +2843,7 @@ type ContractBase = Omit<
                 readonly avatarMimeType: { readonly column: 'avatarMimeType' };
                 readonly phone: { readonly column: 'phone' };
                 readonly address: { readonly column: 'address' };
+                readonly location: { readonly column: 'location' };
                 readonly needsOnboarding: { readonly column: 'needsOnboarding' };
                 readonly active: { readonly column: 'active' };
                 readonly lastSeenAt: { readonly column: 'lastSeenAt' };

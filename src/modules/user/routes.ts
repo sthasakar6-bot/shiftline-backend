@@ -15,13 +15,14 @@ import {
   promoteController,
   reactivateEmployeeController,
   removeManagerController,
+  setLocationController,
   uploadAvatarController,
 } from "./controller";
 import { requireAuth } from "../../middleware/requireAuth";
 import { requireRole } from "../../middleware/requireRole";
 import { requireManagesTarget } from "../../middleware/requireManagesTarget";
 import { validate } from "../../middleware/validate";
-import { createEmployeeSchema } from "./schemas";
+import { createEmployeeSchema, setLocationSchema } from "./schemas";
 import { AppError } from "../../errors/AppError";
 
 const upload = multer({
@@ -100,6 +101,13 @@ router.post(
   requireAuth,
   requireRole("manager"),
   reactivateEmployeeController,
+);
+router.patch(
+  "/users/:id/location",
+  requireAuth,
+  requireRole("manager"),
+  validate(setLocationSchema),
+  setLocationController,
 );
 router.post("/users/me/avatar", requireAuth, upload.single("avatar"), uploadAvatarController);
 router.get("/users/:id/avatar", requireAuth, getAvatarController);

@@ -73,8 +73,13 @@ export async function listShifts(userId: number) {
 export async function listCompanyRoster(companyId: number) {
   const users = await findAllUsersInCompany(companyId);
   const nameById = new Map(users.map((u) => [u.id, u.name]));
+  const locationById = new Map(users.map((u) => [u.id, u.location]));
   const shiftsPerUser = await Promise.all(users.map((u) => findShiftsByUser(u.id)));
-  return shiftsPerUser.flat().map((s) => ({ ...s, userName: nameById.get(s.userId) ?? "" }));
+  return shiftsPerUser.flat().map((s) => ({
+    ...s,
+    userName: nameById.get(s.userId) ?? "",
+    userLocation: locationById.get(s.userId) ?? null,
+  }));
 }
 
 export async function getShift(id: number, userId: number) {

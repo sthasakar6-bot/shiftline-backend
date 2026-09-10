@@ -13,6 +13,7 @@ export interface AuthUser {
   avatarBase64: string | null;
   phone: string | null;
   address: string | null;
+  location: string | null;
   needsOnboarding: boolean;
   active: boolean;
   lastSeenAt: string | null;

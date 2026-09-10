@@ -14,6 +14,7 @@ import {
   promoteToManager,
   reactivateEmployee,
   removeFromTeam,
+  setEmployeeLocation,
   uploadAvatar,
 } from "./service";
 import { AppError } from "../../errors/AppError";
@@ -83,6 +84,12 @@ export const deactivateEmployeeController = async (req: Request, res: Response) 
 
 export const reactivateEmployeeController = async (req: Request, res: Response) => {
   const user = await reactivateEmployee(Number(req.params.id), req.user!.companyId);
+  res.json(user);
+};
+
+export const setLocationController = async (req: Request, res: Response) => {
+  const { location } = req.body;
+  const user = await setEmployeeLocation(Number(req.params.id), req.user!.companyId, location);
   res.json(user);
 };
 

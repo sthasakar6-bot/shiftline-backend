@@ -11,6 +11,7 @@ import {
   setUserManager,
   setUserActive,
   setUserAvatar,
+  setUserLocation,
 } from "./model";
 import { createUser, findUserByEmailInCompany, findUserById } from "../identity/model";
 import { AppError } from "../../errors/AppError";
@@ -163,6 +164,24 @@ export const reactivateEmployee = async (targetId: number, companyId: number) =>
     throw new AppError(404, "User not found");
   }
   const updated = await setUserActive(targetId, true);
+  if (!updated) {
+    throw new AppError(404, "User not found");
+  }
+  return updated;
+};
+
+// Which branch/site someone works out of (e.g. "Almere", "Lelystad") -- a
+// manager can set it for anyone in the company, including other managers.
+export const setEmployeeLocation = async (
+  targetId: number,
+  companyId: number,
+  location: string | null,
+) => {
+  const target = await findUserSummaryById(targetId);
+  if (!target || target.companyId !== companyId) {
+    throw new AppError(404, "User not found");
+  }
+  const updated = await setUserLocation(targetId, location);
   if (!updated) {
     throw new AppError(404, "User not found");
   }

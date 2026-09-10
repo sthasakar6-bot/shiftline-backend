@@ -20,6 +20,7 @@ model User {
   avatarMimeType String?
   phone         String?
   address       String?
+  location      String?
   needsOnboarding Boolean       @default(false)
   active        Boolean        @default(true)
   lastSeenAt    TimestamptzString?
