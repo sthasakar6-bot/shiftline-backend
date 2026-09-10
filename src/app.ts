@@ -12,6 +12,7 @@ import pushRoutes from "./modules/push/routes";
 import passwordResetRoutes from "./modules/passwordReset/routes";
 import backupRoutes from "./modules/backup/routes";
 import companyRoutes from "./modules/company/routes";
+import bookkeeperRoutes from "./modules/bookkeeper/routes";
 import { notFoundHandler, errorHandler } from "./middleware/errorHandler";
 import { env } from "./config/env";
 
@@ -35,6 +36,7 @@ app.use("/api", pushRoutes);
 app.use("/api", passwordResetRoutes);
 app.use("/api", backupRoutes);
 app.use("/api", companyRoutes);
+app.use("/api", bookkeeperRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

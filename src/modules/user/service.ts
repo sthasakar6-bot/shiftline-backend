@@ -18,52 +18,20 @@ export const getAllUsers = async (companyId: number) => {
   return findAllUsersInCompany(companyId);
 };
 
-// The manager sets the employee's initial password directly and hands it to
-// them -- there's no email sending in this app, so a self-serve invite link
-// would just be another link the manager has to copy and deliver by hand
-// anyway. This skips that step and creates the account in one action.
-export const createEmployee = async (
-  managerId: number,
-  firstName: string,
-  lastName: string,
-  email: string,
-  password: string,
-) => {
-  const manager = await findUserById(managerId);
-  if (!manager) {
-    throw new AppError(404, "Manager not found");
-  }
-  const existing = await findUserByEmailInCompany(email, manager.companyId);
-  if (existing) {
-    throw new AppError(400, "A user with that email already exists");
-  }
-  const trimmedFirst = firstName.trim();
-  const trimmedLast = lastName.trim();
-  const passwordHash = await argon2.hash(password);
-  const user = await createUser({
-    name: `${trimmedFirst} ${trimmedLast}`.trim(),
-    firstName: trimmedFirst,
-    lastName: trimmedLast,
-    email,
-    passwordHash,
-    role: "employee",
-    managerId: manager.id,
-    companyId: manager.companyId,
-    needsOnboarding: true,
-  });
-  return { id: user.id, name: user.name, email: user.email };
-};
-
-// Same idea as createEmployee, but for bringing on another manager -- e.g.
-// handing full administration of a company over to someone else. Scoped to
-// the calling manager's own company, same as createEmployee.
-export const createManagerAccount = async (
+// The manager sets the new account's initial password directly and hands it
+// to them -- there's no email sending in this app, so a self-serve invite
+// link would just be another link the manager has to copy and deliver by
+// hand anyway. This skips that step and creates the account in one action.
+// Shared by createEmployee / createManagerAccount / createBookkeeperAccount
+// below, which differ only in role and whether managerId is set.
+async function createAccountAs(
+  role: "employee" | "manager" | "bookkeeper",
   callerId: number,
   firstName: string,
   lastName: string,
   email: string,
   password: string,
-) => {
+) {
   const caller = await findUserById(callerId);
   if (!caller) {
     throw new AppError(404, "Manager not found");
@@ -81,12 +49,43 @@ export const createManagerAccount = async (
     lastName: trimmedLast,
     email,
     passwordHash,
-    role: "manager",
+    role,
+    managerId: role === "employee" ? caller.id : undefined,
     companyId: caller.companyId,
     needsOnboarding: true,
   });
   return { id: user.id, name: user.name, email: user.email };
-};
+}
+
+export const createEmployee = (
+  managerId: number,
+  firstName: string,
+  lastName: string,
+  email: string,
+  password: string,
+) => createAccountAs("employee", managerId, firstName, lastName, email, password);
+
+// Bringing on another manager -- e.g. handing full administration of a
+// company over to someone else. Scoped to the calling manager's own company.
+export const createManagerAccount = (
+  callerId: number,
+  firstName: string,
+  lastName: string,
+  email: string,
+  password: string,
+) => createAccountAs("manager", callerId, firstName, lastName, email, password);
+
+// A bookkeeper gets a company-scoped account too, but signs into a
+// completely separate, restricted UI (see the bookkeeper module) rather
+// than the normal admin dashboard -- they can only upload payslips and
+// contracts for this company's employees, nothing else.
+export const createBookkeeperAccount = (
+  callerId: number,
+  firstName: string,
+  lastName: string,
+  email: string,
+  password: string,
+) => createAccountAs("bookkeeper", callerId, firstName, lastName, email, password);
 
 export const getDirectReports = async (managerId: number) => {
   return findDirectReports(managerId);

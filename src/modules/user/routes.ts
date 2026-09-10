@@ -2,6 +2,7 @@ import { Router } from "express";
 import multer from "multer";
 import {
   assignManagerController,
+  createBookkeeperController,
   createEmployeeController,
   createManagerController,
   deactivateEmployeeController,
@@ -50,6 +51,13 @@ router.post(
   requireRole("manager"),
   validate(createEmployeeSchema),
   createManagerController,
+);
+router.post(
+  "/users/bookkeepers",
+  requireAuth,
+  requireRole("manager"),
+  validate(createEmployeeSchema),
+  createBookkeeperController,
 );
 router.get("/users/reports", requireAuth, requireRole("manager"), getReportsController);
 router.get("/users/employees", requireAuth, requireRole("manager"), getEmployeesController);

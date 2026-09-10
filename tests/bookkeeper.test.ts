@@ -1,0 +1,161 @@
+import { describe, it, expect } from "vitest";
+import request from "supertest";
+import app from "../src/app";
+import { db } from "../src/prisma/db";
+import { registerUser, loginUser, uniqueEmail, createCompany } from "./helpers";
+
+const MIN_PDF = Buffer.from("%PDF-1.4\n%%EOF");
+
+async function makeManager(prefix: string, companyId?: number) {
+  const manager = await registerUser({ email: uniqueEmail(prefix), companyId });
+  await db.orm.public.User.where({ id: manager.id }).update({ role: "manager" });
+  const token = await loginUser(manager.email, manager.password, manager.companyId);
+  return { ...manager, token };
+}
+
+async function makeBookkeeper(managerToken: string, companyId: number, prefix: string) {
+  const email = uniqueEmail(prefix);
+  await request(app)
+    .post("/api/users/bookkeepers")
+    .set("Authorization", `Bearer ${managerToken}`)
+    .send({ firstName: "Book", lastName: "Keeper", email, password: "password123" });
+  const login = await request(app)
+    .post("/api/auth/login")
+    .send({ email, password: "password123", companyId });
+  return { email, companyId, token: login.body.token as string };
+}
+
+describe("Create bookkeeper", () => {
+  it("lets a manager create a bookkeeper account", async () => {
+    const manager = await makeManager("bk-create-mgr");
+    const email = uniqueEmail("bk-new");
+    const res = await request(app)
+      .post("/api/users/bookkeepers")
+      .set("Authorization", `Bearer ${manager.token}`)
+      .send({ firstName: "Book", lastName: "Keeper", email, password: "password123" });
+    expect(res.status).toBe(201);
+
+    const login = await request(app)
+      .post("/api/auth/login")
+      .send({ email, password: "password123", companyId: manager.companyId });
+    expect(login.status).toBe(200);
+    expect(login.body.user.role).toBe("bookkeeper");
+    expect(login.body.user.needsOnboarding).toBe(true);
+  });
+
+  it("blocks a non-manager from creating a bookkeeper", async () => {
+    const manager = await makeManager("bk-block-mgr");
+    const employee = await registerUser({ email: uniqueEmail("bk-block-emp"), managerId: manager.id });
+    const employeeToken = await loginUser(employee.email, employee.password, employee.companyId);
+    const res = await request(app)
+      .post("/api/users/bookkeepers")
+      .set("Authorization", `Bearer ${employeeToken}`)
+      .send({ firstName: "No", lastName: "Access", email: uniqueEmail("bk-blocked"), password: "password123" });
+    expect(res.status).toBe(403);
+  });
+});
+
+describe("Bookkeeper document access", () => {
+  it("lists company employees with their existing contracts and payslips", async () => {
+    const manager = await makeManager("bk-list-mgr");
+    const employee = await registerUser({
+      email: uniqueEmail("bk-list-emp"),
+      managerId: manager.id,
+    });
+    const bookkeeper = await makeBookkeeper(manager.token, manager.companyId, "bk-list-bk");
+
+    const res = await request(app)
+      .get("/api/bookkeeper/employees")
+      .set("Authorization", `Bearer ${bookkeeper.token}`);
+    expect(res.status).toBe(200);
+    const listed = res.body.find((e: { id: number }) => e.id === employee.id);
+    expect(listed).toBeTruthy();
+    expect(listed.contracts).toEqual([]);
+    expect(listed.payslips).toEqual([]);
+  });
+
+  it("lets a bookkeeper create and upload a payslip for an employee", async () => {
+    const manager = await makeManager("bk-payslip-mgr");
+    const employee = await registerUser({
+      email: uniqueEmail("bk-payslip-emp"),
+      managerId: manager.id,
+    });
+    const employeeToken = await loginUser(employee.email, employee.password, employee.companyId);
+    const bookkeeper = await makeBookkeeper(manager.token, manager.companyId, "bk-payslip-bk");
+
+    const create = await request(app)
+      .post(`/api/bookkeeper/employees/${employee.id}/payslips`)
+      .set("Authorization", `Bearer ${bookkeeper.token}`)
+      .send({ period: "August 2026" });
+    expect(create.status).toBe(201);
+
+    const upload = await request(app)
+      .post(`/api/bookkeeper/employees/${employee.id}/payslips/${create.body.id}/pdf`)
+      .set("Authorization", `Bearer ${bookkeeper.token}`)
+      .attach("pdf", MIN_PDF, { filename: "payslip.pdf", contentType: "application/pdf" });
+    expect(upload.status).toBe(200);
+
+    // the employee sees it on their own existing payslips list
+    const employeeView = await request(app)
+      .get("/api/payslips")
+      .set("Authorization", `Bearer ${employeeToken}`);
+    expect(employeeView.body.some((p: { id: number }) => p.id === create.body.id)).toBe(true);
+  });
+
+  it("lets a bookkeeper create and upload a contract for an employee", async () => {
+    const manager = await makeManager("bk-contract-mgr");
+    const employee = await registerUser({
+      email: uniqueEmail("bk-contract-emp"),
+      managerId: manager.id,
+    });
+    const employeeToken = await loginUser(employee.email, employee.password, employee.companyId);
+    const bookkeeper = await makeBookkeeper(manager.token, manager.companyId, "bk-contract-bk");
+
+    const create = await request(app)
+      .post(`/api/bookkeeper/employees/${employee.id}/contracts`)
+      .set("Authorization", `Bearer ${bookkeeper.token}`)
+      .send({ role: "Server" });
+    expect(create.status).toBe(201);
+
+    const upload = await request(app)
+      .post(`/api/bookkeeper/employees/${employee.id}/contracts/${create.body.id}/pdf`)
+      .set("Authorization", `Bearer ${bookkeeper.token}`)
+      .attach("pdf", MIN_PDF, { filename: "contract.pdf", contentType: "application/pdf" });
+    expect(upload.status).toBe(200);
+
+    const employeeView = await request(app)
+      .get("/api/contracts")
+      .set("Authorization", `Bearer ${employeeToken}`);
+    expect(employeeView.body.some((c: { id: number }) => c.id === create.body.id)).toBe(true);
+  });
+
+  it("rejects uploading for an employee in a different company", async () => {
+    const companyBId = await createCompany("Bookkeeper Co B");
+    const managerA = await makeManager("bk-cross-mgrA");
+    const managerB = await makeManager("bk-cross-mgrB", companyBId);
+    const outsider = await registerUser({
+      email: uniqueEmail("bk-cross-emp"),
+      managerId: managerB.id,
+    });
+    const bookkeeperA = await makeBookkeeper(managerA.token, managerA.companyId, "bk-cross-bk");
+
+    const res = await request(app)
+      .post(`/api/bookkeeper/employees/${outsider.id}/payslips`)
+      .set("Authorization", `Bearer ${bookkeeperA.token}`)
+      .send({ period: "August 2026" });
+    expect(res.status).toBe(404);
+  });
+
+  it("blocks a manager from using bookkeeper-only routes", async () => {
+    const manager = await makeManager("bk-mgraccess-mgr");
+    const res = await request(app)
+      .get("/api/bookkeeper/employees")
+      .set("Authorization", `Bearer ${manager.token}`);
+    expect(res.status).toBe(403);
+  });
+
+  it("requires auth", async () => {
+    const res = await request(app).get("/api/bookkeeper/employees");
+    expect(res.status).toBe(401);
+  });
+});

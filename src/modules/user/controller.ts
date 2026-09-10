@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import {
   assignManager,
+  createBookkeeperAccount,
   createEmployee,
   createManagerAccount,
   deactivateEmployee,
@@ -30,6 +31,12 @@ export const createEmployeeController = async (req: Request, res: Response) => {
 export const createManagerController = async (req: Request, res: Response) => {
   const { firstName, lastName, email, password } = req.body;
   const user = await createManagerAccount(req.user!.sub, firstName, lastName, email, password);
+  res.status(201).json(user);
+};
+
+export const createBookkeeperController = async (req: Request, res: Response) => {
+  const { firstName, lastName, email, password } = req.body;
+  const user = await createBookkeeperAccount(req.user!.sub, firstName, lastName, email, password);
   res.status(201).json(user);
 };
 
