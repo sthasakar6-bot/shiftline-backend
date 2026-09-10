@@ -4,6 +4,7 @@ import {
   findAllEmployeesInCompany,
   findFormerEmployeesInCompany,
   findDirectReports,
+  findTeamDirectory,
   findUserSummaryById,
   findUserAvatarById,
   promoteUserToManager,
@@ -16,6 +17,10 @@ import { AppError } from "../../errors/AppError";
 
 export const getAllUsers = async (companyId: number) => {
   return findAllUsersInCompany(companyId);
+};
+
+export const getTeamDirectory = async (companyId: number) => {
+  return findTeamDirectory(companyId);
 };
 
 // The manager sets the new account's initial password directly and hands it

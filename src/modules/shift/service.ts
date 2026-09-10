@@ -9,6 +9,7 @@ import {
 } from "./model";
 import { findLeaveRequestsByUser } from "../leave/model";
 import { deleteAttendanceByShiftId } from "../attendance/model";
+import { findAllUsersInCompany } from "../user/model";
 import { AppError } from "../../errors/AppError";
 import { notify } from "../notifications/service";
 
@@ -65,6 +66,15 @@ async function assertNoApprovedLeaveConflict(userId: number, startsAt: string, e
 
 export async function listShifts(userId: number) {
   return findShiftsByUser(userId);
+}
+
+// So any employee can see who else is scheduled alongside them, not just
+// their own shifts -- read-only, no manager gate, company-wide.
+export async function listCompanyRoster(companyId: number) {
+  const users = await findAllUsersInCompany(companyId);
+  const nameById = new Map(users.map((u) => [u.id, u.name]));
+  const shiftsPerUser = await Promise.all(users.map((u) => findShiftsByUser(u.id)));
+  return shiftsPerUser.flat().map((s) => ({ ...s, userName: nameById.get(s.userId) ?? "" }));
 }
 
 export async function getShift(id: number, userId: number) {

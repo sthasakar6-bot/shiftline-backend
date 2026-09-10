@@ -68,6 +68,32 @@ export async function findAllUsersInCompany(companyId: number): Promise<User[]> 
   return db.orm.public.User.select("id", "name", "email").where({ companyId }).all();
 }
 
+export interface TeamMember {
+  id: number;
+  name: string;
+  role: string;
+  hasAvatar: boolean;
+  online: boolean;
+}
+
+// A lean, read-only "who's on the team" directory any employee can see --
+// deliberately excludes phone/address/email, which is nobody's business but
+// the person themself and their manager.
+export async function findTeamDirectory(companyId: number): Promise<TeamMember[]> {
+  const rows = await db.orm.public.User.select("id", "name", "role", "avatarBase64", "lastSeenAt")
+    .where({ companyId, active: true })
+    .all();
+  return rows
+    .filter((r) => r.role !== "bookkeeper")
+    .map((r) => ({
+      id: r.id,
+      name: r.name,
+      role: r.role,
+      hasAvatar: Boolean(r.avatarBase64),
+      online: r.lastSeenAt !== null && Date.now() - new Date(r.lastSeenAt).getTime() < ONLINE_THRESHOLD_MS,
+    }));
+}
+
 export async function findUserSummaryById(id: number): Promise<UserSummary | null> {
   const row = await db.orm.public.User.select(...SUMMARY_FIELDS).first({ id });
   return row ? toUserSummary(row) : null;

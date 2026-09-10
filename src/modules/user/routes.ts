@@ -9,6 +9,7 @@ import {
   getAvatarController,
   getEmployeesController,
   getFormerEmployeesController,
+  getTeamController,
   getUsersController,
   getReportsController,
   promoteController,
@@ -38,6 +39,7 @@ const upload = multer({
 const router = Router();
 
 router.get("/users", requireAuth, getUsersController);
+router.get("/users/team", requireAuth, getTeamController);
 router.post(
   "/users",
   requireAuth,

@@ -10,6 +10,7 @@ import {
   getAvatar,
   getDirectReports,
   getFormerEmployees,
+  getTeamDirectory,
   promoteToManager,
   reactivateEmployee,
   removeFromTeam,
@@ -20,6 +21,11 @@ import { AppError } from "../../errors/AppError";
 export const getUsersController = async (req: Request, res: Response) => {
   const users = await getAllUsers(req.user!.companyId);
   res.json(users);
+};
+
+export const getTeamController = async (req: Request, res: Response) => {
+  const team = await getTeamDirectory(req.user!.companyId);
+  res.json(team);
 };
 
 export const createEmployeeController = async (req: Request, res: Response) => {

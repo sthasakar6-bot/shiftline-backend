@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   listShiftsController,
+  listCompanyRosterController,
   getShiftController,
   listShiftsForReportController,
   createShiftForReportController,
@@ -18,6 +19,7 @@ const router = Router();
 // Shifts (roster) are set by a manager, not self-service.
 // Employees can only view their own.
 router.get("/shifts", requireAuth, listShiftsController);
+router.get("/shifts/roster", requireAuth, listCompanyRosterController);
 router.get("/shifts/:id", requireAuth, getShiftController);
 
 router.get(

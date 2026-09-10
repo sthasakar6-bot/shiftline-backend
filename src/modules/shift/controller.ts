@@ -1,8 +1,13 @@
 import { Request, Response } from "express";
-import { listShifts, getShift, addShift, editShift, removeShift } from "./service";
+import { listShifts, listCompanyRoster, getShift, addShift, editShift, removeShift } from "./service";
 
 export async function listShiftsController(req: Request, res: Response) {
   const shifts = await listShifts(req.user!.sub);
+  res.json(shifts);
+}
+
+export async function listCompanyRosterController(req: Request, res: Response) {
+  const shifts = await listCompanyRoster(req.user!.companyId);
   res.json(shifts);
 }
 
