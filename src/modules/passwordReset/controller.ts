@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import {
   requestReset,
-  listPendingRequestsForManager,
+  listPendingRequestsForCompany,
   validateResetToken,
   completeReset,
   resolveResetRequest,
@@ -14,7 +14,7 @@ export async function requestResetController(req: Request, res: Response) {
 }
 
 export async function listPendingRequestsController(req: Request, res: Response) {
-  const requests = await listPendingRequestsForManager(req.user!.sub);
+  const requests = await listPendingRequestsForCompany(req.user!.companyId);
   res.json(requests);
 }
 
@@ -31,6 +31,6 @@ export async function completeResetController(req: Request, res: Response) {
 
 export async function resolveResetRequestController(req: Request, res: Response) {
   const { password } = req.body;
-  await resolveResetRequest(req.user!.sub, Number(req.params.id), password);
+  await resolveResetRequest(req.user!.companyId, Number(req.params.id), password);
   res.status(204).send();
 }

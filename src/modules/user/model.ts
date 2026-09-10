@@ -120,6 +120,13 @@ export async function findDirectReports(managerId: number): Promise<UserSummary[
   return rows.map(toUserSummary);
 }
 
+export async function findManagerIdsInCompany(companyId: number): Promise<number[]> {
+  const rows = await db.orm.public.User.select("id")
+    .where({ role: "manager", companyId, active: true })
+    .all();
+  return rows.map((r) => r.id);
+}
+
 export async function findAllEmployeesInCompany(companyId: number): Promise<UserSummary[]> {
   const rows = await db.orm.public.User.select(...SUMMARY_FIELDS)
     .where({ role: "employee", companyId, active: true })

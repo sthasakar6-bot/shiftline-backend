@@ -2,7 +2,7 @@ import crypto from "crypto";
 import argon2 from "argon2";
 import { AppError } from "../../errors/AppError";
 import { findUserByEmailInCompany, findUserById, setUserPassword } from "../identity/model";
-import { findDirectReports } from "../user/model";
+import { findAllUsersInCompany, findManagerIdsInCompany } from "../user/model";
 import { notify } from "../notifications/service";
 import {
   createResetRequest,
@@ -30,26 +30,30 @@ export async function requestReset(email: string, companyId: number) {
   const expiresAt = new Date(Date.now() + REQUEST_TTL_MS).toISOString();
   const request = await createResetRequest({ userId: user.id, token, expiresAt });
 
-  if (user.managerId) {
-    await notify(
-      user.managerId,
-      `${user.name} requested a password reset.`,
-      "Password Reset Requested",
-      "/admin?tab=invite",
-    );
-  }
+  // Not every account has a manager -- a bookkeeper, for instance, isn't
+  // anyone's direct report -- so fall back to notifying every manager in
+  // the company rather than leaving the request invisible to everyone.
+  const notifyIds = user.managerId ? [user.managerId] : await findManagerIdsInCompany(user.companyId);
+  await Promise.all(
+    notifyIds.map((id) =>
+      notify(id, `${user.name} requested a password reset.`, "Password Reset Requested", "/admin?tab=invite"),
+    ),
+  );
 
   return request;
 }
 
-export async function listPendingRequestsForManager(managerId: number) {
-  const reports = await findDirectReports(managerId);
-  const reportIds = new Set(reports.map((r) => r.id));
-  const nameById = new Map(reports.map((r) => [r.id, r.name] as const));
+// Scoped to the whole company, not just direct reports: a password reset
+// isn't an approval decision the way leave is, and accounts like
+// bookkeepers don't have a manager at all, so any manager in the company
+// should be able to see and resolve a pending request.
+export async function listPendingRequestsForCompany(companyId: number) {
+  const companyUsers = await findAllUsersInCompany(companyId);
+  const nameById = new Map(companyUsers.map((u) => [u.id, u.name] as const));
 
   const pending = await findPendingRequests();
   return pending
-    .filter((r) => reportIds.has(r.userId))
+    .filter((r) => nameById.has(r.userId))
     .map((r) => ({ ...r, employeeName: nameById.get(r.userId) ?? "Unknown" }));
 }
 
@@ -78,13 +82,12 @@ export async function completeReset(token: string, newPassword: string) {
   await markRequestCompleted(request.id);
 }
 
-// Lets a manager set a new password directly for a pending request from one
-// of their own direct reports -- the employee can't be expected to click a
-// self-serve reset link if they're the one locked out. Scoped the same way
-// as leave approval: only the requester's own manager, not any manager in
-// the company.
+// Lets a manager set a new password directly for a pending request --
+// the employee can't be expected to click a self-serve reset link if
+// they're the one locked out. Scoped to the company like the listing
+// above, not to direct reports only (see listPendingRequestsForCompany).
 export async function resolveResetRequest(
-  managerId: number,
+  companyId: number,
   requestId: number,
   newPassword: string,
 ) {
@@ -100,8 +103,8 @@ export async function resolveResetRequest(
   if (!user) {
     throw new AppError(404, "Account not found");
   }
-  if (user.managerId !== managerId) {
-    throw new AppError(403, "Not your report");
+  if (user.companyId !== companyId) {
+    throw new AppError(403, "Not in your company");
   }
 
   const passwordHash = await argon2.hash(newPassword);
