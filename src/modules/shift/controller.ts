@@ -22,18 +22,24 @@ export async function listShiftsForReportController(req: Request, res: Response)
 }
 
 export async function createShiftForReportController(req: Request, res: Response) {
-  const { startsAt, endsAt, breakMinutes } = req.body;
-  const shift = await addShift(Number(req.params.id), { startsAt, endsAt, breakMinutes });
+  const { startsAt, endsAt, breakMinutes, shiftTypeId } = req.body;
+  const shift = await addShift(Number(req.params.id), req.user!.companyId, {
+    startsAt,
+    endsAt,
+    breakMinutes,
+    shiftTypeId,
+  });
   res.status(201).json(shift);
 }
 
 export async function updateShiftForReportController(req: Request, res: Response) {
-  const { startsAt, endsAt, breakMinutes } = req.body;
-  const shift = await editShift(Number(req.params.shiftId), Number(req.params.id), {
-    startsAt,
-    endsAt,
-    breakMinutes,
-  });
+  const { startsAt, endsAt, breakMinutes, shiftTypeId } = req.body;
+  const shift = await editShift(
+    Number(req.params.shiftId),
+    Number(req.params.id),
+    req.user!.companyId,
+    { startsAt, endsAt, breakMinutes, shiftTypeId },
+  );
   res.json(shift);
 }
 

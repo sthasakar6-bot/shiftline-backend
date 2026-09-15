@@ -12,8 +12,10 @@ import {
   setUserActive,
   setUserAvatar,
   setUserLocation,
+  setUserDepartment,
 } from "./model";
 import { createUser, findUserByEmailInCompany, findUserById } from "../identity/model";
+import { findDepartmentById } from "../department/model";
 import { AppError } from "../../errors/AppError";
 
 export const getAllUsers = async (companyId: number) => {
@@ -182,6 +184,31 @@ export const setEmployeeLocation = async (
     throw new AppError(404, "User not found");
   }
   const updated = await setUserLocation(targetId, location);
+  if (!updated) {
+    throw new AppError(404, "User not found");
+  }
+  return updated;
+};
+
+// Which team (e.g. "Keuken"/Kitchen) someone belongs to, for grouping the
+// roster grid -- a manager can set it for anyone in the company, same shape
+// as setEmployeeLocation.
+export const setEmployeeDepartment = async (
+  targetId: number,
+  companyId: number,
+  departmentId: number | null,
+) => {
+  const target = await findUserSummaryById(targetId);
+  if (!target || target.companyId !== companyId) {
+    throw new AppError(404, "User not found");
+  }
+  if (departmentId !== null) {
+    const department = await findDepartmentById(departmentId);
+    if (!department || department.companyId !== companyId) {
+      throw new AppError(400, "Invalid department");
+    }
+  }
+  const updated = await setUserDepartment(targetId, departmentId);
   if (!updated) {
     throw new AppError(404, "User not found");
   }

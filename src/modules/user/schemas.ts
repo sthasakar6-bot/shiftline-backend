@@ -10,3 +10,7 @@ export const createEmployeeSchema = z.object({
 export const setLocationSchema = z.object({
   location: z.string().max(100, "location must be at most 100 characters").nullable(),
 });
+
+export const setDepartmentSchema = z.object({
+  departmentId: z.number().int().positive().nullable(),
+});

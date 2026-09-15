@@ -5,6 +5,7 @@ export interface User {
   name: string;
   email: string;
   location: string | null;
+  departmentId: number | null;
 }
 
 export interface UserSummary {
@@ -18,6 +19,7 @@ export interface UserSummary {
   phone: string | null;
   address: string | null;
   location: string | null;
+  departmentId: number | null;
   active: boolean;
   online: boolean;
 }
@@ -35,6 +37,7 @@ const SUMMARY_FIELDS = [
   "phone",
   "address",
   "location",
+  "departmentId",
   "active",
   "lastSeenAt",
 ] as const;
@@ -50,6 +53,7 @@ function toUserSummary(row: {
   phone: string | null;
   address: string | null;
   location: string | null;
+  departmentId: number | null;
   active: boolean;
   lastSeenAt: string | null;
 }): UserSummary {
@@ -64,13 +68,16 @@ function toUserSummary(row: {
     phone: row.phone,
     address: row.address,
     location: row.location,
+    departmentId: row.departmentId,
     active: row.active,
     online: row.lastSeenAt !== null && Date.now() - new Date(row.lastSeenAt).getTime() < ONLINE_THRESHOLD_MS,
   };
 }
 
 export async function findAllUsersInCompany(companyId: number): Promise<User[]> {
-  return db.orm.public.User.select("id", "name", "email", "location").where({ companyId }).all();
+  return db.orm.public.User.select("id", "name", "email", "location", "departmentId")
+    .where({ companyId })
+    .all();
 }
 
 export interface TeamMember {
@@ -79,6 +86,7 @@ export interface TeamMember {
   role: string;
   hasAvatar: boolean;
   location: string | null;
+  departmentId: number | null;
 }
 
 // A lean, read-only "who's on the team" directory any employee can see --
@@ -86,7 +94,14 @@ export interface TeamMember {
 // person themself and their manager) and online status (manager-only,
 // surfaced instead on the admin Team list).
 export async function findTeamDirectory(companyId: number): Promise<TeamMember[]> {
-  const rows = await db.orm.public.User.select("id", "name", "role", "avatarBase64", "location")
+  const rows = await db.orm.public.User.select(
+    "id",
+    "name",
+    "role",
+    "avatarBase64",
+    "location",
+    "departmentId",
+  )
     .where({ companyId, active: true })
     .all();
   return rows
@@ -97,6 +112,7 @@ export async function findTeamDirectory(companyId: number): Promise<TeamMember[]
       role: r.role,
       hasAvatar: Boolean(r.avatarBase64),
       location: r.location,
+      departmentId: r.departmentId,
     }));
 }
 
@@ -107,6 +123,16 @@ export async function setUserLocation(
   const row = await db.orm.public.User.where({ id })
     .select(...SUMMARY_FIELDS)
     .update({ location });
+  return row ? toUserSummary(row) : null;
+}
+
+export async function setUserDepartment(
+  id: number,
+  departmentId: number | null,
+): Promise<UserSummary | null> {
+  const row = await db.orm.public.User.where({ id })
+    .select(...SUMMARY_FIELDS)
+    .update({ departmentId });
   return row ? toUserSummary(row) : null;
 }
 

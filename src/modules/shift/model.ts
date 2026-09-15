@@ -6,6 +6,8 @@ export interface Shift {
   startsAt: string;
   endsAt: string;
   breakMinutes: number | null;
+  shiftTypeId: number | null;
+  openShiftId: number | null;
   noShowCheckedAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -16,16 +18,25 @@ export interface CreateShiftInput {
   startsAt: string;
   endsAt: string;
   breakMinutes?: number;
+  shiftTypeId?: number;
+  // Only ever set internally by openShift/service.ts's assign flow -- never
+  // accepted from the public create-shift-for-report request body.
+  openShiftId?: number;
 }
 
 export interface UpdateShiftInput {
   startsAt?: string;
   endsAt?: string;
   breakMinutes?: number;
+  shiftTypeId?: number | null;
 }
 
 export async function findShiftsByUser(userId: number): Promise<Shift[]> {
   return db.orm.public.Shift.where({ userId }).all();
+}
+
+export async function findShiftsByOpenShiftId(openShiftId: number): Promise<Shift[]> {
+  return db.orm.public.Shift.where({ openShiftId }).all();
 }
 
 export async function findShiftByIdForUser(id: number, userId: number): Promise<Shift | null> {

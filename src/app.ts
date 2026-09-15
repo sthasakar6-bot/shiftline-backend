@@ -14,6 +14,10 @@ import backupRoutes from "./modules/backup/routes";
 import companyRoutes from "./modules/company/routes";
 import bookkeeperRoutes from "./modules/bookkeeper/routes";
 import signupRoutes from "./modules/signup/routes";
+import departmentRoutes from "./modules/department/routes";
+import shiftTypeRoutes from "./modules/shiftType/routes";
+import openShiftRoutes from "./modules/openShift/routes";
+import eventRoutes from "./modules/event/routes";
 import { notFoundHandler, errorHandler } from "./middleware/errorHandler";
 import { env } from "./config/env";
 
@@ -39,6 +43,10 @@ app.use("/api", backupRoutes);
 app.use("/api", companyRoutes);
 app.use("/api", bookkeeperRoutes);
 app.use("/api", signupRoutes);
+app.use("/api", departmentRoutes);
+app.use("/api", shiftTypeRoutes);
+app.use("/api", openShiftRoutes);
+app.use("/api", eventRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

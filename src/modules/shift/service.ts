@@ -10,8 +10,20 @@ import {
 import { findLeaveRequestsByUser } from "../leave/model";
 import { deleteAttendanceByShiftId } from "../attendance/model";
 import { findAllUsersInCompany } from "../user/model";
+import { findShiftTypeById } from "../shiftType/model";
 import { AppError } from "../../errors/AppError";
 import { notify } from "../notifications/service";
+
+async function assertShiftTypeBelongsToCompany(
+  shiftTypeId: number | null | undefined,
+  companyId: number,
+) {
+  if (!shiftTypeId) return;
+  const shiftType = await findShiftTypeById(shiftTypeId);
+  if (!shiftType || shiftType.companyId !== companyId) {
+    throw new AppError(400, "Invalid shift type");
+  }
+}
 
 function validateBreakMinutes(startsAt: string, endsAt: string, breakMinutes?: number) {
   if (!breakMinutes) {
@@ -74,11 +86,13 @@ export async function listCompanyRoster(companyId: number) {
   const users = await findAllUsersInCompany(companyId);
   const nameById = new Map(users.map((u) => [u.id, u.name]));
   const locationById = new Map(users.map((u) => [u.id, u.location]));
+  const departmentIdById = new Map(users.map((u) => [u.id, u.departmentId]));
   const shiftsPerUser = await Promise.all(users.map((u) => findShiftsByUser(u.id)));
   return shiftsPerUser.flat().map((s) => ({
     ...s,
     userName: nameById.get(s.userId) ?? "",
     userLocation: locationById.get(s.userId) ?? null,
+    userDepartmentId: departmentIdById.get(s.userId) ?? null,
   }));
 }
 
@@ -90,11 +104,16 @@ export async function getShift(id: number, userId: number) {
   return shift;
 }
 
-export async function addShift(userId: number, input: Omit<CreateShiftInput, "userId">) {
+export async function addShift(
+  userId: number,
+  companyId: number,
+  input: Omit<CreateShiftInput, "userId">,
+) {
   if (new Date(input.endsAt) <= new Date(input.startsAt)) {
     throw new AppError(400, "endsAt must be after startsAt");
   }
   validateBreakMinutes(input.startsAt, input.endsAt, input.breakMinutes);
+  await assertShiftTypeBelongsToCompany(input.shiftTypeId, companyId);
   await assertNoShiftOverlap(userId, input.startsAt, input.endsAt);
   await assertNoApprovedLeaveConflict(userId, input.startsAt, input.endsAt);
   const shift = await createShift({ ...input, userId });
@@ -110,7 +129,12 @@ export async function addShift(userId: number, input: Omit<CreateShiftInput, "us
   return shift;
 }
 
-export async function editShift(id: number, userId: number, input: UpdateShiftInput) {
+export async function editShift(
+  id: number,
+  userId: number,
+  companyId: number,
+  input: UpdateShiftInput,
+) {
   const existing = await findShiftByIdForUser(id, userId);
   if (!existing) {
     throw new AppError(404, "Shift not found");
@@ -119,6 +143,7 @@ export async function editShift(id: number, userId: number, input: UpdateShiftIn
   const endsAt = input.endsAt ?? existing.endsAt;
   const breakMinutes = input.breakMinutes ?? existing.breakMinutes ?? undefined;
   validateBreakMinutes(startsAt, endsAt, breakMinutes);
+  await assertShiftTypeBelongsToCompany(input.shiftTypeId, companyId);
   await assertNoShiftOverlap(userId, startsAt, endsAt, id);
   await assertNoApprovedLeaveConflict(userId, startsAt, endsAt);
   const updated = await updateShiftForUser(id, userId, input);
