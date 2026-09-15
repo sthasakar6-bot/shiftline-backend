@@ -40,10 +40,19 @@ function priceIdFor(plan: PlanKey, interval: BillingInterval): string {
 }
 
 async function createCheckoutSession(params: CheckoutParams): Promise<CheckoutResult> {
+  // Passing customer_email (rather than an explicit customer id) does NOT
+  // make Stripe create/attach a Customer synchronously -- that only happens
+  // once checkout actually completes, so session.customer comes back empty
+  // for a brand-new signup. Create the customer explicitly up front instead
+  // (same shape as the Mollie adapter) so a customer id is guaranteed to
+  // exist before the manager is even redirected.
+  const customerId =
+    params.existingCustomerId ??
+    (await stripe().customers.create({ email: params.managerEmail, name: params.companyName })).id;
+
   const session = await stripe().checkout.sessions.create({
     mode: "subscription",
-    customer: params.existingCustomerId ?? undefined,
-    customer_email: params.existingCustomerId ? undefined : params.managerEmail,
+    customer: customerId,
     line_items: [{ price: priceIdFor(params.plan, params.interval), quantity: 1 }],
     subscription_data: {
       metadata: {
@@ -59,11 +68,6 @@ async function createCheckoutSession(params: CheckoutParams): Promise<CheckoutRe
 
   if (!session.url) {
     throw new AppError(500, "Stripe did not return a checkout URL");
-  }
-  const customerId =
-    typeof session.customer === "string" ? session.customer : session.customer?.id;
-  if (!customerId) {
-    throw new AppError(500, "Stripe checkout session has no customer id");
   }
 
   return { redirectUrl: session.url, providerCustomerId: customerId };
