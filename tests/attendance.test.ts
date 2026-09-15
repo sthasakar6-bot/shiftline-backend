@@ -95,10 +95,10 @@ describe("Attendance", () => {
       .set("Authorization", `Bearer ${token}`)
       .send({ shiftId: shift.body.id, clockedAt: twoHoursAgo });
     expect(in1.status).toBe(201);
-    // Stored times are rounded to the nearest half hour for clean payroll
+    // Stored times are rounded to the nearest quarter hour for clean payroll
     // numbers, so this checks against the rounded value, not the raw input.
-    const thirtyMinMs = 30 * 60 * 1000;
-    const expectedClockIn = Math.round(new Date(twoHoursAgo).getTime() / thirtyMinMs) * thirtyMinMs;
+    const fifteenMinMs = 15 * 60 * 1000;
+    const expectedClockIn = Math.round(new Date(twoHoursAgo).getTime() / fifteenMinMs) * fifteenMinMs;
     expect(new Date(in1.body.clockIn).getTime()).toBe(expectedClockIn);
 
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
@@ -107,7 +107,7 @@ describe("Attendance", () => {
       .set("Authorization", `Bearer ${token}`)
       .send({ clockedAt: oneHourAgo });
     expect(out1.status).toBe(200);
-    const expectedClockOut = Math.round(new Date(oneHourAgo).getTime() / thirtyMinMs) * thirtyMinMs;
+    const expectedClockOut = Math.round(new Date(oneHourAgo).getTime() / fifteenMinMs) * fifteenMinMs;
     expect(new Date(out1.body.clockOut).getTime()).toBe(expectedClockOut);
   });
 
@@ -260,25 +260,31 @@ describe("Attendance", () => {
     expect(create.body.clockOut).toBeTruthy();
   });
 
-  it("rounds clock in/out to the nearest half hour", async () => {
-    const shift = await request(app)
-      .post(`/api/users/${reportId}/shifts`)
-      .set("Authorization", `Bearer ${managerToken}`)
-      .send({ startsAt: "2026-10-15T09:00:00Z", endsAt: "2026-10-15T17:00:00Z" });
+  it("rounds clock in/out to the nearest quarter hour", async () => {
+    const cases: [string, string][] = [
+      ["2026-10-15T09:10:00Z", "2026-10-15T09:15:00.000Z"],
+      ["2026-10-15T10:20:00Z", "2026-10-15T10:15:00.000Z"],
+      ["2026-10-15T11:25:00Z", "2026-10-15T11:30:00.000Z"],
+      ["2026-10-15T12:35:00Z", "2026-10-15T12:30:00.000Z"],
+      ["2026-10-15T13:40:00Z", "2026-10-15T13:45:00.000Z"],
+      ["2026-10-15T14:50:00Z", "2026-10-15T14:45:00.000Z"],
+      ["2026-10-15T15:55:00Z", "2026-10-15T16:00:00.000Z"],
+    ];
 
-    const create = await request(app)
-      .post(`/api/users/${reportId}/attendance`)
-      .set("Authorization", `Bearer ${managerToken}`)
-      // 09:25 is closer to 09:30 than 09:00 -> rounds up.
-      // 17:05 is closer to 17:00 than 17:30 -> rounds down.
-      .send({
-        shiftId: shift.body.id,
-        clockIn: "2026-10-15T09:25:00Z",
-        clockOut: "2026-10-15T17:05:00Z",
-      });
-    expect(create.status).toBe(201);
-    expect(new Date(create.body.clockIn).getTime()).toBe(new Date("2026-10-15T09:30:00.000Z").getTime());
-    expect(new Date(create.body.clockOut).getTime()).toBe(new Date("2026-10-15T17:00:00.000Z").getTime());
+    for (const [input, expected] of cases) {
+      const startsAt = new Date(new Date(input).getTime() - 60 * 60 * 1000).toISOString();
+      const shift = await request(app)
+        .post(`/api/users/${reportId}/shifts`)
+        .set("Authorization", `Bearer ${managerToken}`)
+        .send({ startsAt, endsAt: input });
+
+      const create = await request(app)
+        .post(`/api/users/${reportId}/attendance`)
+        .set("Authorization", `Bearer ${managerToken}`)
+        .send({ shiftId: shift.body.id, clockIn: startsAt, clockOut: input });
+      expect(create.status).toBe(201);
+      expect(new Date(create.body.clockOut).getTime()).toBe(new Date(expected).getTime());
+    }
   });
 
   it("rejects creating a manual entry for a shift that already has an attendance record", async () => {
