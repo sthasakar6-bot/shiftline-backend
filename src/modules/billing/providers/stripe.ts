@@ -63,6 +63,11 @@ async function createCheckoutSession(params: CheckoutParams): Promise<CheckoutRe
     },
     success_url: `${env.appUrl}/admin?tab=billing&checkout=success`,
     cancel_url: `${env.appUrl}/admin?tab=billing&checkout=canceled`,
+    // automatic_tax needs a billing address to calculate against, and the
+    // customer created just above has none yet -- have Stripe save the
+    // address the customer enters on the checkout page itself back onto
+    // the Customer, rather than requiring one to already exist beforehand.
+    customer_update: { address: "auto" },
     automatic_tax: { enabled: true },
   });
 
