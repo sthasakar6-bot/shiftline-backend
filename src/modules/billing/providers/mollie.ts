@@ -63,12 +63,17 @@ async function createCheckoutSession(params: CheckoutParams): Promise<CheckoutRe
     throw new AppError(500, "Mollie did not return a customer id");
   }
 
+  // No webhookUrl here: this account uses a centrally-registered next-gen
+  // webhook subscription (Mollie Dashboard -> Developers -> Webhooks) that
+  // delivers signed JSON events for matching event types to our one
+  // endpoint, independent of any per-resource webhookUrl. Passing an
+  // inline webhookUrl too would risk a second, unsigned "classic" delivery
+  // to the same endpoint that verifyAndParseWebhook can't parse.
   const payment = await mollie().payments.create({
     paymentRequest: {
       amount: amountFor(params.plan, params.interval),
       description: `Shiftline ${params.plan} (${params.interval}) -- ${params.companyName}`,
       redirectUrl: `${env.appUrl}/admin?tab=billing&checkout=success`,
-      webhookUrl: `${env.appUrl.replace("app.", "")}/api/billing/webhooks/mollie`,
       customerId,
       sequenceType: "first",
       metadata: {
@@ -102,13 +107,14 @@ async function handlePaymentWebhook(paymentId: string): Promise<NormalizedWebhoo
 
     let subscriptionId: string | null = null;
     if (payment.sequenceType === "first" && payment.mandateId && plan && interval) {
+      // Same reasoning as the payment above: no inline webhookUrl, the
+      // central next-gen subscription delivers renewal payment events too.
       const subscription = await mollie().subscriptions.create({
         customerId,
         subscriptionRequest: {
           amount: amountFor(plan, interval),
           interval: mollieInterval(interval),
           description: `Shiftline ${plan} (${interval})`,
-          webhookUrl: `${env.appUrl.replace("app.", "")}/api/billing/webhooks/mollie`,
           mandateId: payment.mandateId,
         },
       });
