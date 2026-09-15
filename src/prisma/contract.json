@@ -48,6 +48,10 @@
       "model": "OpenShift",
       "namespace": "public"
     },
+    "openShiftRequest": {
+      "model": "OpenShiftRequest",
+      "namespace": "public"
+    },
     "passwordResetRequest": {
       "model": "PasswordResetRequest",
       "namespace": "public"
@@ -495,6 +499,21 @@
                 },
                 "to": {
                   "model": "Invite",
+                  "namespace": "public"
+                }
+              },
+              "openShiftRequests": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "companyId"
+                  ]
+                },
+                "to": {
+                  "model": "OpenShiftRequest",
                   "namespace": "public"
                 }
               },
@@ -1343,6 +1362,21 @@
                   "namespace": "public"
                 }
               },
+              "requests": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "openShiftId"
+                  ]
+                },
+                "to": {
+                  "model": "OpenShiftRequest",
+                  "namespace": "public"
+                }
+              },
               "shiftType": {
                 "cardinality": "N:1",
                 "on": {
@@ -1412,6 +1446,133 @@
               },
               "namespaceId": "public",
               "table": "openShift"
+            }
+          },
+          "OpenShiftRequest": {
+            "fields": {
+              "companyId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "openShiftId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "status": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "company": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "companyId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Company",
+                  "namespace": "public"
+                }
+              },
+              "openShift": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "openShiftId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "OpenShift",
+                  "namespace": "public"
+                }
+              },
+              "user": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "userId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "companyId": {
+                  "column": "companyId"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "openShiftId": {
+                  "column": "openShiftId"
+                },
+                "status": {
+                  "column": "status"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
+                },
+                "userId": {
+                  "column": "userId"
+                }
+              },
+              "namespaceId": "public",
+              "table": "openShiftRequest"
             }
           },
           "PasswordResetRequest": {
@@ -2261,6 +2422,21 @@
                 },
                 "to": {
                   "model": "Notification",
+                  "namespace": "public"
+                }
+              },
+              "openShiftRequests": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "userId"
+                  ]
+                },
+                "to": {
+                  "model": "OpenShiftRequest",
                   "namespace": "public"
                 }
               },
@@ -3489,6 +3665,143 @@
               },
               "uniques": []
             },
+            "openShiftRequest": {
+              "columns": {
+                "companyId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "openShiftId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "status": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "pending"
+                  },
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "updatedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "userId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "source": {
+                    "columns": [
+                      "companyId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "openShiftRequest"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "company"
+                  }
+                },
+                {
+                  "source": {
+                    "columns": [
+                      "openShiftId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "openShiftRequest"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "openShift"
+                  }
+                },
+                {
+                  "source": {
+                    "columns": [
+                      "userId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "openShiftRequest"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "user"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "companyId"
+                  ],
+                  "name": "openShiftRequest_companyId_idx_33acc5ed",
+                  "prefix": "openShiftRequest_companyId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "openShiftId"
+                  ],
+                  "name": "openShiftRequest_openShiftId_idx_6d8d40d0",
+                  "prefix": "openShiftRequest_openShiftId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "userId"
+                  ],
+                  "name": "openShiftRequest_userId_idx_a489d58a",
+                  "prefix": "openShiftRequest_userId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": []
+            },
             "passwordResetRequest": {
               "columns": {
                 "createdAt": {
@@ -4191,7 +4504,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "c44a66cfe22fcfdc93d907195f301c58759da18be422ece7370b4bc17188bbac"
+    "storageHash": "c6d682495283e6895ce23c866355825a022302cc426efc691447113ccceb4bf5"
   },
   "capabilities": {
     "postgres": {

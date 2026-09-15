@@ -71,3 +71,62 @@ export async function clearOpenShiftFromShifts(openShiftId: number): Promise<voi
     rows.map((r) => db.orm.public.Shift.where({ id: r.id }).update({ openShiftId: null })),
   );
 }
+
+export interface OpenShiftRequest {
+  id: number;
+  companyId: number;
+  openShiftId: number;
+  userId: number;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateOpenShiftRequestInput {
+  companyId: number;
+  openShiftId: number;
+  userId: number;
+}
+
+export async function findOpenShiftRequestsBySlot(openShiftId: number): Promise<OpenShiftRequest[]> {
+  return db.orm.public.OpenShiftRequest.where({ openShiftId }).all();
+}
+
+export async function findPendingOpenShiftRequestForUser(
+  openShiftId: number,
+  userId: number,
+): Promise<OpenShiftRequest | null> {
+  return db.orm.public.OpenShiftRequest.where({ openShiftId, userId, status: "pending" }).first();
+}
+
+export async function findOpenShiftRequestById(id: number): Promise<OpenShiftRequest | null> {
+  return db.orm.public.OpenShiftRequest.where({ id }).first();
+}
+
+export async function createOpenShiftRequest(
+  data: CreateOpenShiftRequestInput,
+): Promise<OpenShiftRequest> {
+  return db.orm.public.OpenShiftRequest.create(data);
+}
+
+export async function updateOpenShiftRequestStatus(
+  id: number,
+  status: string,
+): Promise<OpenShiftRequest | null> {
+  return db.orm.public.OpenShiftRequest.where({ id }).update({
+    status,
+    updatedAt: new Date().toISOString(),
+  });
+}
+
+export async function deleteOpenShiftRequest(id: number): Promise<void> {
+  await db.orm.public.OpenShiftRequest.where({ id }).delete();
+}
+
+// Requests are meaningless once their slot is gone -- unlike shifts (which
+// detach and stay as real records), delete them outright when the slot is
+// removed. Same multi-row-predicate caveat as clearOpenShiftFromShifts above.
+export async function deleteOpenShiftRequestsBySlot(openShiftId: number): Promise<void> {
+  const rows = await db.orm.public.OpenShiftRequest.select("id").where({ openShiftId }).all();
+  await Promise.all(rows.map((r) => db.orm.public.OpenShiftRequest.where({ id: r.id }).delete()));
+}

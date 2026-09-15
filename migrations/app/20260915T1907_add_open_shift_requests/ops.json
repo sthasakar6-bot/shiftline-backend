@@ -1,0 +1,284 @@
+[
+  {
+    "id": "table.openShiftRequest",
+    "label": "Create table \"openShiftRequest\"",
+    "summary": "Creates table \"openShiftRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "openShiftRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"openShiftRequest\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"openShiftRequest\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"openShiftRequest\"",
+        "sql": "CREATE TABLE \"public\".\"openShiftRequest\" (\n  \"companyId\" int4 NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"openShiftId\" int4 NOT NULL,\n  \"status\" text DEFAULT 'pending' NOT NULL,\n  \"updatedAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"userId\" int4 NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"openShiftRequest\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"openShiftRequest\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.openShiftRequest.openShiftRequest_companyId_idx_33acc5ed",
+    "label": "Create index \"openShiftRequest_companyId_idx_33acc5ed\" on \"openShiftRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "openShiftRequest_companyId_idx_33acc5ed",
+        "table": "openShiftRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"openShiftRequest_companyId_idx_33acc5ed\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"openShiftRequest_companyId_idx_33acc5ed\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"openShiftRequest_companyId_idx_33acc5ed\"",
+        "sql": "CREATE INDEX \"openShiftRequest_companyId_idx_33acc5ed\" ON \"public\".\"openShiftRequest\" (\"companyId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"openShiftRequest_companyId_idx_33acc5ed\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"openShiftRequest_companyId_idx_33acc5ed\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.openShiftRequest.openShiftRequest_openShiftId_idx_6d8d40d0",
+    "label": "Create index \"openShiftRequest_openShiftId_idx_6d8d40d0\" on \"openShiftRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "openShiftRequest_openShiftId_idx_6d8d40d0",
+        "table": "openShiftRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"openShiftRequest_openShiftId_idx_6d8d40d0\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"openShiftRequest_openShiftId_idx_6d8d40d0\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"openShiftRequest_openShiftId_idx_6d8d40d0\"",
+        "sql": "CREATE INDEX \"openShiftRequest_openShiftId_idx_6d8d40d0\" ON \"public\".\"openShiftRequest\" (\"openShiftId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"openShiftRequest_openShiftId_idx_6d8d40d0\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"openShiftRequest_openShiftId_idx_6d8d40d0\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.openShiftRequest.openShiftRequest_userId_idx_a489d58a",
+    "label": "Create index \"openShiftRequest_userId_idx_a489d58a\" on \"openShiftRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "openShiftRequest_userId_idx_a489d58a",
+        "table": "openShiftRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"openShiftRequest_userId_idx_a489d58a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"openShiftRequest_userId_idx_a489d58a\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"openShiftRequest_userId_idx_a489d58a\"",
+        "sql": "CREATE INDEX \"openShiftRequest_userId_idx_a489d58a\" ON \"public\".\"openShiftRequest\" (\"userId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"openShiftRequest_userId_idx_a489d58a\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"openShiftRequest_userId_idx_a489d58a\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.openShiftRequest.openShiftRequest_companyId_fkey",
+    "label": "Add foreign key \"openShiftRequest_companyId_fkey\" on \"openShiftRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "openShiftRequest_companyId_fkey",
+        "table": "openShiftRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"openShiftRequest_companyId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "openShiftRequest_companyId_fkey",
+          "public",
+          "\"public\".\"openShiftRequest\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"openShiftRequest_companyId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"openShiftRequest\"\nADD CONSTRAINT \"openShiftRequest_companyId_fkey\"\nFOREIGN KEY (\"companyId\")\nREFERENCES \"public\".\"company\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"openShiftRequest_companyId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "openShiftRequest_companyId_fkey",
+          "public",
+          "\"public\".\"openShiftRequest\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.openShiftRequest.openShiftRequest_openShiftId_fkey",
+    "label": "Add foreign key \"openShiftRequest_openShiftId_fkey\" on \"openShiftRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "openShiftRequest_openShiftId_fkey",
+        "table": "openShiftRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"openShiftRequest_openShiftId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "openShiftRequest_openShiftId_fkey",
+          "public",
+          "\"public\".\"openShiftRequest\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"openShiftRequest_openShiftId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"openShiftRequest\"\nADD CONSTRAINT \"openShiftRequest_openShiftId_fkey\"\nFOREIGN KEY (\"openShiftId\")\nREFERENCES \"public\".\"openShift\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"openShiftRequest_openShiftId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "openShiftRequest_openShiftId_fkey",
+          "public",
+          "\"public\".\"openShiftRequest\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.openShiftRequest.openShiftRequest_userId_fkey",
+    "label": "Add foreign key \"openShiftRequest_userId_fkey\" on \"openShiftRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "openShiftRequest_userId_fkey",
+        "table": "openShiftRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"openShiftRequest_userId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "openShiftRequest_userId_fkey",
+          "public",
+          "\"public\".\"openShiftRequest\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"openShiftRequest_userId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"openShiftRequest\"\nADD CONSTRAINT \"openShiftRequest_userId_fkey\"\nFOREIGN KEY (\"userId\")\nREFERENCES \"public\".\"user\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"openShiftRequest_userId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "openShiftRequest_userId_fkey",
+          "public",
+          "\"public\".\"openShiftRequest\""
+        ]
+      }
+    ]
+  }
+]

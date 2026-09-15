@@ -20,6 +20,7 @@ model Company {
   departments Department[]
   shiftTypes  ShiftType[]
   openShifts  OpenShift[]
+  openShiftRequests OpenShiftRequest[]
   events      Event[]
 
   createdAt   TimestamptzString @default(now())
@@ -55,6 +56,7 @@ model User {
   notifications Notification[]
   leaveRequests LeaveRequest[]
   invitesSent   Invite[]
+  openShiftRequests OpenShiftRequest[]
   pushSubscriptions PushSubscription[]
   passwordResetRequests PasswordResetRequest[]
   backupToken   BackupToken?
@@ -259,9 +261,26 @@ model OpenShift {
   requiredCount Int                @default(1)
   notes         String?
   shifts        Shift[]
+  requests      OpenShiftRequest[]
 
   createdAt     TimestamptzString  @default(now())
   updatedAt     TimestamptzString  @default(now())
+}
+
+model OpenShiftRequest {
+  id          Int         @id @default(autoincrement())
+  companyId   Int
+  company     Company     @relation(fields: [companyId], references: [id])
+  openShiftId Int
+  openShift   OpenShift   @relation(fields: [openShiftId], references: [id])
+  userId      Int
+  user        User        @relation(fields: [userId], references: [id])
+  // "pending" | "approved" | "rejected" -- plain String, matching how every
+  // other status-like field in this contract works (no enums used anywhere).
+  status      String      @default("pending")
+
+  createdAt   TimestamptzString @default(now())
+  updatedAt   TimestamptzString @default(now())
 }
 
 model Event {

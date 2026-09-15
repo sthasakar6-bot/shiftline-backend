@@ -5,10 +5,14 @@ import {
   editOpenShift,
   removeOpenShift,
   assignOpenShift,
+  requestOpenShift,
+  cancelOpenShiftRequest,
+  approveOpenShiftRequest,
+  rejectOpenShiftRequest,
 } from "./service";
 
 export async function listOpenShiftsController(req: Request, res: Response) {
-  const openShifts = await listOpenShifts(req.user!.companyId);
+  const openShifts = await listOpenShifts(req.user!.companyId, req.user!.sub);
   res.json(openShifts);
 }
 
@@ -56,4 +60,24 @@ export async function assignOpenShiftController(req: Request, res: Response) {
     breakMinutes,
   });
   res.json(openShift);
+}
+
+export async function requestOpenShiftController(req: Request, res: Response) {
+  const request = await requestOpenShift(Number(req.params.id), req.user!.sub, req.user!.companyId);
+  res.status(201).json(request);
+}
+
+export async function cancelOpenShiftRequestController(req: Request, res: Response) {
+  await cancelOpenShiftRequest(Number(req.params.requestId), req.user!.sub);
+  res.status(204).send();
+}
+
+export async function approveOpenShiftRequestController(req: Request, res: Response) {
+  const openShift = await approveOpenShiftRequest(Number(req.params.requestId), req.user!.companyId);
+  res.json(openShift);
+}
+
+export async function rejectOpenShiftRequestController(req: Request, res: Response) {
+  const request = await rejectOpenShiftRequest(Number(req.params.requestId), req.user!.companyId);
+  res.json(request);
 }

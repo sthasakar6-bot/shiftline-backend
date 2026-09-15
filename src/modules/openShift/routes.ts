@@ -5,6 +5,10 @@ import {
   updateOpenShiftController,
   deleteOpenShiftController,
   assignOpenShiftController,
+  requestOpenShiftController,
+  cancelOpenShiftRequestController,
+  approveOpenShiftRequestController,
+  rejectOpenShiftRequestController,
 } from "./controller";
 import { requireAuth } from "../../middleware/requireAuth";
 import { requireRole } from "../../middleware/requireRole";
@@ -13,8 +17,10 @@ import { createOpenShiftSchema, updateOpenShiftSchema, assignOpenShiftSchema } f
 
 const router = Router();
 
-// Open shifts (unfilled/required staffing slots) are manager-only, same as
-// the rest of the roster -- there is no employee self-claim endpoint.
+// Open shifts are visible company-wide, same as the shift roster -- any
+// employee can see what's open and request one, but only a manager can
+// create/edit/delete a slot, assign it directly, or approve/reject a
+// request. There is still no direct employee self-claim.
 router.get("/open-shifts", requireAuth, listOpenShiftsController);
 router.post(
   "/open-shifts",
@@ -37,6 +43,24 @@ router.post(
   requireRole("manager"),
   validate(assignOpenShiftSchema),
   assignOpenShiftController,
+);
+router.post("/open-shifts/:id/requests", requireAuth, requestOpenShiftController);
+router.delete(
+  "/open-shift-requests/:requestId",
+  requireAuth,
+  cancelOpenShiftRequestController,
+);
+router.post(
+  "/open-shift-requests/:requestId/approve",
+  requireAuth,
+  requireRole("manager"),
+  approveOpenShiftRequestController,
+);
+router.post(
+  "/open-shift-requests/:requestId/reject",
+  requireAuth,
+  requireRole("manager"),
+  rejectOpenShiftRequestController,
 );
 
 export default router;
