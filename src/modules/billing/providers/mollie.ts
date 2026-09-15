@@ -10,10 +10,17 @@ import type {
   BillingInterval,
 } from "./types";
 
-const mollie = new Client({
-  testmode: false,
-  security: { apiKey: env.mollieApiKey },
-});
+// Lazy + memoized -- same reasoning as the Stripe adapter's lazy client:
+// this module is imported at server startup regardless of whether billing
+// env vars are configured yet, so constructing the client eagerly risks
+// crashing the whole app before a real MOLLIE_API_KEY exists.
+let mollieClient: Client | null = null;
+function mollie(): Client {
+  if (!mollieClient) {
+    mollieClient = new Client({ testmode: false, security: { apiKey: env.mollieApiKey } });
+  }
+  return mollieClient;
+}
 
 const PRICE_EUR: Record<PlanKey, string> = {
   starter: "9.99",
@@ -47,7 +54,7 @@ function mollieInterval(interval: BillingInterval): string {
 async function createCheckoutSession(params: CheckoutParams): Promise<CheckoutResult> {
   let customerId = params.existingCustomerId;
   if (!customerId) {
-    const customer = await mollie.customers.create({
+    const customer = await mollie().customers.create({
       entityCustomer: { name: params.companyName, email: params.managerEmail },
     });
     customerId = customer.id;
@@ -56,7 +63,7 @@ async function createCheckoutSession(params: CheckoutParams): Promise<CheckoutRe
     throw new AppError(500, "Mollie did not return a customer id");
   }
 
-  const payment = await mollie.payments.create({
+  const payment = await mollie().payments.create({
     paymentRequest: {
       amount: amountFor(params.plan, params.interval),
       description: `Shiftline ${params.plan} (${params.interval}) -- ${params.companyName}`,
@@ -81,7 +88,7 @@ async function createCheckoutSession(params: CheckoutParams): Promise<CheckoutRe
 }
 
 async function handlePaymentWebhook(paymentId: string): Promise<NormalizedWebhookEvent> {
-  const payment = await mollie.payments.get({ paymentId });
+  const payment = await mollie().payments.get({ paymentId });
   const customerId = payment.customerId;
   if (!customerId) {
     throw new AppError(400, `Mollie payment ${paymentId} has no customer id`);
@@ -95,7 +102,7 @@ async function handlePaymentWebhook(paymentId: string): Promise<NormalizedWebhoo
 
     let subscriptionId: string | null = null;
     if (payment.sequenceType === "first" && payment.mandateId && plan && interval) {
-      const subscription = await mollie.subscriptions.create({
+      const subscription = await mollie().subscriptions.create({
         customerId,
         subscriptionRequest: {
           amount: amountFor(plan, interval),

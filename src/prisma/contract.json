@@ -399,6 +399,34 @@
           },
           "Company": {
             "fields": {
+              "billingCustomerId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "billingInterval": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "billingProvider": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "billingSubscriptionId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "createdAt": {
                 "nullable": false,
                 "type": {
@@ -443,6 +471,13 @@
               },
               "slug": {
                 "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "subscriptionStatus": {
+                "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
@@ -565,6 +600,18 @@
             },
             "storage": {
               "fields": {
+                "billingCustomerId": {
+                  "column": "billingCustomerId"
+                },
+                "billingInterval": {
+                  "column": "billingInterval"
+                },
+                "billingProvider": {
+                  "column": "billingProvider"
+                },
+                "billingSubscriptionId": {
+                  "column": "billingSubscriptionId"
+                },
                 "createdAt": {
                   "column": "createdAt"
                 },
@@ -585,6 +632,9 @@
                 },
                 "slug": {
                   "column": "slug"
+                },
+                "subscriptionStatus": {
+                  "column": "subscriptionStatus"
                 },
                 "trialEndsAt": {
                   "column": "trialEndsAt"
@@ -2870,6 +2920,26 @@
             },
             "company": {
               "columns": {
+                "billingCustomerId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "billingInterval": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "billingProvider": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "billingSubscriptionId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "createdAt": {
                   "codecId": "pg/timestamptz-string@1",
                   "default": {
@@ -2916,6 +2986,11 @@
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
+                },
+                "subscriptionStatus": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
                 },
                 "trialEndsAt": {
                   "codecId": "pg/timestamptz-string@1",
@@ -4504,7 +4579,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "c6d682495283e6895ce23c866355825a022302cc426efc691447113ccceb4bf5"
+    "storageHash": "83a658a37cd91e98c1b085d758ecfcabb9023abed8590baa5c3b40111e3f1b6a"
   },
   "capabilities": {
     "postgres": {

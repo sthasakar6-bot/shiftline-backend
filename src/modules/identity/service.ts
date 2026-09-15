@@ -28,20 +28,32 @@ export async function login(email: string, password: string, companyId: number) 
 
   const company = await findCompanyById(user.companyId);
 
-  // Soft-lock: once a trial's date has passed with no plan chosen, block
+  // Soft-lock #1: once a trial's date has passed with no plan chosen, block
   // login rather than letting the app run in an undefined state. Checking
   // trialEndsAt !== null explicitly means this can never fire for a
   // pre-existing/backfilled/paid company -- only one actively mid-trial
   // has a non-null date here.
-  if (
-    company &&
+  const trialExpired =
+    !!company &&
     company.plan === "trial" &&
     company.trialEndsAt !== null &&
-    new Date(company.trialEndsAt) < new Date()
-  ) {
+    new Date(company.trialEndsAt) < new Date();
+
+  // Soft-lock #2: a subscription the billing webhook marked canceled. The
+  // billingProvider !== null guard is what makes this provably safe for
+  // every company that predates billing (Super Sushi, Zuiderzoet, every
+  // trial company) -- they can never have subscriptionStatus === "canceled"
+  // because nothing ever sets it without billingProvider being set first.
+  const subscriptionCanceled =
+    !!company && company.billingProvider !== null && company.subscriptionStatus === "canceled";
+
+  if (trialExpired || subscriptionCanceled) {
     throw new AppError(
       403,
-      "Your 15-day trial has ended. Contact us to choose a plan and keep using Shiftline.",
+      subscriptionCanceled
+        ? "Your subscription has been canceled. Contact us or update your billing to keep using Shiftline."
+        : "Your 15-day trial has ended. Contact us to choose a plan and keep using Shiftline.",
+      subscriptionCanceled ? "SUBSCRIPTION_CANCELED" : "TRIAL_EXPIRED",
     );
   }
 

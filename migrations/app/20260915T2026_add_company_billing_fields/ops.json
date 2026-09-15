@@ -1,0 +1,212 @@
+[
+  {
+    "id": "column.public.company.billingCustomerId",
+    "label": "Add column \"billingCustomerId\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "billingCustomerId",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"billingCustomerId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "billingCustomerId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"billingCustomerId\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"billingCustomerId\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"billingCustomerId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "billingCustomerId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.billingInterval",
+    "label": "Add column \"billingInterval\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "billingInterval",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"billingInterval\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "billingInterval"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"billingInterval\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"billingInterval\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"billingInterval\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "billingInterval"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.billingProvider",
+    "label": "Add column \"billingProvider\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "billingProvider",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"billingProvider\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "billingProvider"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"billingProvider\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"billingProvider\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"billingProvider\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "billingProvider"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.billingSubscriptionId",
+    "label": "Add column \"billingSubscriptionId\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "billingSubscriptionId",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"billingSubscriptionId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "billingSubscriptionId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"billingSubscriptionId\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"billingSubscriptionId\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"billingSubscriptionId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "billingSubscriptionId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.subscriptionStatus",
+    "label": "Add column \"subscriptionStatus\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "subscriptionStatus",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"subscriptionStatus\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "subscriptionStatus"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"subscriptionStatus\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"subscriptionStatus\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"subscriptionStatus\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "subscriptionStatus"
+        ]
+      }
+    ]
+  }
+]

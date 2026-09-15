@@ -10,7 +10,19 @@ import type {
   BillingInterval,
 } from "./types";
 
-const stripe = new Stripe(env.stripeSecretKey);
+// Lazy + memoized: constructing a Stripe client with an empty key throws
+// immediately ("Neither apiKey nor config.authenticator provided"). Every
+// module that (transitively) imports this file gets loaded at server
+// startup regardless of whether billing env vars are configured yet, so
+// eagerly constructing this at module scope would crash the whole app
+// (and every test) before a real STRIPE_SECRET_KEY exists.
+let stripeClient: Stripe | null = null;
+function stripe(): Stripe {
+  if (!stripeClient) {
+    stripeClient = new Stripe(env.stripeSecretKey);
+  }
+  return stripeClient;
+}
 
 function priceIdFor(plan: PlanKey, interval: BillingInterval): string {
   const key =
@@ -28,7 +40,7 @@ function priceIdFor(plan: PlanKey, interval: BillingInterval): string {
 }
 
 async function createCheckoutSession(params: CheckoutParams): Promise<CheckoutResult> {
-  const session = await stripe.checkout.sessions.create({
+  const session = await stripe().checkout.sessions.create({
     mode: "subscription",
     customer: params.existingCustomerId ?? undefined,
     customer_email: params.existingCustomerId ? undefined : params.managerEmail,
@@ -81,7 +93,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<NormalizedWeb
   let plan: PlanKey | undefined;
   let interval: BillingInterval | undefined;
   if (subscriptionIdStr) {
-    const subscription = await stripe.subscriptions.retrieve(subscriptionIdStr);
+    const subscription = await stripe().subscriptions.retrieve(subscriptionIdStr);
     const meta = subscription.metadata;
     if (meta.plan === "starter" || meta.plan === "unlimited") plan = meta.plan;
     if (meta.interval === "monthly" || meta.interval === "yearly") interval = meta.interval;
@@ -133,7 +145,7 @@ async function verifyAndParseWebhook(
 
   let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(rawBody, signature, env.stripeWebhookSecret);
+    event = stripe().webhooks.constructEvent(rawBody, signature, env.stripeWebhookSecret);
   } catch {
     throw new AppError(400, "Invalid Stripe webhook signature");
   }

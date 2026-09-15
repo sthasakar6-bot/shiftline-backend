@@ -18,6 +18,8 @@ import departmentRoutes from "./modules/department/routes";
 import shiftTypeRoutes from "./modules/shiftType/routes";
 import openShiftRoutes from "./modules/openShift/routes";
 import eventRoutes from "./modules/event/routes";
+import billingRoutes from "./modules/billing/routes";
+import billingWebhookRoutes from "./modules/billing/webhookRoutes";
 import { notFoundHandler, errorHandler } from "./middleware/errorHandler";
 import { env } from "./config/env";
 
@@ -28,6 +30,16 @@ const app = express();
 const allowedOrigins = env.corsOrigin ? env.corsOrigin.split(",").map((o) => o.trim()) : true;
 
 app.use(cors({ origin: allowedOrigins, credentials: true }));
+
+// Mounted BEFORE express.json(): both Mollie and Stripe webhook signature
+// verification needs the exact original request bytes, and express.json()
+// below parses (and discards the original bytes of) every other route.
+app.use(
+  "/api/billing/webhooks",
+  express.raw({ type: "application/json" }),
+  billingWebhookRoutes,
+);
+
 app.use(express.json());
 app.use("/api", userRoutes);
 app.use("/api", identityRoutes);
@@ -47,6 +59,7 @@ app.use("/api", departmentRoutes);
 app.use("/api", shiftTypeRoutes);
 app.use("/api", openShiftRoutes);
 app.use("/api", eventRoutes);
+app.use("/api", billingRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
