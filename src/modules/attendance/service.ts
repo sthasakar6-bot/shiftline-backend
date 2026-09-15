@@ -25,6 +25,17 @@ const CLOCK_IN_WINDOW_MS = 30 * 60 * 1000;
 // clocked into hours or days ahead of time.
 const EARLY_CLOCK_IN_MS = 5 * 60 * 1000;
 
+// Payroll math wants clean numbers, not "7h 23m" -- every clock in/out gets
+// snapped to the nearest half hour before it's stored (25 min -> :30, 10:05
+// -> 10:00). Rounding both directions symmetrically means it doesn't
+// systematically favor the employee or the employer over a full shift.
+const ROUND_TO_MS = 30 * 60 * 1000;
+
+function roundToNearestHalfHour(isoString: string): string {
+  const ms = new Date(isoString).getTime();
+  return new Date(Math.round(ms / ROUND_TO_MS) * ROUND_TO_MS).toISOString();
+}
+
 function resolveClockedAt(clockedAt?: string): string {
   if (!clockedAt) {
     return new Date().toISOString();
@@ -81,7 +92,7 @@ export async function clockIn(
     );
   }
 
-  return createAttendance(userId, shiftId, resolved, lat, lng);
+  return createAttendance(userId, shiftId, roundToNearestHalfHour(resolved), lat, lng);
 }
 
 export async function clockOut(
@@ -104,7 +115,7 @@ export async function clockOut(
     throw new AppError(400, "clockedAt cannot be before clock-in");
   }
 
-  const updated = await setClockOut(attendanceId, userId, resolved, lat, lng);
+  const updated = await setClockOut(attendanceId, userId, roundToNearestHalfHour(resolved), lat, lng);
   if (!updated) {
     throw new AppError(404, "Attendance record not found");
   }
@@ -144,10 +155,15 @@ export async function createManualAttendanceEntry(
     if (clockOutDate < clockInDate) {
       throw new AppError(400, "clockOut cannot be before clockIn");
     }
-    resolvedClockOut = clockOutDate.toISOString();
+    resolvedClockOut = roundToNearestHalfHour(clockOutDate.toISOString());
   }
 
-  return createManualAttendance(employeeId, shiftId, clockInDate.toISOString(), resolvedClockOut);
+  return createManualAttendance(
+    employeeId,
+    shiftId,
+    roundToNearestHalfHour(clockInDate.toISOString()),
+    resolvedClockOut,
+  );
 }
 
 export async function editManualAttendanceEntry(
@@ -175,11 +191,11 @@ export async function editManualAttendanceEntry(
     if (clockOutDate < clockInDate) {
       throw new AppError(400, "clockOut cannot be before clockIn");
     }
-    resolvedClockOut = clockOutDate.toISOString();
+    resolvedClockOut = roundToNearestHalfHour(clockOutDate.toISOString());
   }
 
   const updated = await updateAttendanceTimes(attendanceId, employeeId, {
-    clockIn: clockInDate.toISOString(),
+    clockIn: roundToNearestHalfHour(clockInDate.toISOString()),
     clockOut: resolvedClockOut,
   });
   if (!updated) {
