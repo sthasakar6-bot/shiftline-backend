@@ -1,0 +1,86 @@
+[
+  {
+    "id": "column.public.company.plan",
+    "label": "Add column \"plan\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "plan",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"plan\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "plan"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"plan\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"plan\" text DEFAULT 'trial' NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"plan\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "plan"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.trialEndsAt",
+    "label": "Add column \"trialEndsAt\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "trialEndsAt",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"trialEndsAt\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "trialEndsAt"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"trialEndsAt\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"trialEndsAt\" timestamptz"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"trialEndsAt\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "trialEndsAt"
+        ]
+      }
+    ]
+  }
+]

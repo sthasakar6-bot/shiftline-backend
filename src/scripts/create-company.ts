@@ -22,7 +22,10 @@ async function main() {
     return;
   }
 
-  const company = await db.orm.public.Company.create({ name: companyName, slug });
+  // Manually-provisioned companies never go through the self-signup trial
+  // flow, so they must not inherit the "trial" schema default -- that would
+  // put them on the same soft-lock clock as a real trial signup.
+  const company = await db.orm.public.Company.create({ name: companyName, slug, plan: "legacy" });
 
   const existingUser = await db.orm.public.User.where({ email, companyId: company.id }).first();
   if (existingUser) {

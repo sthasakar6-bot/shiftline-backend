@@ -13,6 +13,7 @@
     "make-manager": "node dist/scripts/make-manager.js",
     "create-manager": "node dist/scripts/create-manager.js",
     "create-company": "node dist/scripts/create-company.js",
+    "backfill-company-plans": "node dist/scripts/backfill-company-plans.js",
     "reset-password": "node dist/scripts/reset-password.js",
     "clear-pending-password-reset": "node dist/scripts/clear-pending-password-reset.js",
     "add-notification-related-shift-column": "node dist/scripts/add-notification-related-shift-column.js",

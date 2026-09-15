@@ -400,10 +400,24 @@
                   "kind": "scalar"
                 }
               },
+              "plan": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "slug": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "trialEndsAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
                   "kind": "scalar"
                 }
               }
@@ -451,8 +465,14 @@
                 "name": {
                   "column": "name"
                 },
+                "plan": {
+                  "column": "plan"
+                },
                 "slug": {
                   "column": "slug"
+                },
+                "trialEndsAt": {
+                  "column": "trialEndsAt"
                 }
               },
               "namespaceId": "public",
@@ -1993,10 +2013,24 @@
                   "nativeType": "text",
                   "nullable": false
                 },
+                "plan": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "trial"
+                  },
+                  "nativeType": "text",
+                  "nullable": false
+                },
                 "slug": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
+                },
+                "trialEndsAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
                 }
               },
               "foreignKeys": [],
@@ -2922,7 +2956,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "54b8d0713d4a6a2d065be88df71f3da60cfa7b86a32ec77d30739b497264aa58"
+    "storageHash": "3d78f108eed6fdbe21ac67df9dab5236b2ae5ade67197ba84c7b34e26194b597"
   },
   "capabilities": {
     "postgres": {

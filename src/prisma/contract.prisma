@@ -1,11 +1,19 @@
 model Company {
-  id        Int               @id @default(autoincrement())
-  name      String
-  slug      String            @unique
-  users     User[]
-  invites   Invite[]
+  id          Int               @id @default(autoincrement())
+  name        String
+  slug        String            @unique
+  // "trial" | "legacy" | "starter" | "unlimited" -- plain String, matching
+  // how role/status fields work everywhere else in this contract (no enums
+  // used anywhere).
+  plan        String            @default("trial")
+  // Non-null only while a company is actively on a timed trial. Every
+  // pre-existing company and every paid/manually-provisioned company has
+  // this as null, so the trial-expiry check can never lock them out.
+  trialEndsAt TimestamptzString?
+  users       User[]
+  invites     Invite[]
 
-  createdAt TimestamptzString @default(now())
+  createdAt   TimestamptzString @default(now())
 }
 
 model User {

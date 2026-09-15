@@ -26,13 +26,30 @@ export async function login(email: string, password: string, companyId: number) 
     throw new AppError(403, "This account has been deactivated. Contact your manager.");
   }
 
+  const company = await findCompanyById(user.companyId);
+
+  // Soft-lock: once a trial's date has passed with no plan chosen, block
+  // login rather than letting the app run in an undefined state. Checking
+  // trialEndsAt !== null explicitly means this can never fire for a
+  // pre-existing/backfilled/paid company -- only one actively mid-trial
+  // has a non-null date here.
+  if (
+    company &&
+    company.plan === "trial" &&
+    company.trialEndsAt !== null &&
+    new Date(company.trialEndsAt) < new Date()
+  ) {
+    throw new AppError(
+      403,
+      "Your 15-day trial has ended. Contact us to choose a plan and keep using Shiftline.",
+    );
+  }
+
   const token = jwt.sign(
     { sub: user.id, email: user.email, role: user.role, companyId: user.companyId },
     env.jwtSecret,
     { expiresIn: "7d" },
   );
-
-  const company = await findCompanyById(user.companyId);
 
   return {
     token,

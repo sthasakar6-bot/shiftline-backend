@@ -4,10 +4,21 @@ export interface Company {
   id: number;
   name: string;
   slug: string;
+  plan: string;
+  trialEndsAt: string | null;
   createdAt: string;
 }
 
-export async function findAllCompanies(): Promise<Company[]> {
+export interface CompanyListItem {
+  id: number;
+  name: string;
+  slug: string;
+  createdAt: string;
+}
+
+// Deliberately narrower than Company: this backs the public pre-login
+// company picker, which has no reason to expose trial/plan status.
+export async function findAllCompanies(): Promise<CompanyListItem[]> {
   return db.orm.public.Company.select("id", "name", "slug", "createdAt").all();
 }
 
