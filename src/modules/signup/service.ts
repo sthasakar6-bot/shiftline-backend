@@ -2,6 +2,7 @@ import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import { db } from "../../prisma/db";
 import { env } from "../../config/env";
+import { AppError } from "../../errors/AppError";
 
 const TRIAL_DAYS = 15;
 const MAX_SLUG_ATTEMPTS = 20;
@@ -28,8 +29,26 @@ export async function signup(input: {
   const baseSlug = slugify(input.companyName);
   const firstName = input.firstName.trim();
   const lastName = input.lastName.trim();
+  // Normalized so "Test@X.com" can't dodge the reuse check below by casing
+  // alone -- User.email isn't globally unique in the schema (it's scoped
+  // per-company, to support the manager-created-employee flow), so this is
+  // an application-level check, not a DB constraint.
+  const email = input.email.trim().toLowerCase();
 
   const { company, user } = await db.transaction(async (tx) => {
+    // An email that's already signed up for a trial before (in any company,
+    // regardless of that company's current plan/trial status) can't start
+    // a fresh trial under a new company name -- closes the "trial expired,
+    // just sign up again" loophole. A genuinely new customer with a new
+    // email is unaffected.
+    const existingUser = await tx.orm.public.User.where({ email }).first();
+    if (existingUser) {
+      throw new AppError(
+        400,
+        "An account with this email already exists. Log in instead, or contact us if you need a new company set up.",
+      );
+    }
+
     // Resolve a free slug inside the transaction so two concurrent signups
     // for the same company name can't both pick the same candidate -- the
     // slug @unique constraint is the final backstop regardless.
@@ -60,7 +79,7 @@ export async function signup(input: {
       name: `${firstName} ${lastName}`.trim(),
       firstName,
       lastName,
-      email: input.email,
+      email,
       passwordHash,
       role: "manager",
       companyId: company.id,
