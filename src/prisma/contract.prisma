@@ -102,14 +102,19 @@ model Attendance {
 }
 
 model Notification {
-  id        Int               @id @default(autoincrement())
-  userId    Int
-  user      User              @relation(fields: [userId], references: [id])
-  message   String
-  url       String?
-  read      Boolean           @default(false)
+  id             Int               @id @default(autoincrement())
+  userId         Int
+  user           User              @relation(fields: [userId], references: [id])
+  message        String
+  url            String?
+  read           Boolean           @default(false)
+  // Loosely correlates a missed clock-in/out notification back to the shift
+  // it's about, so it can be cleared automatically once the employee
+  // actually clocks in/out -- not a real FK, so a deleted shift doesn't
+  // cascade or block here.
+  relatedShiftId Int?
 
-  createdAt TimestamptzString @default(now())
+  createdAt      TimestamptzString @default(now())
 }
 
 model Invite {

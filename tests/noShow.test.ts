@@ -3,6 +3,7 @@ import { db } from "../src/prisma/db";
 import { registerAndLogin, registerUser, loginUser, uniqueEmail } from "./helpers";
 import { runNoShowCheck, runMissedClockOutCheck } from "../src/modules/shift/noShowService";
 import { findNotificationsByUser } from "../src/modules/notifications/model";
+import { clockIn, clockOut } from "../src/modules/attendance/service";
 
 describe("No-show check", () => {
   let managerId: number;
@@ -103,6 +104,31 @@ describe("No-show check", () => {
 
     const refreshed = await db.orm.public.Shift.where({ id: shift.id }).first();
     expect(refreshed?.noShowCheckedAt).toBeTruthy();
+  });
+
+  it("auto-clears the missed clock-in notification once the employee clocks in, even without reading it", async () => {
+    const shift = await db.orm.public.Shift.create({
+      userId: employeeId,
+      startsAt: new Date(Date.now() - 90 * 1000).toISOString(),
+      endsAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    });
+
+    await runNoShowCheck();
+    expect(
+      (await findNotificationsByUser(employeeId)).some((n) => n.relatedShiftId === shift.id),
+    ).toBe(true);
+    expect(
+      (await findNotificationsByUser(managerId)).some((n) => n.relatedShiftId === shift.id),
+    ).toBe(true);
+
+    await clockIn(employeeId, shift.id);
+
+    expect(
+      (await findNotificationsByUser(employeeId)).some((n) => n.relatedShiftId === shift.id),
+    ).toBe(false);
+    expect(
+      (await findNotificationsByUser(managerId)).some((n) => n.relatedShiftId === shift.id),
+    ).toBe(false);
   });
 });
 
@@ -227,5 +253,35 @@ describe("Missed clock-out check", () => {
 
     const refreshed = await db.orm.public.Attendance.where({ id: attendance.id }).first();
     expect(refreshed?.missedClockOutNotifiedAt).toBeFalsy();
+  });
+
+  it("auto-clears the missed clock-out notification once the employee clocks out, even without reading it", async () => {
+    const shift = await db.orm.public.Shift.create({
+      userId: employeeId,
+      startsAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+      endsAt: new Date(Date.now() - 90 * 1000).toISOString(),
+    });
+    const attendance = await db.orm.public.Attendance.create({
+      userId: employeeId,
+      shiftId: shift.id,
+      clockIn: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+    });
+
+    await runMissedClockOutCheck();
+    expect(
+      (await findNotificationsByUser(employeeId)).some((n) => n.relatedShiftId === shift.id),
+    ).toBe(true);
+    expect(
+      (await findNotificationsByUser(managerId)).some((n) => n.relatedShiftId === shift.id),
+    ).toBe(true);
+
+    await clockOut(attendance.id, employeeId);
+
+    expect(
+      (await findNotificationsByUser(employeeId)).some((n) => n.relatedShiftId === shift.id),
+    ).toBe(false);
+    expect(
+      (await findNotificationsByUser(managerId)).some((n) => n.relatedShiftId === shift.id),
+    ).toBe(false);
   });
 });

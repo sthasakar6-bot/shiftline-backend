@@ -825,6 +825,13 @@
                   "kind": "scalar"
                 }
               },
+              "relatedShiftId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
               "url": {
                 "nullable": true,
                 "type": {
@@ -870,6 +877,9 @@
                 },
                 "read": {
                   "column": "read"
+                },
+                "relatedShiftId": {
+                  "column": "relatedShiftId"
                 },
                 "url": {
                   "column": "url"
@@ -2342,6 +2352,11 @@
                   "nativeType": "bool",
                   "nullable": false
                 },
+                "relatedShiftId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
+                },
                 "url": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -2907,7 +2922,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "a86f061a8e0960c389a97622fe3423bfe6d7d4d744a960481b9aed057b435ca0"
+    "storageHash": "54b8d0713d4a6a2d065be88df71f3da60cfa7b86a32ec77d30739b497264aa58"
   },
   "capabilities": {
     "postgres": {

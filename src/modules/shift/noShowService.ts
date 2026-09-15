@@ -26,6 +26,7 @@ export async function runNoShowCheck(): Promise<void> {
           "You haven't clocked in for your scheduled shift yet. Tap to clock in.",
           "Missed Clock-In",
           "/?tab=attendance",
+          shift.id,
         );
         if (user.managerId) {
           await notify(
@@ -33,6 +34,7 @@ export async function runNoShowCheck(): Promise<void> {
             `${user.name} hasn't clocked in for their scheduled shift.`,
             "Missed Clock-In",
             "/admin?tab=attendance",
+            shift.id,
           );
         }
       }
@@ -60,6 +62,7 @@ export async function runMissedClockOutCheck(): Promise<void> {
         "Your shift has ended but you haven't clocked out yet. Tap to clock out.",
         "Missed Clock-Out",
         "/?tab=attendance",
+        shift.id,
       );
       if (user.managerId) {
         await notify(
@@ -67,6 +70,7 @@ export async function runMissedClockOutCheck(): Promise<void> {
           `${user.name} hasn't clocked out even though their shift has ended.`,
           "Missed Clock-Out",
           "/admin?tab=attendance",
+          shift.id,
         );
       }
     }

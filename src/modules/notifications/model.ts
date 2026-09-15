@@ -6,6 +6,7 @@ export interface Notification {
   message: string;
   url: string | null;
   read: boolean;
+  relatedShiftId: number | null;
   createdAt: string;
 }
 
@@ -24,8 +25,17 @@ export async function createNotification(
   userId: number,
   message: string,
   url?: string,
+  relatedShiftId?: number,
 ): Promise<Notification> {
-  return db.orm.public.Notification.create({ userId, message, url });
+  return db.orm.public.Notification.create({ userId, message, url, relatedShiftId });
+}
+
+// Clears every notification (employee's and manager's copies alike) tied to
+// a shift -- used to auto-dismiss a "missed clock-in/out" alert once the
+// employee actually clocks in/out, even if nobody ever opened it.
+export async function deleteNotificationsForShift(shiftId: number): Promise<void> {
+  const matches = await db.orm.public.Notification.select("id").where({ relatedShiftId: shiftId }).all();
+  await Promise.all(matches.map((n) => db.orm.public.Notification.where({ id: n.id }).delete()));
 }
 
 export async function markNotificationRead(

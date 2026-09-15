@@ -9,6 +9,7 @@ import {
   updateAttendanceTimes,
 } from "./model";
 import { AppError } from "../../errors/AppError";
+import { clearShiftNotifications } from "../notifications/service";
 
 // Lets the client supply the actual clock-in/out instant when it was
 // recorded offline and only synced later, instead of stamping it with the
@@ -93,7 +94,9 @@ export async function clockIn(
     );
   }
 
-  return createAttendance(userId, shiftId, roundToNearestQuarterHour(resolved), lat, lng);
+  const attendance = await createAttendance(userId, shiftId, roundToNearestQuarterHour(resolved), lat, lng);
+  await clearShiftNotifications(shiftId);
+  return attendance;
 }
 
 export async function clockOut(
@@ -120,6 +123,7 @@ export async function clockOut(
   if (!updated) {
     throw new AppError(404, "Attendance record not found");
   }
+  await clearShiftNotifications(existing.shiftId);
   return updated;
 }
 
@@ -159,12 +163,14 @@ export async function createManualAttendanceEntry(
     resolvedClockOut = roundToNearestQuarterHour(clockOutDate.toISOString());
   }
 
-  return createManualAttendance(
+  const attendance = await createManualAttendance(
     employeeId,
     shiftId,
     roundToNearestQuarterHour(clockInDate.toISOString()),
     resolvedClockOut,
   );
+  await clearShiftNotifications(shiftId);
+  return attendance;
 }
 
 export async function editManualAttendanceEntry(
@@ -202,5 +208,6 @@ export async function editManualAttendanceEntry(
   if (!updated) {
     throw new AppError(404, "Attendance record not found");
   }
+  await clearShiftNotifications(existing.shiftId);
   return updated;
 }
