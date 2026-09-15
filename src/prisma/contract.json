@@ -24,6 +24,14 @@
       "model": "Contract",
       "namespace": "public"
     },
+    "department": {
+      "model": "Department",
+      "namespace": "public"
+    },
+    "event": {
+      "model": "Event",
+      "namespace": "public"
+    },
     "invite": {
       "model": "Invite",
       "namespace": "public"
@@ -34,6 +42,10 @@
     },
     "notification": {
       "model": "Notification",
+      "namespace": "public"
+    },
+    "openShift": {
+      "model": "OpenShift",
       "namespace": "public"
     },
     "passwordResetRequest": {
@@ -50,6 +62,10 @@
     },
     "shift": {
       "model": "Shift",
+      "namespace": "public"
+    },
+    "shiftType": {
+      "model": "ShiftType",
       "namespace": "public"
     },
     "user": {
@@ -393,6 +409,20 @@
                   "kind": "scalar"
                 }
               },
+              "logoBase64": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "logoMimeType": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "name": {
                 "nullable": false,
                 "type": {
@@ -423,6 +453,36 @@
               }
             },
             "relations": {
+              "departments": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "companyId"
+                  ]
+                },
+                "to": {
+                  "model": "Department",
+                  "namespace": "public"
+                }
+              },
+              "events": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "companyId"
+                  ]
+                },
+                "to": {
+                  "model": "Event",
+                  "namespace": "public"
+                }
+              },
               "invites": {
                 "cardinality": "1:N",
                 "on": {
@@ -435,6 +495,36 @@
                 },
                 "to": {
                   "model": "Invite",
+                  "namespace": "public"
+                }
+              },
+              "openShifts": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "companyId"
+                  ]
+                },
+                "to": {
+                  "model": "OpenShift",
+                  "namespace": "public"
+                }
+              },
+              "shiftTypes": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "companyId"
+                  ]
+                },
+                "to": {
+                  "model": "ShiftType",
                   "namespace": "public"
                 }
               },
@@ -461,6 +551,12 @@
                 },
                 "id": {
                   "column": "id"
+                },
+                "logoBase64": {
+                  "column": "logoBase64"
+                },
+                "logoMimeType": {
+                  "column": "logoMimeType"
                 },
                 "name": {
                   "column": "name"
@@ -574,6 +670,230 @@
               },
               "namespaceId": "public",
               "table": "contract"
+            }
+          },
+          "Department": {
+            "fields": {
+              "color": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "companyId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "name": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "order": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "company": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "companyId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Company",
+                  "namespace": "public"
+                }
+              },
+              "openShifts": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "departmentId"
+                  ]
+                },
+                "to": {
+                  "model": "OpenShift",
+                  "namespace": "public"
+                }
+              },
+              "users": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "departmentId"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "color": {
+                  "column": "color"
+                },
+                "companyId": {
+                  "column": "companyId"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "name": {
+                  "column": "name"
+                },
+                "order": {
+                  "column": "order"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
+                }
+              },
+              "namespaceId": "public",
+              "table": "department"
+            }
+          },
+          "Event": {
+            "fields": {
+              "companyId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "endsAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "startsAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "title": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "company": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "companyId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Company",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "companyId": {
+                  "column": "companyId"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "endsAt": {
+                  "column": "endsAt"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "startsAt": {
+                  "column": "startsAt"
+                },
+                "title": {
+                  "column": "title"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
+                }
+              },
+              "namespaceId": "public",
+              "table": "event"
             }
           },
           "Invite": {
@@ -912,6 +1232,188 @@
               "table": "notification"
             }
           },
+          "OpenShift": {
+            "fields": {
+              "breakMinutes": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "companyId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "departmentId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "endsAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "notes": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "requiredCount": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "shiftTypeId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "startsAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "company": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "companyId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Company",
+                  "namespace": "public"
+                }
+              },
+              "department": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "departmentId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Department",
+                  "namespace": "public"
+                }
+              },
+              "shiftType": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "shiftTypeId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "ShiftType",
+                  "namespace": "public"
+                }
+              },
+              "shifts": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "openShiftId"
+                  ]
+                },
+                "to": {
+                  "model": "Shift",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "breakMinutes": {
+                  "column": "breakMinutes"
+                },
+                "companyId": {
+                  "column": "companyId"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "departmentId": {
+                  "column": "departmentId"
+                },
+                "endsAt": {
+                  "column": "endsAt"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "notes": {
+                  "column": "notes"
+                },
+                "requiredCount": {
+                  "column": "requiredCount"
+                },
+                "shiftTypeId": {
+                  "column": "shiftTypeId"
+                },
+                "startsAt": {
+                  "column": "startsAt"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
+                }
+              },
+              "namespaceId": "public",
+              "table": "openShift"
+            }
+          },
           "PasswordResetRequest": {
             "fields": {
               "createdAt": {
@@ -1220,6 +1722,20 @@
                   "kind": "scalar"
                 }
               },
+              "openShiftId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "shiftTypeId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
               "startsAt": {
                 "nullable": false,
                 "type": {
@@ -1258,6 +1774,36 @@
                   "namespace": "public"
                 }
               },
+              "openShift": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "openShiftId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "OpenShift",
+                  "namespace": "public"
+                }
+              },
+              "shiftType": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "shiftTypeId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "ShiftType",
+                  "namespace": "public"
+                }
+              },
               "user": {
                 "cardinality": "N:1",
                 "on": {
@@ -1291,6 +1837,12 @@
                 "noShowCheckedAt": {
                   "column": "noShowCheckedAt"
                 },
+                "openShiftId": {
+                  "column": "openShiftId"
+                },
+                "shiftTypeId": {
+                  "column": "shiftTypeId"
+                },
                 "startsAt": {
                   "column": "startsAt"
                 },
@@ -1303,6 +1855,133 @@
               },
               "namespaceId": "public",
               "table": "shift"
+            }
+          },
+          "ShiftType": {
+            "fields": {
+              "color": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "companyId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "name": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "order": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "company": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "companyId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Company",
+                  "namespace": "public"
+                }
+              },
+              "openShifts": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "shiftTypeId"
+                  ]
+                },
+                "to": {
+                  "model": "OpenShift",
+                  "namespace": "public"
+                }
+              },
+              "shifts": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "shiftTypeId"
+                  ]
+                },
+                "to": {
+                  "model": "Shift",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "color": {
+                  "column": "color"
+                },
+                "companyId": {
+                  "column": "companyId"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "name": {
+                  "column": "name"
+                },
+                "order": {
+                  "column": "order"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
+                }
+              },
+              "namespaceId": "public",
+              "table": "shiftType"
             }
           },
           "User": {
@@ -1337,6 +2016,13 @@
               },
               "companyId": {
                 "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "departmentId": {
+                "nullable": true,
                 "type": {
                   "codecId": "pg/int4@1",
                   "kind": "scalar"
@@ -1503,6 +2189,21 @@
                   "namespace": "public"
                 }
               },
+              "department": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "departmentId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Department",
+                  "namespace": "public"
+                }
+              },
               "invitesSent": {
                 "cardinality": "1:N",
                 "on": {
@@ -1655,6 +2356,9 @@
                 },
                 "companyId": {
                   "column": "companyId"
+                },
+                "departmentId": {
+                  "column": "departmentId"
                 },
                 "email": {
                   "column": "email"
@@ -2008,6 +2712,16 @@
                   "nativeType": "int4",
                   "nullable": false
                 },
+                "logoBase64": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "logoMimeType": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "name": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -2123,6 +2837,187 @@
                   ],
                   "name": "contract_userId_idx_a489d58a",
                   "prefix": "contract_userId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": []
+            },
+            "department": {
+              "columns": {
+                "color": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "companyId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "name": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "order": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 0
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "updatedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "source": {
+                    "columns": [
+                      "companyId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "department"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "company"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "companyId"
+                  ],
+                  "name": "department_companyId_idx_33acc5ed",
+                  "prefix": "department_companyId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "companyId",
+                    "name"
+                  ]
+                }
+              ]
+            },
+            "event": {
+              "columns": {
+                "companyId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "endsAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "startsAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "title": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "updatedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "source": {
+                    "columns": [
+                      "companyId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "event"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "company"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "companyId"
+                  ],
+                  "name": "event_companyId_idx_33acc5ed",
+                  "prefix": "event_companyId_idx",
                   "unique": false
                 }
               ],
@@ -2437,6 +3332,163 @@
               },
               "uniques": []
             },
+            "openShift": {
+              "columns": {
+                "breakMinutes": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
+                },
+                "companyId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "departmentId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
+                },
+                "endsAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "notes": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "requiredCount": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 1
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "shiftTypeId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
+                },
+                "startsAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "updatedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "source": {
+                    "columns": [
+                      "companyId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "openShift"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "company"
+                  }
+                },
+                {
+                  "source": {
+                    "columns": [
+                      "departmentId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "openShift"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "department"
+                  }
+                },
+                {
+                  "source": {
+                    "columns": [
+                      "shiftTypeId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "openShift"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "shiftType"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "companyId"
+                  ],
+                  "name": "openShift_companyId_idx_33acc5ed",
+                  "prefix": "openShift_companyId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "departmentId"
+                  ],
+                  "name": "openShift_departmentId_idx_8e261ed8",
+                  "prefix": "openShift_departmentId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "shiftTypeId"
+                  ],
+                  "name": "openShift_shiftTypeId_idx_d85655a9",
+                  "prefix": "openShift_shiftTypeId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": []
+            },
             "passwordResetRequest": {
               "columns": {
                 "createdAt": {
@@ -2725,6 +3777,16 @@
                   "nativeType": "timestamptz",
                   "nullable": true
                 },
+                "openShiftId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
+                },
+                "shiftTypeId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
+                },
                 "startsAt": {
                   "codecId": "pg/timestamptz-string@1",
                   "nativeType": "timestamptz",
@@ -2761,9 +3823,57 @@
                     "namespaceId": "public",
                     "tableName": "user"
                   }
+                },
+                {
+                  "source": {
+                    "columns": [
+                      "shiftTypeId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "shift"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "shiftType"
+                  }
+                },
+                {
+                  "source": {
+                    "columns": [
+                      "openShiftId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "shift"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "openShift"
+                  }
                 }
               ],
               "indexes": [
+                {
+                  "columns": [
+                    "openShiftId"
+                  ],
+                  "name": "shift_openShiftId_idx_6d8d40d0",
+                  "prefix": "shift_openShiftId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "shiftTypeId"
+                  ],
+                  "name": "shift_shiftTypeId_idx_d85655a9",
+                  "prefix": "shift_shiftTypeId_idx",
+                  "unique": false
+                },
                 {
                   "columns": [
                     "userId"
@@ -2779,6 +3889,102 @@
                 ]
               },
               "uniques": []
+            },
+            "shiftType": {
+              "columns": {
+                "color": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "companyId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "name": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "order": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 0
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "updatedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "source": {
+                    "columns": [
+                      "companyId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "shiftType"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "company"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "companyId"
+                  ],
+                  "name": "shiftType_companyId_idx_33acc5ed",
+                  "prefix": "shiftType_companyId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "companyId",
+                    "name"
+                  ]
+                }
+              ]
             },
             "user": {
               "columns": {
@@ -2810,6 +4016,11 @@
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
                   "nullable": false
+                },
+                "departmentId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
                 },
                 "email": {
                   "codecId": "pg/text@1",
@@ -2888,6 +4099,22 @@
                 {
                   "source": {
                     "columns": [
+                      "departmentId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "user"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "department"
+                  }
+                },
+                {
+                  "source": {
+                    "columns": [
                       "managerId"
                     ],
                     "namespaceId": "public",
@@ -2929,6 +4156,14 @@
                 },
                 {
                   "columns": [
+                    "departmentId"
+                  ],
+                  "name": "user_departmentId_idx_8e261ed8",
+                  "prefix": "user_departmentId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
                     "managerId"
                   ],
                   "name": "user_managerId_idx_f8369ba6",
@@ -2956,7 +4191,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "3d78f108eed6fdbe21ac67df9dab5236b2ae5ade67197ba84c7b34e26194b597"
+    "storageHash": "c44a66cfe22fcfdc93d907195f301c58759da18be422ece7370b4bc17188bbac"
   },
   "capabilities": {
     "postgres": {

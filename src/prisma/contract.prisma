@@ -10,8 +10,17 @@ model Company {
   // pre-existing company and every paid/manually-provisioned company has
   // this as null, so the trial-expiry check can never lock them out.
   trialEndsAt TimestamptzString?
+  // Required at self-service signup (enforced in the signup endpoint, not
+  // here -- pre-existing companies never uploaded one, so this stays
+  // nullable at the schema level).
+  logoBase64  String?
+  logoMimeType String?
   users       User[]
   invites     Invite[]
+  departments Department[]
+  shiftTypes  ShiftType[]
+  openShifts  OpenShift[]
+  events      Event[]
 
   createdAt   TimestamptzString @default(now())
 }
@@ -29,6 +38,8 @@ model User {
   phone         String?
   address       String?
   location      String?
+  departmentId  Int?
+  department    Department?    @relation(fields: [departmentId], references: [id])
   needsOnboarding Boolean       @default(false)
   active        Boolean        @default(true)
   lastSeenAt    TimestamptzString?
@@ -83,6 +94,12 @@ model Shift {
   startsAt         TimestamptzString
   endsAt           TimestamptzString
   breakMinutes     Int?
+  shiftTypeId      Int?
+  shiftType        ShiftType?         @relation(fields: [shiftTypeId], references: [id])
+  // Set only when this shift was created by assigning an OpenShift slot;
+  // deleting the slot nulls this out rather than deleting the shift.
+  openShiftId      Int?
+  openShift        OpenShift?         @relation(fields: [openShiftId], references: [id])
   attendance       Attendance[]
   noShowCheckedAt  TimestamptzString?
 
@@ -187,6 +204,74 @@ model LeaveRequest {
   endDate   TimestamptzString
   reason    String?
   status    String             @default("pending")
+
+  createdAt TimestamptzString  @default(now())
+  updatedAt TimestamptzString  @default(now())
+}
+
+model Department {
+  id         Int         @id @default(autoincrement())
+  companyId  Int
+  company    Company     @relation(fields: [companyId], references: [id])
+  name       String
+  // Hex color string (e.g. "#4f46e5"), validated at the Zod layer -- matching
+  // how every other "type-like" field in this contract is a plain String.
+  color      String
+  order      Int         @default(0)
+  users      User[]
+  openShifts OpenShift[]
+
+  createdAt  TimestamptzString @default(now())
+  updatedAt  TimestamptzString @default(now())
+
+  @@unique([companyId, name])
+}
+
+model ShiftType {
+  id         Int         @id @default(autoincrement())
+  companyId  Int
+  company    Company     @relation(fields: [companyId], references: [id])
+  name       String
+  color      String
+  order      Int         @default(0)
+  shifts     Shift[]
+  openShifts OpenShift[]
+
+  createdAt  TimestamptzString @default(now())
+  updatedAt  TimestamptzString @default(now())
+
+  @@unique([companyId, name])
+}
+
+model OpenShift {
+  id            Int                @id @default(autoincrement())
+  companyId     Int
+  company       Company            @relation(fields: [companyId], references: [id])
+  departmentId  Int?
+  department    Department?        @relation(fields: [departmentId], references: [id])
+  shiftTypeId   Int?
+  shiftType     ShiftType?         @relation(fields: [shiftTypeId], references: [id])
+  startsAt      TimestamptzString
+  endsAt        TimestamptzString
+  breakMinutes  Int?
+  // How many people this slot needs; "filled" is derived by counting Shift
+  // rows whose openShiftId points back here, not stored redundantly.
+  requiredCount Int                @default(1)
+  notes         String?
+  shifts        Shift[]
+
+  createdAt     TimestamptzString  @default(now())
+  updatedAt     TimestamptzString  @default(now())
+}
+
+model Event {
+  id        Int                @id @default(autoincrement())
+  companyId Int
+  company   Company            @relation(fields: [companyId], references: [id])
+  title     String
+  startsAt  TimestamptzString
+  // Null endsAt = a single-moment marker banner, not a time range.
+  endsAt    TimestamptzString?
 
   createdAt TimestamptzString  @default(now())
   updatedAt TimestamptzString  @default(now())

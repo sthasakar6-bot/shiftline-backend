@@ -1,0 +1,1181 @@
+[
+  {
+    "id": "table.department",
+    "label": "Create table \"department\"",
+    "summary": "Creates table \"department\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "department"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"department\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"department\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"department\"",
+        "sql": "CREATE TABLE \"public\".\"department\" (\n  \"color\" text NOT NULL,\n  \"companyId\" int4 NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"name\" text NOT NULL,\n  \"order\" int4 DEFAULT 0 NOT NULL,\n  \"updatedAt\" timestamptz DEFAULT (now()) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"department\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"department\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.event",
+    "label": "Create table \"event\"",
+    "summary": "Creates table \"event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"event\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"event\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"event\"",
+        "sql": "CREATE TABLE \"public\".\"event\" (\n  \"companyId\" int4 NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"endsAt\" timestamptz,\n  \"id\" SERIAL NOT NULL,\n  \"startsAt\" timestamptz NOT NULL,\n  \"title\" text NOT NULL,\n  \"updatedAt\" timestamptz DEFAULT (now()) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"event\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"event\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.openShift",
+    "label": "Create table \"openShift\"",
+    "summary": "Creates table \"openShift\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "openShift"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"openShift\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"openShift\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"openShift\"",
+        "sql": "CREATE TABLE \"public\".\"openShift\" (\n  \"breakMinutes\" int4,\n  \"companyId\" int4 NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"departmentId\" int4,\n  \"endsAt\" timestamptz NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"notes\" text,\n  \"requiredCount\" int4 DEFAULT 1 NOT NULL,\n  \"shiftTypeId\" int4,\n  \"startsAt\" timestamptz NOT NULL,\n  \"updatedAt\" timestamptz DEFAULT (now()) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"openShift\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"openShift\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.shiftType",
+    "label": "Create table \"shiftType\"",
+    "summary": "Creates table \"shiftType\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "shiftType"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"shiftType\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"shiftType\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"shiftType\"",
+        "sql": "CREATE TABLE \"public\".\"shiftType\" (\n  \"color\" text NOT NULL,\n  \"companyId\" int4 NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"name\" text NOT NULL,\n  \"order\" int4 DEFAULT 0 NOT NULL,\n  \"updatedAt\" timestamptz DEFAULT (now()) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"shiftType\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"shiftType\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.logoBase64",
+    "label": "Add column \"logoBase64\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "logoBase64",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"logoBase64\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "logoBase64"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"logoBase64\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"logoBase64\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"logoBase64\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "logoBase64"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.logoMimeType",
+    "label": "Add column \"logoMimeType\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "logoMimeType",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"logoMimeType\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "logoMimeType"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"logoMimeType\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"logoMimeType\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"logoMimeType\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "logoMimeType"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.shift.openShiftId",
+    "label": "Add column \"openShiftId\" to \"shift\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "openShiftId",
+        "table": "shift"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"openShiftId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "shift",
+          "openShiftId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"openShiftId\"",
+        "sql": "ALTER TABLE \"public\".\"shift\" ADD COLUMN \"openShiftId\" int4"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"openShiftId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "shift",
+          "openShiftId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.shift.shiftTypeId",
+    "label": "Add column \"shiftTypeId\" to \"shift\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "shiftTypeId",
+        "table": "shift"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"shiftTypeId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "shift",
+          "shiftTypeId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"shiftTypeId\"",
+        "sql": "ALTER TABLE \"public\".\"shift\" ADD COLUMN \"shiftTypeId\" int4"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"shiftTypeId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "shift",
+          "shiftTypeId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.user.departmentId",
+    "label": "Add column \"departmentId\" to \"user\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "departmentId",
+        "table": "user"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"departmentId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "user",
+          "departmentId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"departmentId\"",
+        "sql": "ALTER TABLE \"public\".\"user\" ADD COLUMN \"departmentId\" int4"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"departmentId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "user",
+          "departmentId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.department.department_companyId_name_key",
+    "label": "Add unique constraint on \"department\" (companyId, name)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "department_companyId_name_key",
+        "table": "department"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"department_companyId_name_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "department_companyId_name_key",
+          "public",
+          "\"public\".\"department\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"department_companyId_name_key\"",
+        "sql": "ALTER TABLE \"public\".\"department\" ADD CONSTRAINT \"department_companyId_name_key\" UNIQUE (\"companyId\", \"name\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"department_companyId_name_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "department_companyId_name_key",
+          "public",
+          "\"public\".\"department\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.shiftType.shiftType_companyId_name_key",
+    "label": "Add unique constraint on \"shiftType\" (companyId, name)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "shiftType_companyId_name_key",
+        "table": "shiftType"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"shiftType_companyId_name_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "shiftType_companyId_name_key",
+          "public",
+          "\"public\".\"shiftType\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"shiftType_companyId_name_key\"",
+        "sql": "ALTER TABLE \"public\".\"shiftType\" ADD CONSTRAINT \"shiftType_companyId_name_key\" UNIQUE (\"companyId\", \"name\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"shiftType_companyId_name_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "shiftType_companyId_name_key",
+          "public",
+          "\"public\".\"shiftType\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.department.department_companyId_idx_33acc5ed",
+    "label": "Create index \"department_companyId_idx_33acc5ed\" on \"department\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "department_companyId_idx_33acc5ed",
+        "table": "department"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"department_companyId_idx_33acc5ed\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"department_companyId_idx_33acc5ed\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"department_companyId_idx_33acc5ed\"",
+        "sql": "CREATE INDEX \"department_companyId_idx_33acc5ed\" ON \"public\".\"department\" (\"companyId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"department_companyId_idx_33acc5ed\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"department_companyId_idx_33acc5ed\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.event.event_companyId_idx_33acc5ed",
+    "label": "Create index \"event_companyId_idx_33acc5ed\" on \"event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "event_companyId_idx_33acc5ed",
+        "table": "event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"event_companyId_idx_33acc5ed\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"event_companyId_idx_33acc5ed\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"event_companyId_idx_33acc5ed\"",
+        "sql": "CREATE INDEX \"event_companyId_idx_33acc5ed\" ON \"public\".\"event\" (\"companyId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"event_companyId_idx_33acc5ed\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"event_companyId_idx_33acc5ed\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.openShift.openShift_companyId_idx_33acc5ed",
+    "label": "Create index \"openShift_companyId_idx_33acc5ed\" on \"openShift\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "openShift_companyId_idx_33acc5ed",
+        "table": "openShift"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"openShift_companyId_idx_33acc5ed\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"openShift_companyId_idx_33acc5ed\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"openShift_companyId_idx_33acc5ed\"",
+        "sql": "CREATE INDEX \"openShift_companyId_idx_33acc5ed\" ON \"public\".\"openShift\" (\"companyId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"openShift_companyId_idx_33acc5ed\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"openShift_companyId_idx_33acc5ed\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.openShift.openShift_departmentId_idx_8e261ed8",
+    "label": "Create index \"openShift_departmentId_idx_8e261ed8\" on \"openShift\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "openShift_departmentId_idx_8e261ed8",
+        "table": "openShift"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"openShift_departmentId_idx_8e261ed8\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"openShift_departmentId_idx_8e261ed8\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"openShift_departmentId_idx_8e261ed8\"",
+        "sql": "CREATE INDEX \"openShift_departmentId_idx_8e261ed8\" ON \"public\".\"openShift\" (\"departmentId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"openShift_departmentId_idx_8e261ed8\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"openShift_departmentId_idx_8e261ed8\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.openShift.openShift_shiftTypeId_idx_d85655a9",
+    "label": "Create index \"openShift_shiftTypeId_idx_d85655a9\" on \"openShift\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "openShift_shiftTypeId_idx_d85655a9",
+        "table": "openShift"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"openShift_shiftTypeId_idx_d85655a9\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"openShift_shiftTypeId_idx_d85655a9\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"openShift_shiftTypeId_idx_d85655a9\"",
+        "sql": "CREATE INDEX \"openShift_shiftTypeId_idx_d85655a9\" ON \"public\".\"openShift\" (\"shiftTypeId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"openShift_shiftTypeId_idx_d85655a9\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"openShift_shiftTypeId_idx_d85655a9\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.shift.shift_openShiftId_idx_6d8d40d0",
+    "label": "Create index \"shift_openShiftId_idx_6d8d40d0\" on \"shift\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "shift_openShiftId_idx_6d8d40d0",
+        "table": "shift"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"shift_openShiftId_idx_6d8d40d0\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"shift_openShiftId_idx_6d8d40d0\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"shift_openShiftId_idx_6d8d40d0\"",
+        "sql": "CREATE INDEX \"shift_openShiftId_idx_6d8d40d0\" ON \"public\".\"shift\" (\"openShiftId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"shift_openShiftId_idx_6d8d40d0\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"shift_openShiftId_idx_6d8d40d0\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.shift.shift_shiftTypeId_idx_d85655a9",
+    "label": "Create index \"shift_shiftTypeId_idx_d85655a9\" on \"shift\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "shift_shiftTypeId_idx_d85655a9",
+        "table": "shift"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"shift_shiftTypeId_idx_d85655a9\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"shift_shiftTypeId_idx_d85655a9\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"shift_shiftTypeId_idx_d85655a9\"",
+        "sql": "CREATE INDEX \"shift_shiftTypeId_idx_d85655a9\" ON \"public\".\"shift\" (\"shiftTypeId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"shift_shiftTypeId_idx_d85655a9\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"shift_shiftTypeId_idx_d85655a9\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.shiftType.shiftType_companyId_idx_33acc5ed",
+    "label": "Create index \"shiftType_companyId_idx_33acc5ed\" on \"shiftType\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "shiftType_companyId_idx_33acc5ed",
+        "table": "shiftType"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"shiftType_companyId_idx_33acc5ed\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"shiftType_companyId_idx_33acc5ed\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"shiftType_companyId_idx_33acc5ed\"",
+        "sql": "CREATE INDEX \"shiftType_companyId_idx_33acc5ed\" ON \"public\".\"shiftType\" (\"companyId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"shiftType_companyId_idx_33acc5ed\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"shiftType_companyId_idx_33acc5ed\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.user.user_departmentId_idx_8e261ed8",
+    "label": "Create index \"user_departmentId_idx_8e261ed8\" on \"user\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "user_departmentId_idx_8e261ed8",
+        "table": "user"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"user_departmentId_idx_8e261ed8\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"user_departmentId_idx_8e261ed8\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"user_departmentId_idx_8e261ed8\"",
+        "sql": "CREATE INDEX \"user_departmentId_idx_8e261ed8\" ON \"public\".\"user\" (\"departmentId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"user_departmentId_idx_8e261ed8\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"user_departmentId_idx_8e261ed8\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.department.department_companyId_fkey",
+    "label": "Add foreign key \"department_companyId_fkey\" on \"department\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "department_companyId_fkey",
+        "table": "department"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"department_companyId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "department_companyId_fkey",
+          "public",
+          "\"public\".\"department\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"department_companyId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"department\"\nADD CONSTRAINT \"department_companyId_fkey\"\nFOREIGN KEY (\"companyId\")\nREFERENCES \"public\".\"company\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"department_companyId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "department_companyId_fkey",
+          "public",
+          "\"public\".\"department\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.event.event_companyId_fkey",
+    "label": "Add foreign key \"event_companyId_fkey\" on \"event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "event_companyId_fkey",
+        "table": "event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"event_companyId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "event_companyId_fkey",
+          "public",
+          "\"public\".\"event\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"event_companyId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"event\"\nADD CONSTRAINT \"event_companyId_fkey\"\nFOREIGN KEY (\"companyId\")\nREFERENCES \"public\".\"company\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"event_companyId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "event_companyId_fkey",
+          "public",
+          "\"public\".\"event\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.openShift.openShift_companyId_fkey",
+    "label": "Add foreign key \"openShift_companyId_fkey\" on \"openShift\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "openShift_companyId_fkey",
+        "table": "openShift"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"openShift_companyId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "openShift_companyId_fkey",
+          "public",
+          "\"public\".\"openShift\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"openShift_companyId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"openShift\"\nADD CONSTRAINT \"openShift_companyId_fkey\"\nFOREIGN KEY (\"companyId\")\nREFERENCES \"public\".\"company\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"openShift_companyId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "openShift_companyId_fkey",
+          "public",
+          "\"public\".\"openShift\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.openShift.openShift_departmentId_fkey",
+    "label": "Add foreign key \"openShift_departmentId_fkey\" on \"openShift\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "openShift_departmentId_fkey",
+        "table": "openShift"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"openShift_departmentId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "openShift_departmentId_fkey",
+          "public",
+          "\"public\".\"openShift\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"openShift_departmentId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"openShift\"\nADD CONSTRAINT \"openShift_departmentId_fkey\"\nFOREIGN KEY (\"departmentId\")\nREFERENCES \"public\".\"department\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"openShift_departmentId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "openShift_departmentId_fkey",
+          "public",
+          "\"public\".\"openShift\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.openShift.openShift_shiftTypeId_fkey",
+    "label": "Add foreign key \"openShift_shiftTypeId_fkey\" on \"openShift\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "openShift_shiftTypeId_fkey",
+        "table": "openShift"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"openShift_shiftTypeId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "openShift_shiftTypeId_fkey",
+          "public",
+          "\"public\".\"openShift\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"openShift_shiftTypeId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"openShift\"\nADD CONSTRAINT \"openShift_shiftTypeId_fkey\"\nFOREIGN KEY (\"shiftTypeId\")\nREFERENCES \"public\".\"shiftType\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"openShift_shiftTypeId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "openShift_shiftTypeId_fkey",
+          "public",
+          "\"public\".\"openShift\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.shift.shift_openShiftId_fkey",
+    "label": "Add foreign key \"shift_openShiftId_fkey\" on \"shift\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "shift_openShiftId_fkey",
+        "table": "shift"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"shift_openShiftId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "shift_openShiftId_fkey",
+          "public",
+          "\"public\".\"shift\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"shift_openShiftId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"shift\"\nADD CONSTRAINT \"shift_openShiftId_fkey\"\nFOREIGN KEY (\"openShiftId\")\nREFERENCES \"public\".\"openShift\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"shift_openShiftId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "shift_openShiftId_fkey",
+          "public",
+          "\"public\".\"shift\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.shiftType.shiftType_companyId_fkey",
+    "label": "Add foreign key \"shiftType_companyId_fkey\" on \"shiftType\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "shiftType_companyId_fkey",
+        "table": "shiftType"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"shiftType_companyId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "shiftType_companyId_fkey",
+          "public",
+          "\"public\".\"shiftType\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"shiftType_companyId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"shiftType\"\nADD CONSTRAINT \"shiftType_companyId_fkey\"\nFOREIGN KEY (\"companyId\")\nREFERENCES \"public\".\"company\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"shiftType_companyId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "shiftType_companyId_fkey",
+          "public",
+          "\"public\".\"shiftType\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.shift.shift_shiftTypeId_fkey",
+    "label": "Add foreign key \"shift_shiftTypeId_fkey\" on \"shift\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "shift_shiftTypeId_fkey",
+        "table": "shift"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"shift_shiftTypeId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "shift_shiftTypeId_fkey",
+          "public",
+          "\"public\".\"shift\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"shift_shiftTypeId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"shift\"\nADD CONSTRAINT \"shift_shiftTypeId_fkey\"\nFOREIGN KEY (\"shiftTypeId\")\nREFERENCES \"public\".\"shiftType\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"shift_shiftTypeId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "shift_shiftTypeId_fkey",
+          "public",
+          "\"public\".\"shift\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.user.user_departmentId_fkey",
+    "label": "Add foreign key \"user_departmentId_fkey\" on \"user\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "user_departmentId_fkey",
+        "table": "user"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"user_departmentId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "user_departmentId_fkey",
+          "public",
+          "\"public\".\"user\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"user_departmentId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"user\"\nADD CONSTRAINT \"user_departmentId_fkey\"\nFOREIGN KEY (\"departmentId\")\nREFERENCES \"public\".\"department\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"user_departmentId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "user_departmentId_fkey",
+          "public",
+          "\"public\".\"user\""
+        ]
+      }
+    ]
+  }
+]

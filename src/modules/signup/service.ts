@@ -20,6 +20,8 @@ export async function signup(input: {
   lastName: string;
   email: string;
   password: string;
+  logoBuffer: Buffer;
+  logoMimeType: string;
 }) {
   const passwordHash = await argon2.hash(input.password);
   const trialEndsAt = new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
@@ -46,6 +48,8 @@ export async function signup(input: {
       slug,
       plan: "trial",
       trialEndsAt: trialEndsAt.toISOString(),
+      logoBase64: input.logoBuffer.toString("base64"),
+      logoMimeType: input.logoMimeType,
     });
 
     // The signup form sets a real password directly, unlike a manager-created
