@@ -8,6 +8,11 @@ export interface Company {
   trialEndsAt: string | null;
   logoBase64: string | null;
   logoMimeType: string | null;
+  billingProvider: string | null;
+  billingCustomerId: string | null;
+  billingSubscriptionId: string | null;
+  billingInterval: string | null;
+  subscriptionStatus: string | null;
   createdAt: string;
 }
 
