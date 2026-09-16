@@ -12,7 +12,11 @@ import {
 import { findCompanyById } from "../company/model";
 
 export async function login(email: string, password: string, companyId: number) {
-  const user = await findUserByEmailInCompany(email, companyId);
+  // Every email is stored lowercase (signup and manager-created accounts
+  // both normalize it on write) -- normalizing the login input the same
+  // way means capitalization at login never matters, regardless of how
+  // the person types their own address.
+  const user = await findUserByEmailInCompany(email.trim().toLowerCase(), companyId);
   if (!user) {
     throw new AppError(401, "Invalid email or password");
   }

@@ -44,7 +44,12 @@ async function createAccountAs(
   if (!caller) {
     throw new AppError(404, "Manager not found");
   }
-  const existing = await findUserByEmailInCompany(email, caller.companyId);
+  // Normalized the same way signup already normalizes its own email, so
+  // login (also normalized, see identity/service.ts) can't fail just
+  // because whoever typed this address in here used different casing than
+  // the employee naturally types when logging in themselves.
+  const normalizedEmail = email.trim().toLowerCase();
+  const existing = await findUserByEmailInCompany(normalizedEmail, caller.companyId);
   if (existing) {
     throw new AppError(400, "A user with that email already exists");
   }
@@ -55,7 +60,7 @@ async function createAccountAs(
     name: `${trimmedFirst} ${trimmedLast}`.trim(),
     firstName: trimmedFirst,
     lastName: trimmedLast,
-    email,
+    email: normalizedEmail,
     passwordHash,
     role,
     managerId: role === "employee" ? caller.id : undefined,

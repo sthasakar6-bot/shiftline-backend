@@ -20,11 +20,19 @@ export interface AuthUser {
   lastSeenAt: string | null;
 }
 
+// Case-insensitive by comparing in JS rather than relying on every email
+// already being stored lowercase -- new accounts are normalized on write
+// (see signup/service.ts and user/service.ts's createAccountAs), but this
+// also has to work for any account created before that normalization
+// existed, without a backfill migration. Companies are small teams, so
+// fetching the company's users to filter in memory is cheap.
 export async function findUserByEmailInCompany(
   email: string,
   companyId: number,
 ): Promise<AuthUser | null> {
-  return db.orm.public.User.first({ email, companyId });
+  const normalized = email.trim().toLowerCase();
+  const users = await db.orm.public.User.where({ companyId }).all();
+  return users.find((u) => u.email.toLowerCase() === normalized) ?? null;
 }
 
 export async function findUserById(id: number): Promise<AuthUser | null> {
