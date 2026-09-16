@@ -7,8 +7,8 @@ export async function listMessagesController(req: Request, res: Response) {
 }
 
 export async function createMessageController(req: Request, res: Response) {
-  const { body } = req.body;
-  const message = await postMessage(req.user!.companyId, req.user!.sub, body);
+  const { body, replyToId } = req.body;
+  const message = await postMessage(req.user!.companyId, req.user!.sub, body, replyToId ?? null);
   res.status(201).json(message);
 }
 

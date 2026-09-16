@@ -4,6 +4,13 @@ import { createMessage, findRecentMessages, findMessageById, deleteMessageById }
 import { broadcastMessage, broadcastMessageDeleted } from "./ws";
 
 const HISTORY_LIMIT = 100;
+const REPLY_SNIPPET_MAX_LENGTH = 140;
+
+export interface ChatMessageReplyTo {
+  id: number;
+  userName: string;
+  bodySnippet: string;
+}
 
 export interface ChatMessage {
   id: number;
@@ -11,6 +18,7 @@ export interface ChatMessage {
   userName: string;
   hasAvatar: boolean;
   body: string;
+  replyTo: ChatMessageReplyTo | null;
   createdAt: string;
 }
 
@@ -27,18 +35,40 @@ async function senderMapForCompany(companyId: number): Promise<Map<number, { nam
   return new Map(users.map((u) => [u.id, { name: u.name, hasAvatar: Boolean(u.avatarBase64) }]));
 }
 
-function hydrate(
-  rows: { id: number; userId: number; body: string; createdAt: string }[],
+async function hydrate(
+  rows: { id: number; userId: number; body: string; replyToId: number | null; createdAt: string }[],
   senders: Map<number, { name: string; hasAvatar: boolean }>,
-): ChatMessage[] {
+): Promise<ChatMessage[]> {
+  // Reply targets aren't necessarily inside the same batch being hydrated
+  // (e.g. a reply to a message older than the history window), so they're
+  // fetched separately -- one lookup per distinct target, not per message.
+  const replyToIds = [...new Set(rows.map((r) => r.replyToId).filter((id): id is number => id !== null))];
+  const replyTargets = new Map(
+    (await Promise.all(replyToIds.map((id) => findMessageById(id))))
+      .filter((m): m is NonNullable<typeof m> => m !== null)
+      .map((m) => [m.id, m]),
+  );
+
   return rows.map((row) => {
     const sender = senders.get(row.userId);
+    const target = row.replyToId !== null ? replyTargets.get(row.replyToId) : undefined;
+    const replyTo: ChatMessageReplyTo | null = target
+      ? {
+          id: target.id,
+          userName: senders.get(target.userId)?.name ?? "Former employee",
+          bodySnippet:
+            target.body.length > REPLY_SNIPPET_MAX_LENGTH
+              ? `${target.body.slice(0, REPLY_SNIPPET_MAX_LENGTH)}…`
+              : target.body,
+        }
+      : null;
     return {
       id: row.id,
       userId: row.userId,
       userName: sender?.name ?? "Former employee",
       hasAvatar: sender?.hasAvatar ?? false,
       body: row.body,
+      replyTo,
       createdAt: row.createdAt,
     };
   });
@@ -58,10 +88,17 @@ export async function postMessage(
   companyId: number,
   userId: number,
   body: string,
+  replyToId: number | null,
 ): Promise<ChatMessage> {
-  const row = await createMessage(companyId, userId, body);
+  if (replyToId !== null) {
+    const target = await findMessageById(replyToId);
+    if (!target || target.companyId !== companyId) {
+      throw new AppError(400, "Cannot reply to a message that doesn't exist in this chat");
+    }
+  }
+  const row = await createMessage(companyId, userId, body, replyToId);
   const senders = await senderMapForCompany(companyId);
-  const [message] = hydrate([row], senders);
+  const [message] = await hydrate([row], senders);
   broadcastMessage(companyId, message);
   return message;
 }

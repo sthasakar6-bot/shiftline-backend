@@ -5,6 +5,7 @@ export interface ChatMessageRow {
   companyId: number;
   userId: number;
   body: string;
+  replyToId: number | null;
   createdAt: string;
 }
 
@@ -12,8 +13,9 @@ export async function createMessage(
   companyId: number,
   userId: number,
   body: string,
+  replyToId: number | null,
 ): Promise<ChatMessageRow> {
-  return db.orm.public.Message.create({ companyId, userId, body });
+  return db.orm.public.Message.create({ companyId, userId, body, replyToId });
 }
 
 // Fetched newest-first so LIMIT bounds the *recent* end of the table, then

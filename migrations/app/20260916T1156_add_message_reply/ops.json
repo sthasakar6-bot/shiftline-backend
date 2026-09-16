@@ -1,0 +1,125 @@
+[
+  {
+    "id": "column.public.message.replyToId",
+    "label": "Add column \"replyToId\" to \"message\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "replyToId",
+        "table": "message"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"replyToId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "message",
+          "replyToId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"replyToId\"",
+        "sql": "ALTER TABLE \"public\".\"message\" ADD COLUMN \"replyToId\" int4"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"replyToId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "message",
+          "replyToId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.message.message_replyToId_idx_f2e7fcdc",
+    "label": "Create index \"message_replyToId_idx_f2e7fcdc\" on \"message\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "message_replyToId_idx_f2e7fcdc",
+        "table": "message"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"message_replyToId_idx_f2e7fcdc\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_replyToId_idx_f2e7fcdc\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"message_replyToId_idx_f2e7fcdc\"",
+        "sql": "CREATE INDEX \"message_replyToId_idx_f2e7fcdc\" ON \"public\".\"message\" (\"replyToId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"message_replyToId_idx_f2e7fcdc\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_replyToId_idx_f2e7fcdc\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.message.message_replyToId_fkey",
+    "label": "Add foreign key \"message_replyToId_fkey\" on \"message\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "message_replyToId_fkey",
+        "table": "message"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"message_replyToId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "message_replyToId_fkey",
+          "public",
+          "\"public\".\"message\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"message_replyToId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"message\"\nADD CONSTRAINT \"message_replyToId_fkey\"\nFOREIGN KEY (\"replyToId\")\nREFERENCES \"public\".\"message\" (\"id\")\nON DELETE SET NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"message_replyToId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "message_replyToId_fkey",
+          "public",
+          "\"public\".\"message\""
+        ]
+      }
+    ]
+  }
+]

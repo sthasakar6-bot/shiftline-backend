@@ -334,12 +334,20 @@ model Event {
 // list rather than a paginated "conversation" concept since scope is
 // explicitly a single channel per company, not a messaging inbox.
 model Message {
-  id        Int               @id @default(autoincrement())
-  companyId Int
-  company   Company           @relation(fields: [companyId], references: [id])
-  userId    Int
-  user      User              @relation(fields: [userId], references: [id])
-  body      String
+  id          Int               @id @default(autoincrement())
+  companyId   Int
+  company     Company           @relation(fields: [companyId], references: [id])
+  userId      Int
+  user        User              @relation(fields: [userId], references: [id])
+  body        String
+  // Set when this message is a reply to another one -- no restriction on
+  // replying to a reply (a flat chain, not nested threads), matching how
+  // WhatsApp/Messenger's own "reply" feature works. Deleting the original
+  // leaves this pointing at nothing (nulled, not cascaded) rather than
+  // deleting every reply to it too.
+  replyToId   Int?
+  replyTo     Message?          @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies     Message[]         @relation("MessageReplies")
 
   createdAt TimestamptzString @default(now())
 }
