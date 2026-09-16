@@ -45,6 +45,7 @@ model Company {
   openShifts  OpenShift[]
   openShiftRequests OpenShiftRequest[]
   events      Event[]
+  messages    Message[]
 
   createdAt   TimestamptzString @default(now())
 }
@@ -84,6 +85,7 @@ model User {
   passwordResetRequests PasswordResetRequest[]
   backupToken   BackupToken?
   backupSnapshots BackupSnapshot[]
+  messages      Message[]
 
   @@unique([email, companyId])
 }
@@ -317,4 +319,19 @@ model Event {
 
   createdAt TimestamptzString  @default(now())
   updatedAt TimestamptzString  @default(now())
+}
+
+// One shared company-wide chat stream -- no per-thread/DM model, every
+// employee in the company reads and posts to the same feed. Kept as a flat
+// list rather than a paginated "conversation" concept since scope is
+// explicitly a single channel per company, not a messaging inbox.
+model Message {
+  id        Int               @id @default(autoincrement())
+  companyId Int
+  company   Company           @relation(fields: [companyId], references: [id])
+  userId    Int
+  user      User              @relation(fields: [userId], references: [id])
+  body      String
+
+  createdAt TimestamptzString @default(now())
 }

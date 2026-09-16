@@ -40,6 +40,10 @@
       "model": "LeaveRequest",
       "namespace": "public"
     },
+    "message": {
+      "model": "Message",
+      "namespace": "public"
+    },
     "notification": {
       "model": "Notification",
       "namespace": "public"
@@ -534,6 +538,21 @@
                 },
                 "to": {
                   "model": "Invite",
+                  "namespace": "public"
+                }
+              },
+              "messages": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "companyId"
+                  ]
+                },
+                "to": {
+                  "model": "Message",
                   "namespace": "public"
                 }
               },
@@ -1202,6 +1221,98 @@
               },
               "namespaceId": "public",
               "table": "leaveRequest"
+            }
+          },
+          "Message": {
+            "fields": {
+              "body": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "companyId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "company": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "companyId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Company",
+                  "namespace": "public"
+                }
+              },
+              "user": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "userId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "body": {
+                  "column": "body"
+                },
+                "companyId": {
+                  "column": "companyId"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "userId": {
+                  "column": "userId"
+                }
+              },
+              "namespaceId": "public",
+              "table": "message"
             }
           },
           "Notification": {
@@ -2460,6 +2571,21 @@
                   "namespace": "public"
                 }
               },
+              "messages": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "userId"
+                  ]
+                },
+                "to": {
+                  "model": "Message",
+                  "namespace": "public"
+                }
+              },
               "notifications": {
                 "cardinality": "1:N",
                 "on": {
@@ -3488,6 +3614,101 @@
                   ],
                   "name": "leaveRequest_userId_idx_a489d58a",
                   "prefix": "leaveRequest_userId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": []
+            },
+            "message": {
+              "columns": {
+                "body": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "companyId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "userId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "source": {
+                    "columns": [
+                      "companyId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "message"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "company"
+                  }
+                },
+                {
+                  "source": {
+                    "columns": [
+                      "userId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "message"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "user"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "companyId"
+                  ],
+                  "name": "message_companyId_idx_33acc5ed",
+                  "prefix": "message_companyId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "userId"
+                  ],
+                  "name": "message_userId_idx_a489d58a",
+                  "prefix": "message_userId_idx",
                   "unique": false
                 }
               ],
@@ -4579,7 +4800,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "83a658a37cd91e98c1b085d758ecfcabb9023abed8590baa5c3b40111e3f1b6a"
+    "storageHash": "8999b3096fa48b272cb27a5b284aa347f8bd2e62aa2aa05a7e23fec8bdb5a618"
   },
   "capabilities": {
     "postgres": {

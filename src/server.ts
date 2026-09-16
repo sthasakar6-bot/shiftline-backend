@@ -1,14 +1,17 @@
 import app from "./app";
 import { runNoShowCheck, runMissedClockOutCheck } from "./modules/shift/noShowService";
 import { runScheduledBackups } from "./modules/backup/service";
+import { attachChatWebSocket } from "./modules/chat/ws";
 
 const PORT = process.env.PORT || 3000;
 const ATTENDANCE_CHECK_INTERVAL_MS = 30 * 1000;
 const BACKUP_INTERVAL_MS = 60 * 60 * 1000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Backend running on port ${PORT}`);
 });
+
+attachChatWebSocket(server);
 
 setInterval(() => {
   runNoShowCheck().catch((err) => console.error("No-show check failed:", err));

@@ -20,6 +20,7 @@ import openShiftRoutes from "./modules/openShift/routes";
 import eventRoutes from "./modules/event/routes";
 import billingRoutes from "./modules/billing/routes";
 import billingWebhookRoutes from "./modules/billing/webhookRoutes";
+import chatRoutes from "./modules/chat/routes";
 import { notFoundHandler, errorHandler } from "./middleware/errorHandler";
 import { env } from "./config/env";
 
@@ -60,6 +61,7 @@ app.use("/api", shiftTypeRoutes);
 app.use("/api", openShiftRoutes);
 app.use("/api", eventRoutes);
 app.use("/api", billingRoutes);
+app.use("/api", chatRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

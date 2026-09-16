@@ -1,0 +1,29 @@
+import { db } from "../../prisma/db";
+
+export interface ChatMessageRow {
+  id: number;
+  companyId: number;
+  userId: number;
+  body: string;
+  createdAt: string;
+}
+
+export async function createMessage(
+  companyId: number,
+  userId: number,
+  body: string,
+): Promise<ChatMessageRow> {
+  return db.orm.public.Message.create({ companyId, userId, body });
+}
+
+// Fetched newest-first so LIMIT bounds the *recent* end of the table, then
+// reversed by the caller for chronological (oldest-first) display.
+export async function findRecentMessages(
+  companyId: number,
+  limit: number,
+): Promise<ChatMessageRow[]> {
+  return db.orm.public.Message.where({ companyId })
+    .orderBy((m) => m.createdAt.desc())
+    .limit(limit)
+    .all();
+}
