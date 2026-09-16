@@ -16,4 +16,6 @@ export const env = {
   stripePriceStarterYearly: process.env.STRIPE_PRICE_STARTER_YEARLY || "",
   stripePriceUnlimitedMonthly: process.env.STRIPE_PRICE_UNLIMITED_MONTHLY || "",
   stripePriceUnlimitedYearly: process.env.STRIPE_PRICE_UNLIMITED_YEARLY || "",
+  stripePriceAiAssistantMonthly: process.env.STRIPE_PRICE_AI_ASSISTANT_MONTHLY || "",
+  anthropicApiKey: process.env.ANTHROPIC_API_KEY || "",
 };

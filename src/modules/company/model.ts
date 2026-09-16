@@ -15,6 +15,8 @@ export interface Company {
   subscriptionStatus: string | null;
   pendingPlan: string | null;
   pendingInterval: string | null;
+  aiAssistantSubscriptionId: string | null;
+  aiAssistantStatus: string | null;
   createdAt: string;
 }
 

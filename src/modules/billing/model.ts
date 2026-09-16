@@ -7,7 +7,7 @@ import { db } from "../../prisma/db";
 
 export async function setBillingCustomer(
   companyId: number,
-  data: { billingProvider: string; billingCustomerId: string; billingInterval: string },
+  data: { billingProvider: string; billingCustomerId: string; billingInterval: string | null },
 ): Promise<void> {
   await db.orm.public.Company.where({ id: companyId }).update(data);
 }
@@ -33,6 +33,24 @@ export async function markCanceled(companyId: number): Promise<void> {
   await db.orm.public.Company.where({ id: companyId }).update({ subscriptionStatus: "canceled" });
 }
 
+export async function activateAiAssistant(
+  companyId: number,
+  subscriptionId: string | null,
+): Promise<void> {
+  await db.orm.public.Company.where({ id: companyId }).update({
+    aiAssistantStatus: "active",
+    aiAssistantSubscriptionId: subscriptionId,
+  });
+}
+
+export async function markAiAssistantPastDue(companyId: number): Promise<void> {
+  await db.orm.public.Company.where({ id: companyId }).update({ aiAssistantStatus: "past_due" });
+}
+
+export async function markAiAssistantCanceled(companyId: number): Promise<void> {
+  await db.orm.public.Company.where({ id: companyId }).update({ aiAssistantStatus: "canceled" });
+}
+
 export async function schedulePendingPlan(
   companyId: number,
   data: { pendingPlan: string; pendingInterval: string },
@@ -56,6 +74,12 @@ export async function clearBillingSubscription(companyId: number): Promise<void>
 export async function findCompanyByBillingCustomer(
   billingProvider: string,
   billingCustomerId: string,
-): Promise<{ id: number } | null> {
-  return db.orm.public.Company.select("id").where({ billingProvider, billingCustomerId }).first();
+): Promise<{
+  id: number;
+  billingSubscriptionId: string | null;
+  aiAssistantSubscriptionId: string | null;
+} | null> {
+  return db.orm.public.Company.select("id", "billingSubscriptionId", "aiAssistantSubscriptionId")
+    .where({ billingProvider, billingCustomerId })
+    .first();
 }

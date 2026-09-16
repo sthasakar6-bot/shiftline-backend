@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { initiateCheckout, getBillingStatus, handleWebhook } from "./service";
+import { initiateCheckout, initiateAddonCheckout, getBillingStatus, handleWebhook } from "./service";
 
 export async function checkoutController(req: Request, res: Response) {
   const { plan, interval, provider } = req.body;
@@ -10,6 +10,12 @@ export async function checkoutController(req: Request, res: Response) {
     interval,
     provider,
   );
+  res.json(result);
+}
+
+export async function addonCheckoutController(req: Request, res: Response) {
+  const { provider } = req.body;
+  const result = await initiateAddonCheckout(req.user!.companyId, req.user!.sub, provider);
   res.json(result);
 }
 

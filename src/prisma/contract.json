@@ -403,6 +403,20 @@
           },
           "Company": {
             "fields": {
+              "aiAssistantStatus": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "aiAssistantSubscriptionId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "billingCustomerId": {
                 "nullable": true,
                 "type": {
@@ -633,6 +647,12 @@
             },
             "storage": {
               "fields": {
+                "aiAssistantStatus": {
+                  "column": "aiAssistantStatus"
+                },
+                "aiAssistantSubscriptionId": {
+                  "column": "aiAssistantSubscriptionId"
+                },
                 "billingCustomerId": {
                   "column": "billingCustomerId"
                 },
@@ -3126,6 +3146,16 @@
             },
             "company": {
               "columns": {
+                "aiAssistantStatus": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "aiAssistantSubscriptionId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "billingCustomerId": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -4930,7 +4960,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "6cdd151ccc1f0b6965309d099be95f52c4949fb57c456583e9d8d0d42fe4d3b2"
+    "storageHash": "6501a756e3e8bc3b6844fb7f10c9fd58bc5110924a627b32dcd34424ee9be1b5"
   },
   "capabilities": {
     "postgres": {

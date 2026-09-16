@@ -7,6 +7,9 @@ import {
   activatePlan,
   markPastDue,
   markCanceled,
+  activateAiAssistant,
+  markAiAssistantPastDue,
+  markAiAssistantCanceled,
   findCompanyByBillingCustomer,
 } from "./model";
 
@@ -50,6 +53,49 @@ export async function initiateCheckout(
   return { redirectUrl };
 }
 
+// Same shape as initiateCheckout above, minus plan/interval. The add-on
+// reuses the company's existing billing identity (customer id) when it's
+// already on this same provider -- exactly the same reuse rule the base
+// plan already applies. When it isn't (no billing identity yet, or a
+// different provider), a fresh customer is created and billingProvider/
+// billingCustomerId are (re)written, preserving whatever billingInterval
+// already held since that field belongs to the base plan, not this add-on.
+export async function initiateAddonCheckout(
+  companyId: number,
+  managerId: number,
+  providerName: "mollie" | "stripe",
+): Promise<{ redirectUrl: string }> {
+  const company = await findCompanyById(companyId);
+  if (!company) {
+    throw new AppError(404, "Company not found");
+  }
+  const manager = await findUserById(managerId);
+  if (!manager) {
+    throw new AppError(404, "Manager not found");
+  }
+
+  const alreadyOnThisProvider = company.billingProvider === providerName;
+  const existingCustomerId = alreadyOnThisProvider ? company.billingCustomerId : null;
+
+  const provider = getProvider(providerName);
+  const { redirectUrl, providerCustomerId } = await provider.createAddonCheckoutSession({
+    companyId: company.id,
+    companyName: company.name,
+    managerEmail: manager.email,
+    existingCustomerId,
+  });
+
+  if (!alreadyOnThisProvider) {
+    await setBillingCustomer(company.id, {
+      billingProvider: providerName,
+      billingCustomerId: providerCustomerId,
+      billingInterval: company.billingInterval,
+    });
+  }
+
+  return { redirectUrl };
+}
+
 export async function getBillingStatus(companyId: number) {
   const company = await findCompanyById(companyId);
   if (!company) {
@@ -61,6 +107,7 @@ export async function getBillingStatus(companyId: number) {
     billingProvider: company.billingProvider,
     billingInterval: company.billingInterval,
     subscriptionStatus: company.subscriptionStatus,
+    aiAssistantStatus: company.aiAssistantStatus,
   };
 }
 
@@ -89,6 +136,10 @@ async function applyWebhookEvent(
 
   switch (event.type) {
     case "payment_succeeded": {
+      if (event.product === "aiAssistant") {
+        await activateAiAssistant(company.id, event.providerSubscriptionId);
+        return;
+      }
       if (!event.plan || !event.interval) {
         throw new AppError(400, "payment_succeeded event missing plan/interval metadata");
       }
@@ -100,10 +151,29 @@ async function applyWebhookEvent(
       return;
     }
     case "payment_failed":
-      await markPastDue(company.id);
+      if (event.product === "aiAssistant") {
+        await markAiAssistantPastDue(company.id);
+      } else {
+        await markPastDue(company.id);
+      }
       return;
-    case "subscription_canceled":
-      await markCanceled(company.id);
+    case "subscription_canceled": {
+      // event.product is a best-effort tag at best (Mollie's cancellation
+      // payload carries no metadata to tag it from at all -- see
+      // providers/mollie.ts) -- the real target is derived here by
+      // comparing the subscription id itself against what this company has
+      // on file for each of its two independent subscriptions. A duplicate
+      // or late cancellation webhook for an id that matches neither (e.g.
+      // already cleared by an earlier delivery) is a no-op, not an error.
+      if (event.providerSubscriptionId && event.providerSubscriptionId === company.aiAssistantSubscriptionId) {
+        await markAiAssistantCanceled(company.id);
+      } else if (
+        event.providerSubscriptionId &&
+        event.providerSubscriptionId === company.billingSubscriptionId
+      ) {
+        await markCanceled(company.id);
+      }
       return;
+    }
   }
 }

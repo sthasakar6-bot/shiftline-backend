@@ -46,6 +46,16 @@ model Company {
   // this, since it takes effect (and is charged in full) immediately.
   pendingPlan            String?
   pendingInterval        String?
+  // Independent of billingSubscriptionId/subscriptionStatus above (the base
+  // plan) -- the AI scheduling assistant is billed as its own separate
+  // recurring add-on, on top of whatever base plan a company is on. Null
+  // until the manager subscribes to it.
+  aiAssistantSubscriptionId String?
+  // "active" | "past_due" | "canceled" | null. Same semantics as
+  // subscriptionStatus: past_due does NOT revoke access (protects against
+  // punishing a self-healing failed retry) -- only "canceled" gates the
+  // assistant tab behind the paywall again.
+  aiAssistantStatus         String?
   users       User[]
   invites     Invite[]
   departments Department[]

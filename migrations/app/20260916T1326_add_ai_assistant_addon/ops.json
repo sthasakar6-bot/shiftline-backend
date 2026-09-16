@@ -1,0 +1,86 @@
+[
+  {
+    "id": "column.public.company.aiAssistantStatus",
+    "label": "Add column \"aiAssistantStatus\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "aiAssistantStatus",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"aiAssistantStatus\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "aiAssistantStatus"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"aiAssistantStatus\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"aiAssistantStatus\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"aiAssistantStatus\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "aiAssistantStatus"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.aiAssistantSubscriptionId",
+    "label": "Add column \"aiAssistantSubscriptionId\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "aiAssistantSubscriptionId",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"aiAssistantSubscriptionId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "aiAssistantSubscriptionId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"aiAssistantSubscriptionId\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"aiAssistantSubscriptionId\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"aiAssistantSubscriptionId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "aiAssistantSubscriptionId"
+        ]
+      }
+    ]
+  }
+]

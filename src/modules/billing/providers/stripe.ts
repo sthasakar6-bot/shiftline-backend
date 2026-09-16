@@ -5,6 +5,7 @@ import type {
   BillingProviderAdapter,
   CheckoutParams,
   CheckoutResult,
+  AddonCheckoutParams,
   NormalizedWebhookEvent,
   PlanKey,
   BillingInterval,
@@ -78,6 +79,43 @@ async function createCheckoutSession(params: CheckoutParams): Promise<CheckoutRe
   return { redirectUrl: session.url, providerCustomerId: customerId };
 }
 
+// Same shape as createCheckoutSession above, minus plan/interval -- the AI
+// assistant add-on has exactly one price and is its own independent
+// subscription (never a line item on the base plan's subscription -- see
+// the plan doc for why: Mollie has no line-item equivalent, and it would
+// make invoice.paid ambiguous about which charge was actually paid).
+async function createAddonCheckoutSession(params: AddonCheckoutParams): Promise<CheckoutResult> {
+  const customerId =
+    params.existingCustomerId ??
+    (await stripe().customers.create({ email: params.managerEmail, name: params.companyName })).id;
+
+  if (!env.stripePriceAiAssistantMonthly) {
+    throw new AppError(500, "No Stripe price configured for the AI assistant add-on");
+  }
+
+  const session = await stripe().checkout.sessions.create({
+    mode: "subscription",
+    customer: customerId,
+    line_items: [{ price: env.stripePriceAiAssistantMonthly, quantity: 1 }],
+    subscription_data: {
+      metadata: {
+        companyId: String(params.companyId),
+        product: "aiAssistant",
+      },
+    },
+    success_url: `${env.appUrl}/admin?tab=assistant&checkout=success`,
+    cancel_url: `${env.appUrl}/admin?tab=assistant&checkout=canceled`,
+    customer_update: { address: "auto" },
+    automatic_tax: { enabled: true },
+  });
+
+  if (!session.url) {
+    throw new AppError(500, "Stripe did not return a checkout URL");
+  }
+
+  return { redirectUrl: session.url, providerCustomerId: customerId };
+}
+
 // Stripe API 2025-03-31.basil+ moved the invoice-to-subscription link under
 // `parent.subscription_details` (the old top-level `invoice.subscription`
 // field was removed) -- confirmed against Stripe's own changelog.
@@ -101,32 +139,44 @@ async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<NormalizedWeb
 
   let plan: PlanKey | undefined;
   let interval: BillingInterval | undefined;
+  let product: "plan" | "aiAssistant" = "plan";
   if (subscriptionIdStr) {
     const subscription = await stripe().subscriptions.retrieve(subscriptionIdStr);
     const meta = subscription.metadata;
-    if (meta.plan === "starter" || meta.plan === "unlimited") plan = meta.plan;
-    if (meta.interval === "monthly" || meta.interval === "yearly") interval = meta.interval;
+    if (meta.product === "aiAssistant") {
+      product = "aiAssistant";
+    } else {
+      if (meta.plan === "starter" || meta.plan === "unlimited") plan = meta.plan;
+      if (meta.interval === "monthly" || meta.interval === "yearly") interval = meta.interval;
+    }
   }
 
   return {
     providerCustomerId: customerId,
     providerSubscriptionId: subscriptionIdStr,
     type: "payment_succeeded",
+    product,
     plan,
     interval,
   };
 }
 
-function handleInvoicePaymentFailed(invoice: Stripe.Invoice): NormalizedWebhookEvent {
+async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<NormalizedWebhookEvent> {
   const customerId = typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id;
   const subscriptionIdStr = subscriptionIdFromInvoice(invoice);
   if (!customerId) {
     throw new AppError(400, "Stripe invoice.payment_failed webhook missing customer id");
   }
+  let product: "plan" | "aiAssistant" = "plan";
+  if (subscriptionIdStr) {
+    const subscription = await stripe().subscriptions.retrieve(subscriptionIdStr);
+    if (subscription.metadata.product === "aiAssistant") product = "aiAssistant";
+  }
   return {
     providerCustomerId: customerId,
     providerSubscriptionId: subscriptionIdStr,
     type: "payment_failed",
+    product,
   };
 }
 
@@ -140,6 +190,13 @@ function handleSubscriptionDeleted(subscription: Stripe.Subscription): Normalize
     providerCustomerId: customerId,
     providerSubscriptionId: subscription.id,
     type: "subscription_canceled",
+    // Best-effort only -- applyWebhookEvent in service.ts re-derives the
+    // real target by comparing providerSubscriptionId against the
+    // company's own stored subscription ids, the same disambiguation
+    // mechanism the Mollie adapter needs (whose cancellation payload has
+    // no metadata to tag from at all). Kept here too so both adapters
+    // return a same-shaped event.
+    product: subscription.metadata.product === "aiAssistant" ? "aiAssistant" : "plan",
   };
 }
 
@@ -163,7 +220,7 @@ async function verifyAndParseWebhook(
     case "invoice.paid":
       return handleInvoicePaid(event.data.object as Stripe.Invoice);
     case "invoice.payment_failed":
-      return handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
+      return await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
     case "customer.subscription.deleted":
       return handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
     default:
@@ -174,5 +231,6 @@ async function verifyAndParseWebhook(
 export const stripeAdapter: BillingProviderAdapter = {
   name: "stripe",
   createCheckoutSession,
+  createAddonCheckoutSession,
   verifyAndParseWebhook,
 };

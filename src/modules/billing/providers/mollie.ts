@@ -5,6 +5,7 @@ import type {
   BillingProviderAdapter,
   CheckoutParams,
   CheckoutResult,
+  AddonCheckoutParams,
   NormalizedWebhookEvent,
   PlanKey,
   BillingInterval,
@@ -42,6 +43,12 @@ function amountFor(plan: PlanKey, interval: BillingInterval) {
 function mollieInterval(interval: BillingInterval): string {
   return interval === "monthly" ? "1 month" : "12 months";
 }
+
+// Placeholder default -- well above the ~$3-6/mo real Claude API cost at
+// realistic usage; the final number is a business decision, not a
+// technical one. Flat monthly only, no yearly variant -- kept as a simple
+// toggle rather than mirroring the base plan's interval choice.
+const AI_ASSISTANT_PRICE_EUR = { currency: "EUR", value: "4.99" };
 
 // Mollie has no Stripe-Checkout equivalent that creates a subscription up
 // front: a subscription needs a mandate, and a mandate only exists once a
@@ -92,6 +99,43 @@ async function createCheckoutSession(params: CheckoutParams): Promise<CheckoutRe
   return { redirectUrl, providerCustomerId: customerId };
 }
 
+// Same shape as createCheckoutSession above, minus plan/interval -- see the
+// Stripe adapter's createAddonCheckoutSession for why this is its own
+// independent subscription rather than folded into the base plan's.
+async function createAddonCheckoutSession(params: AddonCheckoutParams): Promise<CheckoutResult> {
+  let customerId = params.existingCustomerId;
+  if (!customerId) {
+    const customer = await mollie().customers.create({
+      entityCustomer: { name: params.companyName, email: params.managerEmail },
+    });
+    customerId = customer.id;
+  }
+  if (!customerId) {
+    throw new AppError(500, "Mollie did not return a customer id");
+  }
+
+  const payment = await mollie().payments.create({
+    paymentRequest: {
+      amount: AI_ASSISTANT_PRICE_EUR,
+      description: `Shiftline AI Assistant -- ${params.companyName}`,
+      redirectUrl: `${env.appUrl}/admin?tab=assistant&checkout=success`,
+      customerId,
+      sequenceType: "first",
+      metadata: {
+        companyId: String(params.companyId),
+        product: "aiAssistant",
+      },
+    },
+  });
+
+  const redirectUrl = payment.links?.checkout?.href;
+  if (!redirectUrl) {
+    throw new AppError(500, "Mollie did not return a checkout URL");
+  }
+
+  return { redirectUrl, providerCustomerId: customerId };
+}
+
 async function handlePaymentWebhook(paymentId: string): Promise<NormalizedWebhookEvent> {
   const payment = await mollie().payments.get({ paymentId });
   const customerId = payment.customerId;
@@ -101,40 +145,57 @@ async function handlePaymentWebhook(paymentId: string): Promise<NormalizedWebhoo
 
   if (payment.status === "paid") {
     const meta = payment.metadata as Record<string, string> | undefined;
+    const isAddon = meta?.product === "aiAssistant";
     const plan = meta?.plan === "starter" || meta?.plan === "unlimited" ? meta.plan : undefined;
     const interval =
       meta?.interval === "monthly" || meta?.interval === "yearly" ? meta.interval : undefined;
 
     let subscriptionId: string | null = null;
-    if (payment.sequenceType === "first" && payment.mandateId && plan && interval) {
-      // Same reasoning as the payment above: no inline webhookUrl, the
-      // central next-gen subscription delivers renewal payment events too.
-      const subscription = await mollie().subscriptions.create({
-        customerId,
-        subscriptionRequest: {
-          amount: amountFor(plan, interval),
-          interval: mollieInterval(interval),
-          description: `Shiftline ${plan} (${interval})`,
-          mandateId: payment.mandateId,
-        },
-      });
-      subscriptionId = subscription.id ?? null;
+    if (payment.sequenceType === "first" && payment.mandateId) {
+      if (isAddon) {
+        // Same reasoning as the plan branch below: no inline webhookUrl,
+        // the central next-gen subscription delivers renewal events too.
+        const subscription = await mollie().subscriptions.create({
+          customerId,
+          subscriptionRequest: {
+            amount: AI_ASSISTANT_PRICE_EUR,
+            interval: "1 month",
+            description: "Shiftline AI Assistant",
+            mandateId: payment.mandateId,
+          },
+        });
+        subscriptionId = subscription.id ?? null;
+      } else if (plan && interval) {
+        const subscription = await mollie().subscriptions.create({
+          customerId,
+          subscriptionRequest: {
+            amount: amountFor(plan, interval),
+            interval: mollieInterval(interval),
+            description: `Shiftline ${plan} (${interval})`,
+            mandateId: payment.mandateId,
+          },
+        });
+        subscriptionId = subscription.id ?? null;
+      }
     }
 
     return {
       providerCustomerId: customerId,
       providerSubscriptionId: subscriptionId,
       type: "payment_succeeded",
-      plan,
-      interval,
+      product: isAddon ? "aiAssistant" : "plan",
+      plan: isAddon ? undefined : plan,
+      interval: isAddon ? undefined : interval,
     };
   }
 
   if (payment.status === "failed" || payment.status === "expired" || payment.status === "canceled") {
+    const meta = payment.metadata as Record<string, string> | undefined;
     return {
       providerCustomerId: customerId,
       providerSubscriptionId: null,
       type: "payment_failed",
+      product: meta?.product === "aiAssistant" ? "aiAssistant" : "plan",
     };
   }
 
@@ -198,6 +259,13 @@ async function verifyAndParseWebhook(
         providerCustomerId: entity.customerId,
         providerSubscriptionId: entity.id ?? event.entityId ?? null,
         type: "subscription_canceled",
+        // Best-effort placeholder -- this embedded payload carries no
+        // metadata to read a real product tag from (only id/customerId/
+        // status), so applyWebhookEvent in service.ts ignores this field
+        // for cancellations and instead compares providerSubscriptionId
+        // against the company's own stored billingSubscriptionId /
+        // aiAssistantSubscriptionId to find the real target.
+        product: "plan",
       };
     }
     // Other subscription status changes (e.g. newly "active") aren't
@@ -213,5 +281,6 @@ async function verifyAndParseWebhook(
 export const mollieAdapter: BillingProviderAdapter = {
   name: "mollie",
   createCheckoutSession,
+  createAddonCheckoutSession,
   verifyAndParseWebhook,
 };
