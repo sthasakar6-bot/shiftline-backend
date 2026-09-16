@@ -74,6 +74,21 @@ export async function initiateAddonCheckout(
     throw new AppError(404, "Manager not found");
   }
 
+  // Refuse to switch a company's stored billing identity out from under
+  // its base plan just because the add-on checkout was requested through a
+  // different provider -- that would silently overwrite billingProvider/
+  // billingCustomerId, and any future webhook for the base plan's own
+  // (still-active, still-on-the-old-provider) subscription would then fail
+  // to resolve back to this company at all. A company with no billing
+  // identity yet (billingProvider === null) is free to start on either.
+  if (company.billingProvider !== null && company.billingProvider !== providerName) {
+    throw new AppError(
+      400,
+      `The AI assistant add-on is only available through ${company.billingProvider} for this account, matching your existing plan.`,
+      "AI_ASSISTANT_PROVIDER_MISMATCH",
+    );
+  }
+
   const alreadyOnThisProvider = company.billingProvider === providerName;
   const existingCustomerId = alreadyOnThisProvider ? company.billingCustomerId : null;
 
