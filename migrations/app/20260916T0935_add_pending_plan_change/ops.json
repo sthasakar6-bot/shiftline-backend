@@ -1,0 +1,86 @@
+[
+  {
+    "id": "column.public.company.pendingInterval",
+    "label": "Add column \"pendingInterval\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "pendingInterval",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"pendingInterval\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "pendingInterval"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"pendingInterval\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"pendingInterval\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"pendingInterval\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "pendingInterval"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.pendingPlan",
+    "label": "Add column \"pendingPlan\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "pendingPlan",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"pendingPlan\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "pendingPlan"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"pendingPlan\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"pendingPlan\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"pendingPlan\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "pendingPlan"
+        ]
+      }
+    ]
+  }
+]

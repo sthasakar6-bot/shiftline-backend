@@ -13,6 +13,8 @@ export interface Company {
   billingSubscriptionId: string | null;
   billingInterval: string | null;
   subscriptionStatus: string | null;
+  pendingPlan: string | null;
+  pendingInterval: string | null;
   createdAt: string;
 }
 

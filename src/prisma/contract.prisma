@@ -38,6 +38,14 @@ model Company {
   // first failure -- only a canceled subscription extends the login
   // soft-lock (see identity/service.ts).
   subscriptionStatus     String?
+  // Set only for a scheduled downgrade (e.g. unlimited -> starter): the
+  // customer keeps their current (higher) plan's access until the
+  // in-progress billing period they already paid for runs out, and only
+  // then does the provider subscription actually switch to this lower
+  // plan/interval. Null the rest of the time -- an upgrade never uses
+  // this, since it takes effect (and is charged in full) immediately.
+  pendingPlan            String?
+  pendingInterval        String?
   users       User[]
   invites     Invite[]
   departments Department[]

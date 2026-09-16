@@ -33,6 +33,26 @@ export async function markCanceled(companyId: number): Promise<void> {
   await db.orm.public.Company.where({ id: companyId }).update({ subscriptionStatus: "canceled" });
 }
 
+export async function schedulePendingPlan(
+  companyId: number,
+  data: { pendingPlan: string; pendingInterval: string },
+): Promise<void> {
+  await db.orm.public.Company.where({ id: companyId }).update(data);
+}
+
+export async function clearPendingPlan(companyId: number): Promise<void> {
+  await db.orm.public.Company.where({ id: companyId }).update({
+    pendingPlan: null,
+    pendingInterval: null,
+  });
+}
+
+export async function clearBillingSubscription(companyId: number): Promise<void> {
+  await db.orm.public.Company.where({ id: companyId }).update({
+    billingSubscriptionId: null,
+  });
+}
+
 export async function findCompanyByBillingCustomer(
   billingProvider: string,
   billingCustomerId: string,
