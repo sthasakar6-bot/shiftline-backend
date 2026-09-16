@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { signup } from "./service";
+import { signup, startPurchase, completeSignup } from "./service";
 import { AppError } from "../../errors/AppError";
 
 export async function signupController(req: Request, res: Response) {
@@ -12,6 +12,29 @@ export async function signupController(req: Request, res: Response) {
     firstName,
     lastName,
     email,
+    password,
+    logoBuffer: req.file.buffer,
+    logoMimeType: req.file.mimetype,
+  });
+  res.status(201).json(result);
+}
+
+export async function purchaseCheckoutController(req: Request, res: Response) {
+  const { email, plan, interval } = req.body;
+  const result = await startPurchase(email, plan, interval);
+  res.json(result);
+}
+
+export async function completeSignupController(req: Request, res: Response) {
+  if (!req.file) {
+    throw new AppError(400, "A company logo is required");
+  }
+  const { email, companyName, firstName, lastName, password } = req.body;
+  const result = await completeSignup({
+    email,
+    companyName,
+    firstName,
+    lastName,
     password,
     logoBuffer: req.file.buffer,
     logoMimeType: req.file.mimetype,

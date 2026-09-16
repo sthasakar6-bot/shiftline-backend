@@ -5,6 +5,7 @@ import type {
   CheckoutParams,
   CheckoutResult,
   AddonCheckoutParams,
+  PresignupCheckoutParams,
   NormalizedWebhookEvent,
   PlanKey,
   BillingInterval,
@@ -132,6 +133,47 @@ export async function createAddonCheckoutSession(params: AddonCheckoutParams): P
   return { redirectUrl, providerCustomerId: customerId };
 }
 
+// Same shape as createCheckoutSession above, minus companyId -- no Company
+// row exists yet at this point (see signup/service.ts startPurchase). The
+// customer's Mollie-side "name" is just their email since the real company
+// name isn't known yet -- that's Mollie-dashboard-only, never shown to the
+// customer.
+export async function createPresignupCheckoutSession(params: PresignupCheckoutParams): Promise<CheckoutResult> {
+  let customerId = params.existingCustomerId;
+  if (!customerId) {
+    const customer = await mollie().customers.create({
+      entityCustomer: { name: params.email, email: params.email },
+    });
+    customerId = customer.id;
+  }
+  if (!customerId) {
+    throw new AppError(500, "Mollie did not return a customer id");
+  }
+
+  const payment = await mollie().payments.create({
+    paymentRequest: {
+      amount: amountFor(params.plan, params.interval),
+      description: `Shiftline ${params.plan} (${params.interval}) -- ${params.email}`,
+      redirectUrl: `${env.appUrl}/complete-signup?email=${encodeURIComponent(params.email)}`,
+      customerId,
+      sequenceType: "first",
+      metadata: {
+        presignup: "true",
+        email: params.email,
+        plan: params.plan,
+        interval: params.interval,
+      },
+    },
+  });
+
+  const redirectUrl = payment.links?.checkout?.href;
+  if (!redirectUrl) {
+    throw new AppError(500, "Mollie did not return a checkout URL");
+  }
+
+  return { redirectUrl, providerCustomerId: customerId };
+}
+
 async function handlePaymentWebhook(paymentId: string): Promise<NormalizedWebhookEvent> {
   const payment = await mollie().payments.get({ paymentId });
   const customerId = payment.customerId;
@@ -162,6 +204,10 @@ async function handlePaymentWebhook(paymentId: string): Promise<NormalizedWebhoo
         });
         subscriptionId = subscription.id ?? null;
       } else if (plan && interval) {
+        // Same subscription-creation shape for both a real company's
+        // checkout and a presignup checkout -- plan/interval are present
+        // in metadata either way, and the resulting subscription id is
+        // just stored differently downstream (Company vs PendingSignup).
         const subscription = await mollie().subscriptions.create({
           customerId,
           subscriptionRequest: {

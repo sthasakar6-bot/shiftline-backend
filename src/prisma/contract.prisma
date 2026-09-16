@@ -65,6 +65,30 @@ model Company {
   createdAt   TimestamptzString @default(now())
 }
 
+// A brand-new customer who buys a plan directly from the marketing site
+// pays *before* any Company/User row exists (see signup/service.ts
+// startPurchase/completeSignup) -- this is where that paid-but-not-yet-
+// created state lives between the Mollie webhook firing and the customer
+// finishing the company-details form. Deleted once completeSignup
+// consumes it.
+model PendingSignup {
+  id                     Int                @id @default(autoincrement())
+  // Normalized lowercase, same as every other email comparison in this
+  // codebase. Unique so a retried/abandoned checkout re-uses the same row
+  // (and the same Mollie customer) instead of accumulating duplicates.
+  email                  String             @unique
+  plan                   String
+  interval               String
+  billingCustomerId      String
+  // Only set once the webhook's first-payment handler creates the Mollie
+  // subscription -- same timing as Company.billingSubscriptionId.
+  billingSubscriptionId  String?
+  // False until the webhook confirms payment. completeSignup refuses to
+  // create the company until this is true.
+  paid                   Boolean            @default(false)
+  createdAt              TimestamptzString  @default(now())
+}
+
 model User {
   id            Int            @id @default(autoincrement())
   name          String

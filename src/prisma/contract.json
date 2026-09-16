@@ -64,6 +64,10 @@
       "model": "Payslip",
       "namespace": "public"
     },
+    "pendingSignup": {
+      "model": "PendingSignup",
+      "namespace": "public"
+    },
     "pushSubscription": {
       "model": "PushSubscription",
       "namespace": "public"
@@ -2018,6 +2022,97 @@
               },
               "namespaceId": "public",
               "table": "payslip"
+            }
+          },
+          "PendingSignup": {
+            "fields": {
+              "billingCustomerId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "billingSubscriptionId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "email": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "interval": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "paid": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "plan": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "billingCustomerId": {
+                  "column": "billingCustomerId"
+                },
+                "billingSubscriptionId": {
+                  "column": "billingSubscriptionId"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "email": {
+                  "column": "email"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "interval": {
+                  "column": "interval"
+                },
+                "paid": {
+                  "column": "paid"
+                },
+                "plan": {
+                  "column": "plan"
+                }
+              },
+              "namespaceId": "public",
+              "table": "pendingSignup"
             }
           },
           "PushSubscription": {
@@ -4429,6 +4524,76 @@
               },
               "uniques": []
             },
+            "pendingSignup": {
+              "columns": {
+                "billingCustomerId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "billingSubscriptionId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "email": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "interval": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "paid": {
+                  "codecId": "pg/bool@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nativeType": "bool",
+                  "nullable": false
+                },
+                "plan": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "email"
+                  ]
+                }
+              ]
+            },
             "pushSubscription": {
               "columns": {
                 "auth": {
@@ -4960,7 +5125,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "6501a756e3e8bc3b6844fb7f10c9fd58bc5110924a627b32dcd34424ee9be1b5"
+    "storageHash": "3de7ca0de2810b9d02c3aaeab37d9075803c95577bc99538ba2cd5bc238ba64e"
   },
   "capabilities": {
     "postgres": {

@@ -39,3 +39,12 @@ export interface AddonCheckoutParams {
   managerEmail: string;
   existingCustomerId: string | null;
 }
+
+// No companyId here -- a presignup checkout happens before any Company row
+// exists at all (see signup/service.ts startPurchase).
+export interface PresignupCheckoutParams {
+  email: string;
+  plan: PlanKey;
+  interval: BillingInterval;
+  existingCustomerId: string | null;
+}

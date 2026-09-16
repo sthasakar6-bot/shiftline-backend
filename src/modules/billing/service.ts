@@ -13,6 +13,7 @@ import {
   markAiAssistantCanceled,
   findCompanyByBillingCustomer,
 } from "./model";
+import { findPendingSignupByBillingCustomerId, markPendingSignupPaid } from "../signup/pendingSignupModel";
 
 export async function initiateCheckout(
   companyId: number,
@@ -118,6 +119,18 @@ async function applyWebhookEvent(event: NormalizedWebhookEvent): Promise<void> {
   // no metadata-based fast path is needed as a separate case.
   const company = await findCompanyByBillingCustomer("mollie", event.providerCustomerId);
   if (!company) {
+    // Might be a presignup checkout -- no Company row exists yet for this
+    // customer (see signup/service.ts startPurchase). A payment_succeeded
+    // here just marks the pending signup paid so /signup/complete can
+    // proceed; a failed/canceled/expired payment needs no action at all,
+    // since PendingSignup.paid already defaults to false.
+    const pending = await findPendingSignupByBillingCustomerId(event.providerCustomerId);
+    if (pending) {
+      if (event.type === "payment_succeeded") {
+        await markPendingSignupPaid(pending.email, event.providerSubscriptionId);
+      }
+      return;
+    }
     throw new AppError(404, `No company found for Mollie customer ${event.providerCustomerId}`);
   }
 
