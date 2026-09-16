@@ -30,13 +30,21 @@ function removeSocket(companyId: number, socket: WebSocket) {
   if (set.size === 0) companySockets.delete(companyId);
 }
 
-export function broadcastMessage(companyId: number, message: ChatMessage) {
+function broadcast(companyId: number, payload: unknown) {
   const set = companySockets.get(companyId);
   if (!set) return;
-  const payload = JSON.stringify({ type: "message", message });
+  const data = JSON.stringify(payload);
   for (const socket of set) {
-    if (socket.readyState === WebSocket.OPEN) socket.send(payload);
+    if (socket.readyState === WebSocket.OPEN) socket.send(data);
   }
+}
+
+export function broadcastMessage(companyId: number, message: ChatMessage) {
+  broadcast(companyId, { type: "message", message });
+}
+
+export function broadcastMessageDeleted(companyId: number, messageId: number) {
+  broadcast(companyId, { type: "message_deleted", id: messageId });
 }
 
 export function attachChatWebSocket(server: HttpServer) {

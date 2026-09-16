@@ -27,3 +27,11 @@ export async function findRecentMessages(
     .limit(limit)
     .all();
 }
+
+export async function findMessageById(id: number): Promise<ChatMessageRow | null> {
+  return db.orm.public.Message.where({ id }).first();
+}
+
+export async function deleteMessageById(id: number): Promise<void> {
+  await db.orm.public.Message.where({ id }).delete();
+}

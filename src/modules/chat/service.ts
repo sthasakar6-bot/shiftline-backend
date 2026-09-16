@@ -1,6 +1,7 @@
 import { db } from "../../prisma/db";
-import { createMessage, findRecentMessages } from "./model";
-import { broadcastMessage } from "./ws";
+import { AppError } from "../../errors/AppError";
+import { createMessage, findRecentMessages, findMessageById, deleteMessageById } from "./model";
+import { broadcastMessage, broadcastMessageDeleted } from "./ws";
 
 const HISTORY_LIMIT = 100;
 
@@ -63,4 +64,23 @@ export async function postMessage(
   const [message] = hydrate([row], senders);
   broadcastMessage(companyId, message);
   return message;
+}
+
+// Sender-only, and "for everyone" (the row is gone, not just hidden on the
+// sender's own screen) -- matches how the shared-stream chat has no
+// per-viewer state to hide messages behind in the first place.
+export async function deleteMessage(
+  companyId: number,
+  userId: number,
+  messageId: number,
+): Promise<void> {
+  const message = await findMessageById(messageId);
+  if (!message || message.companyId !== companyId) {
+    throw new AppError(404, "Message not found");
+  }
+  if (message.userId !== userId) {
+    throw new AppError(403, "You can only delete your own messages");
+  }
+  await deleteMessageById(messageId);
+  broadcastMessageDeleted(companyId, messageId);
 }
