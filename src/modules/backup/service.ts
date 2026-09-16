@@ -1,10 +1,4 @@
-import crypto from "crypto";
 import {
-  findBackupTokenByUser,
-  findUserIdByBackupToken,
-  createBackupToken,
-  deleteBackupTokenForUser,
-  touchBackupTokenUsage,
   findAllManagerIds,
   createBackupSnapshot,
   findBackupSnapshotsByUser,
@@ -28,28 +22,6 @@ function csvEscape(value: string | number | null | undefined): string {
 
 function csvRow(fields: (string | number | null | undefined)[]): string {
   return fields.map(csvEscape).join(",");
-}
-
-export async function getBackupTokenInfo(userId: number) {
-  return findBackupTokenByUser(userId);
-}
-
-export async function generateBackupToken(userId: number) {
-  const token = crypto.randomBytes(32).toString("hex");
-  return createBackupToken(userId, token);
-}
-
-export async function revokeBackupToken(userId: number) {
-  await deleteBackupTokenForUser(userId);
-}
-
-export async function resolveBackupUserId(token: string): Promise<number> {
-  const userId = await findUserIdByBackupToken(token);
-  if (!userId) {
-    throw new AppError(401, "Invalid backup token");
-  }
-  await touchBackupTokenUsage(token);
-  return userId;
 }
 
 export async function generateBackupCsv(managerId: number): Promise<string> {
@@ -115,7 +87,11 @@ export async function getBackupSnapshotCsv(id: number, userId: number): Promise<
   return snapshot.csv;
 }
 
-const SNAPSHOT_RETENTION_DAYS = 30;
+// Snapshots run hourly (see server.ts), so 5 hours keeps roughly the last
+// 5 snapshots per manager -- enough to recover from a same-day mistake
+// without the list growing into hundreds of near-identical entries a
+// manager has to scroll past to find anything.
+const SNAPSHOT_RETENTION_HOURS = 5;
 
 // Runs on a server-side interval (see server.ts) so backups keep happening
 // even when no manager's own computer is on -- one snapshot per manager,
@@ -128,6 +104,6 @@ export async function runScheduledBackups(): Promise<void> {
     await createBackupSnapshot(managerId, csv);
   }
 
-  const cutoff = new Date(Date.now() - SNAPSHOT_RETENTION_DAYS * 24 * 60 * 60 * 1000).toISOString();
+  const cutoff = new Date(Date.now() - SNAPSHOT_RETENTION_HOURS * 60 * 60 * 1000).toISOString();
   await deleteBackupSnapshotsOlderThan(cutoff);
 }
