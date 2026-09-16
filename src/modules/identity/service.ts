@@ -79,6 +79,8 @@ export async function login(email: string, password: string, companyId: number) 
       companyId: user.companyId,
       companyName: company?.name ?? "",
       companySlug: company?.slug ?? "",
+      companyPlan: company?.plan ?? "trial",
+      companyTrialEndsAt: company?.trialEndsAt ?? null,
     },
   };
 }
@@ -103,6 +105,8 @@ export async function getCurrentUser(userId: number) {
     companyId: user.companyId,
     companyName: company?.name ?? "",
     companySlug: company?.slug ?? "",
+    companyPlan: company?.plan ?? "trial",
+    companyTrialEndsAt: company?.trialEndsAt ?? null,
   };
 }
 
