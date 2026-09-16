@@ -33,9 +33,9 @@ const allowedOrigins = env.corsOrigin ? env.corsOrigin.split(",").map((o) => o.t
 
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 
-// Mounted BEFORE express.json(): both Mollie and Stripe webhook signature
-// verification needs the exact original request bytes, and express.json()
-// below parses (and discards the original bytes of) every other route.
+// Mounted BEFORE express.json(): Mollie's webhook signature verification
+// needs the exact original request bytes, and express.json() below parses
+// (and discards the original bytes of) every other route.
 app.use(
   "/api/billing/webhooks",
   express.raw({ type: "application/json" }),

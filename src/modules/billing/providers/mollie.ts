@@ -2,7 +2,6 @@ import { Client, SignatureValidator } from "mollie-api-typescript";
 import { env } from "../../../config/env";
 import { AppError } from "../../../errors/AppError";
 import type {
-  BillingProviderAdapter,
   CheckoutParams,
   CheckoutResult,
   AddonCheckoutParams,
@@ -11,8 +10,7 @@ import type {
   BillingInterval,
 } from "./types";
 
-// Lazy + memoized -- same reasoning as the Stripe adapter's lazy client:
-// this module is imported at server startup regardless of whether billing
+// Lazy + memoized: this module is imported at server startup regardless of whether billing
 // env vars are configured yet, so constructing the client eagerly risks
 // crashing the whole app before a real MOLLIE_API_KEY exists.
 let mollieClient: Client | null = null;
@@ -50,15 +48,13 @@ function mollieInterval(interval: BillingInterval): string {
 // toggle rather than mirroring the base plan's interval choice.
 const AI_ASSISTANT_PRICE_EUR = { currency: "EUR", value: "4.99" };
 
-// Mollie has no Stripe-Checkout equivalent that creates a subscription up
-// front: a subscription needs a mandate, and a mandate only exists once a
-// "first" payment has actually been completed by the customer. So checkout
-// here means "create a customer + a first payment", and the Subscription
-// itself is created later, inside the webhook handler, once that first
-// payment clears (see handlePaymentWebhook below). This asymmetry is
-// intentionally contained in this file -- the rest of the app just sees
-// "payment_succeeded".
-async function createCheckoutSession(params: CheckoutParams): Promise<CheckoutResult> {
+// Mollie has no way to create a subscription up front: a subscription
+// needs a mandate, and a mandate only exists once a "first" payment has
+// actually been completed by the customer. So checkout here means "create
+// a customer + a first payment", and the Subscription itself is created
+// later, inside the webhook handler, once that first payment clears (see
+// handlePaymentWebhook below).
+export async function createCheckoutSession(params: CheckoutParams): Promise<CheckoutResult> {
   let customerId = params.existingCustomerId;
   if (!customerId) {
     const customer = await mollie().customers.create({
@@ -99,10 +95,10 @@ async function createCheckoutSession(params: CheckoutParams): Promise<CheckoutRe
   return { redirectUrl, providerCustomerId: customerId };
 }
 
-// Same shape as createCheckoutSession above, minus plan/interval -- see the
-// Stripe adapter's createAddonCheckoutSession for why this is its own
-// independent subscription rather than folded into the base plan's.
-async function createAddonCheckoutSession(params: AddonCheckoutParams): Promise<CheckoutResult> {
+// Same shape as createCheckoutSession above, minus plan/interval -- this is
+// its own independent subscription rather than folded into the base
+// plan's, so the two can be subscribed to and canceled separately.
+export async function createAddonCheckoutSession(params: AddonCheckoutParams): Promise<CheckoutResult> {
   let customerId = params.existingCustomerId;
   if (!customerId) {
     const customer = await mollie().customers.create({
@@ -202,7 +198,7 @@ async function handlePaymentWebhook(paymentId: string): Promise<NormalizedWebhoo
   throw new AppError(400, `Unhandled Mollie payment status: ${payment.status}`);
 }
 
-async function verifyAndParseWebhook(
+export async function verifyAndParseWebhook(
   rawBody: Buffer,
   headers: Record<string, string | string[] | undefined>,
 ): Promise<NormalizedWebhookEvent> {
@@ -277,10 +273,3 @@ async function verifyAndParseWebhook(
 
   throw new AppError(400, `Unhandled Mollie webhook resource: ${event.resource}`);
 }
-
-export const mollieAdapter: BillingProviderAdapter = {
-  name: "mollie",
-  createCheckoutSession,
-  createAddonCheckoutSession,
-  verifyAndParseWebhook,
-};

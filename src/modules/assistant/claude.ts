@@ -1,9 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { env } from "../../config/env";
 
-// Lazy + memoized -- same reasoning as the Stripe/Mollie clients in the
-// billing adapters: this module is imported at server startup regardless
-// of whether ANTHROPIC_API_KEY is configured yet.
+// Lazy + memoized -- same reasoning as the Mollie client in the billing
+// adapter: this module is imported at server startup regardless of
+// whether ANTHROPIC_API_KEY is configured yet.
 let client: Anthropic | null = null;
 export function claude(): Anthropic {
   if (!client) {

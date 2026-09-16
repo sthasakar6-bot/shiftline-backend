@@ -15,19 +15,16 @@ model Company {
   // nullable at the schema level).
   logoBase64  String?
   logoMimeType String?
-  // "mollie" | "stripe" | null. A company is on at most one provider at a
-  // time, chosen once at checkout -- null for every company that has never
-  // gone through billing (every pre-existing company, every company still
-  // on trial).
+  // "mollie" | null -- Mollie is the only billing provider. Null for every
+  // company that has never gone through billing (every pre-existing
+  // company, every company still on trial).
   billingProvider       String?
-  // The provider's own Customer id (Stripe "cus_..." / Mollie "cst_...").
-  // Set synchronously at checkout time, before the manager is even
-  // redirected -- both providers return the customer id immediately on
-  // creation.
+  // Mollie's own Customer id ("cst_..."). Set synchronously at checkout
+  // time, before the manager is even redirected.
   billingCustomerId     String?
-  // The provider's own Subscription id. Exists once checkout completes for
-  // Stripe; for Mollie it doesn't exist until the webhook handler creates
-  // it in reaction to the first successful payment.
+  // Mollie's own Subscription id. Doesn't exist until the webhook handler
+  // creates it in reaction to the first successful payment (a mandate, and
+  // so a subscription, can't exist before that).
   billingSubscriptionId String?
   // "monthly" | "yearly" | null -- same vocabulary as the marketing site's
   // own billing toggle state.

@@ -3,7 +3,7 @@ import { checkoutController, addonCheckoutController, statusController } from ".
 import { requireAuth } from "../../middleware/requireAuth";
 import { requireRole } from "../../middleware/requireRole";
 import { validate } from "../../middleware/validate";
-import { checkoutSchema, addonCheckoutSchema } from "./schemas";
+import { checkoutSchema } from "./schemas";
 
 const router = Router();
 
@@ -14,13 +14,7 @@ router.post(
   validate(checkoutSchema),
   checkoutController,
 );
-router.post(
-  "/billing/addon/checkout",
-  requireAuth,
-  requireRole("manager"),
-  validate(addonCheckoutSchema),
-  addonCheckoutController,
-);
+router.post("/billing/addon/checkout", requireAuth, requireRole("manager"), addonCheckoutController);
 router.get("/billing/status", requireAuth, requireRole("manager"), statusController);
 
 export default router;

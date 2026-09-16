@@ -39,13 +39,3 @@ export interface AddonCheckoutParams {
   managerEmail: string;
   existingCustomerId: string | null;
 }
-
-export interface BillingProviderAdapter {
-  readonly name: "mollie" | "stripe";
-  createCheckoutSession(params: CheckoutParams): Promise<CheckoutResult>;
-  createAddonCheckoutSession(params: AddonCheckoutParams): Promise<CheckoutResult>;
-  verifyAndParseWebhook(
-    rawBody: Buffer,
-    headers: Record<string, string | string[] | undefined>,
-  ): Promise<NormalizedWebhookEvent>;
-}

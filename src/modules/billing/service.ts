@@ -1,7 +1,8 @@
 import { AppError } from "../../errors/AppError";
 import { findCompanyById } from "../company/model";
 import { findUserById } from "../identity/model";
-import { getProvider, type PlanKey, type BillingInterval, type NormalizedWebhookEvent } from "./providers";
+import { createCheckoutSession, createAddonCheckoutSession, verifyAndParseWebhook } from "./providers/mollie";
+import type { PlanKey, BillingInterval, NormalizedWebhookEvent } from "./providers/types";
 import {
   setBillingCustomer,
   activatePlan,
@@ -18,7 +19,6 @@ export async function initiateCheckout(
   managerId: number,
   plan: PlanKey,
   interval: BillingInterval,
-  providerName: "mollie" | "stripe",
 ): Promise<{ redirectUrl: string }> {
   const company = await findCompanyById(companyId);
   if (!company) {
@@ -29,13 +29,11 @@ export async function initiateCheckout(
     throw new AppError(404, "Manager not found");
   }
 
-  // A company already on this same provider keeps its existing customer
-  // record (avoids creating a duplicate customer on every plan change);
-  // switching providers starts a fresh customer on the new one.
-  const existingCustomerId = company.billingProvider === providerName ? company.billingCustomerId : null;
+  // A company already on Mollie keeps its existing customer record
+  // (avoids creating a duplicate customer on every plan change).
+  const existingCustomerId = company.billingProvider === "mollie" ? company.billingCustomerId : null;
 
-  const provider = getProvider(providerName);
-  const { redirectUrl, providerCustomerId } = await provider.createCheckoutSession({
+  const { redirectUrl, providerCustomerId } = await createCheckoutSession({
     companyId: company.id,
     companyName: company.name,
     managerEmail: manager.email,
@@ -45,7 +43,7 @@ export async function initiateCheckout(
   });
 
   await setBillingCustomer(company.id, {
-    billingProvider: providerName,
+    billingProvider: "mollie",
     billingCustomerId: providerCustomerId,
     billingInterval: interval,
   });
@@ -54,16 +52,11 @@ export async function initiateCheckout(
 }
 
 // Same shape as initiateCheckout above, minus plan/interval. The add-on
-// reuses the company's existing billing identity (customer id) when it's
-// already on this same provider -- exactly the same reuse rule the base
-// plan already applies. When it isn't (no billing identity yet, or a
-// different provider), a fresh customer is created and billingProvider/
-// billingCustomerId are (re)written, preserving whatever billingInterval
-// already held since that field belongs to the base plan, not this add-on.
+// reuses the company's existing billing identity (customer id) when it
+// already has one -- exactly the same reuse rule the base plan applies.
 export async function initiateAddonCheckout(
   companyId: number,
   managerId: number,
-  providerName: "mollie" | "stripe",
 ): Promise<{ redirectUrl: string }> {
   const company = await findCompanyById(companyId);
   if (!company) {
@@ -74,35 +67,19 @@ export async function initiateAddonCheckout(
     throw new AppError(404, "Manager not found");
   }
 
-  // Refuse to switch a company's stored billing identity out from under
-  // its base plan just because the add-on checkout was requested through a
-  // different provider -- that would silently overwrite billingProvider/
-  // billingCustomerId, and any future webhook for the base plan's own
-  // (still-active, still-on-the-old-provider) subscription would then fail
-  // to resolve back to this company at all. A company with no billing
-  // identity yet (billingProvider === null) is free to start on either.
-  if (company.billingProvider !== null && company.billingProvider !== providerName) {
-    throw new AppError(
-      400,
-      `The AI assistant add-on is only available through ${company.billingProvider} for this account, matching your existing plan.`,
-      "AI_ASSISTANT_PROVIDER_MISMATCH",
-    );
-  }
+  const alreadyHasCustomer = company.billingProvider === "mollie";
+  const existingCustomerId = alreadyHasCustomer ? company.billingCustomerId : null;
 
-  const alreadyOnThisProvider = company.billingProvider === providerName;
-  const existingCustomerId = alreadyOnThisProvider ? company.billingCustomerId : null;
-
-  const provider = getProvider(providerName);
-  const { redirectUrl, providerCustomerId } = await provider.createAddonCheckoutSession({
+  const { redirectUrl, providerCustomerId } = await createAddonCheckoutSession({
     companyId: company.id,
     companyName: company.name,
     managerEmail: manager.email,
     existingCustomerId,
   });
 
-  if (!alreadyOnThisProvider) {
+  if (!alreadyHasCustomer) {
     await setBillingCustomer(company.id, {
-      billingProvider: providerName,
+      billingProvider: "mollie",
       billingCustomerId: providerCustomerId,
       billingInterval: company.billingInterval,
     });
@@ -127,26 +104,21 @@ export async function getBillingStatus(companyId: number) {
 }
 
 export async function handleWebhook(
-  providerName: "mollie" | "stripe",
   rawBody: Buffer,
   headers: Record<string, string | string[] | undefined>,
 ): Promise<void> {
-  const provider = getProvider(providerName);
-  const event = await provider.verifyAndParseWebhook(rawBody, headers);
-  await applyWebhookEvent(providerName, event);
+  const event = await verifyAndParseWebhook(rawBody, headers);
+  await applyWebhookEvent(event);
 }
 
-async function applyWebhookEvent(
-  providerName: "mollie" | "stripe",
-  event: NormalizedWebhookEvent,
-): Promise<void> {
+async function applyWebhookEvent(event: NormalizedWebhookEvent): Promise<void> {
   // The checkout-initiation write (setBillingCustomer, above) always
   // persists billingProvider/billingCustomerId before the customer can
   // possibly reach a payment page, so this lookup is always reliable --
   // no metadata-based fast path is needed as a separate case.
-  const company = await findCompanyByBillingCustomer(providerName, event.providerCustomerId);
+  const company = await findCompanyByBillingCustomer("mollie", event.providerCustomerId);
   if (!company) {
-    throw new AppError(404, `No company found for ${providerName} customer ${event.providerCustomerId}`);
+    throw new AppError(404, `No company found for Mollie customer ${event.providerCustomerId}`);
   }
 
   switch (event.type) {
