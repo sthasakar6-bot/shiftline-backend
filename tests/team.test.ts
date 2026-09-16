@@ -152,12 +152,38 @@ describe("Deactivate / reactivate employees", () => {
     expect(res.status).toBe(404);
   });
 
-  it("rejects deactivating a manager", async () => {
+  // A co-manager is just another team member from this action's point of
+  // view -- deactivating one is allowed the same way deactivating an
+  // employee is, so a manager can actually remove a co-manager if needed.
+  it("allows deactivating a co-manager", async () => {
     const manager = await makeManager("deact-mgrtargetmgr");
     const otherManager = await makeManager("deact-mgrtarget-other", manager.companyId);
 
     const res = await request(app)
       .post(`/api/users/${otherManager.id}/deactivate`)
+      .set("Authorization", `Bearer ${manager.token}`);
+    expect(res.status).toBe(200);
+  });
+
+  it("rejects deactivating your own account", async () => {
+    const manager = await makeManager("deact-selfmgr");
+
+    const res = await request(app)
+      .post(`/api/users/${manager.id}/deactivate`)
+      .set("Authorization", `Bearer ${manager.token}`);
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects deactivating a bookkeeper this way", async () => {
+    const manager = await makeManager("deact-bkmgr");
+    const bkEmail = uniqueEmail("deact-bk");
+    const created = await request(app)
+      .post("/api/users/bookkeepers")
+      .set("Authorization", `Bearer ${manager.token}`)
+      .send({ firstName: "Bk", lastName: "Keeper", email: bkEmail, password: "password123" });
+
+    const res = await request(app)
+      .post(`/api/users/${created.body.id}/deactivate`)
       .set("Authorization", `Bearer ${manager.token}`);
     expect(res.status).toBe(400);
   });

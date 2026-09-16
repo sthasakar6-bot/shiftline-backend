@@ -104,8 +104,8 @@ export const getDirectReports = async (managerId: number) => {
   return findDirectReports(managerId);
 };
 
-export const getAllEmployees = async (companyId: number) => {
-  return findAllEmployeesInCompany(companyId);
+export const getAllEmployees = async (companyId: number, callerId: number) => {
+  return findAllEmployeesInCompany(companyId, callerId);
 };
 
 export const promoteToManager = async (id: number) => {
@@ -150,13 +150,20 @@ export const getFormerEmployees = async (companyId: number) => {
 // but keeps their historical records (payslips, contracts, attendance,
 // shifts) intact -- they move to the former-employees list instead of
 // disappearing outright, and can be reactivated if this was a mistake.
-export const deactivateEmployee = async (targetId: number, companyId: number) => {
+// A co-manager can be deactivated the same way an employee can (they're
+// both just "someone on the team" from this action's point of view) --
+// only bookkeepers (their own separate flow) and the caller's own account
+// are off-limits.
+export const deactivateEmployee = async (targetId: number, companyId: number, callerId: number) => {
+  if (targetId === callerId) {
+    throw new AppError(400, "You can't remove your own account.");
+  }
   const target = await findUserSummaryById(targetId);
   if (!target || target.companyId !== companyId) {
     throw new AppError(404, "User not found");
   }
-  if (target.role !== "employee") {
-    throw new AppError(400, "Only employees can be removed this way");
+  if (target.role === "bookkeeper") {
+    throw new AppError(400, "Bookkeepers can't be removed this way");
   }
   const updated = await setUserActive(targetId, false);
   if (!updated) {

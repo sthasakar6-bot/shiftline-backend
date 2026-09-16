@@ -54,7 +54,7 @@ export const getReportsController = async (req: Request, res: Response) => {
 };
 
 export const getEmployeesController = async (req: Request, res: Response) => {
-  const employees = await getAllEmployees(req.user!.companyId);
+  const employees = await getAllEmployees(req.user!.companyId, req.user!.sub);
   res.json(employees);
 };
 
@@ -79,7 +79,7 @@ export const getFormerEmployeesController = async (req: Request, res: Response) 
 };
 
 export const deactivateEmployeeController = async (req: Request, res: Response) => {
-  const user = await deactivateEmployee(Number(req.params.id), req.user!.companyId);
+  const user = await deactivateEmployee(Number(req.params.id), req.user!.companyId, req.user!.sub);
   res.json(user);
 };
 

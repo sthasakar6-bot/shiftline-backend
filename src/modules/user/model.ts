@@ -153,11 +153,22 @@ export async function findManagerIdsInCompany(companyId: number): Promise<number
   return rows.map((r) => r.id);
 }
 
-export async function findAllEmployeesInCompany(companyId: number): Promise<UserSummary[]> {
+// "Team" here means everyone a manager administers -- plain employees and
+// any co-managers alike, since a second manager has full access too and
+// still needs to show up (be removable, promotable, etc.) somewhere. Only
+// the caller's own row and bookkeepers are excluded: a manager doesn't
+// manage themselves from this screen, and a bookkeeper has its own
+// separate restricted UI entirely.
+export async function findAllEmployeesInCompany(
+  companyId: number,
+  excludeUserId: number,
+): Promise<UserSummary[]> {
   const rows = await db.orm.public.User.select(...SUMMARY_FIELDS)
-    .where({ role: "employee", companyId, active: true })
+    .where({ companyId, active: true })
     .all();
-  return rows.map(toUserSummary);
+  return rows
+    .filter((r) => r.role !== "bookkeeper" && r.id !== excludeUserId)
+    .map(toUserSummary);
 }
 
 // Managers need payslips, contracts, and documents too -- only bookkeepers
