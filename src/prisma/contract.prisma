@@ -101,6 +101,12 @@ model User {
 model Contract {
   id          Int                @id @default(autoincrement())
   role        String
+  // Optional -- a contract can be created before either date is decided,
+  // same nullable-until-set convention as everything else on this model.
+  // Date-only in practice (no time-of-day meaning), stored the same way
+  // LeaveRequest's own start/end dates already are.
+  startDate   TimestamptzString?
+  endDate     TimestamptzString?
   pdfBase64   String?
   pdfFilename String?
   userId      Int

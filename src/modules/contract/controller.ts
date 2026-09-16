@@ -43,15 +43,17 @@ export async function getContractPdfForReportController(req: Request, res: Respo
 }
 
 export async function createContractForReportController(req: Request, res: Response) {
-  const { role } = req.body;
-  const contract = await addContract(Number(req.params.id), { role });
+  const { role, startDate, endDate } = req.body;
+  const contract = await addContract(Number(req.params.id), { role, startDate, endDate });
   res.status(201).json(contract);
 }
 
 export async function updateContractForReportController(req: Request, res: Response) {
-  const { role } = req.body;
+  const { role, startDate, endDate } = req.body;
   const contract = await editContract(Number(req.params.contractId), Number(req.params.id), {
     role,
+    startDate,
+    endDate,
   });
   res.json(contract);
 }

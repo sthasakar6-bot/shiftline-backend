@@ -1,0 +1,86 @@
+[
+  {
+    "id": "column.public.contract.endDate",
+    "label": "Add column \"endDate\" to \"contract\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "endDate",
+        "table": "contract"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"endDate\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "contract",
+          "endDate"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"endDate\"",
+        "sql": "ALTER TABLE \"public\".\"contract\" ADD COLUMN \"endDate\" timestamptz"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"endDate\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "contract",
+          "endDate"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.contract.startDate",
+    "label": "Add column \"startDate\" to \"contract\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "startDate",
+        "table": "contract"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"startDate\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "contract",
+          "startDate"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"startDate\"",
+        "sql": "ALTER TABLE \"public\".\"contract\" ADD COLUMN \"startDate\" timestamptz"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"startDate\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "contract",
+          "startDate"
+        ]
+      }
+    ]
+  }
+]

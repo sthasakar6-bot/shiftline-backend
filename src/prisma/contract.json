@@ -692,6 +692,13 @@
                   "kind": "scalar"
                 }
               },
+              "endDate": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
               "id": {
                 "nullable": false,
                 "type": {
@@ -717,6 +724,13 @@
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "startDate": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
                   "kind": "scalar"
                 }
               },
@@ -757,6 +771,9 @@
                 "createdAt": {
                   "column": "createdAt"
                 },
+                "endDate": {
+                  "column": "endDate"
+                },
                 "id": {
                   "column": "id"
                 },
@@ -768,6 +785,9 @@
                 },
                 "role": {
                   "column": "role"
+                },
+                "startDate": {
+                  "column": "startDate"
                 },
                 "updatedAt": {
                   "column": "updatedAt"
@@ -3220,6 +3240,11 @@
                   "nativeType": "timestamptz",
                   "nullable": false
                 },
+                "endDate": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
                 "id": {
                   "codecId": "pg/int4@1",
                   "default": {
@@ -3243,6 +3268,11 @@
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
+                },
+                "startDate": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
                 },
                 "updatedAt": {
                   "codecId": "pg/timestamptz-string@1",
@@ -4900,7 +4930,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "f0bf9b81d4eb217e0e334ca09d8a06a75aaaadd052d98c8ddf60ddea2f85f4ba"
+    "storageHash": "6cdd151ccc1f0b6965309d099be95f52c4949fb57c456583e9d8d0d42fe4d3b2"
   },
   "capabilities": {
     "postgres": {

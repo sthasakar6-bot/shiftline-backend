@@ -3,6 +3,8 @@ import { db } from "../../prisma/db";
 export interface Contract {
   id: number;
   role: string;
+  startDate: string | null;
+  endDate: string | null;
   pdfFilename: string | null;
   userId: number;
   createdAt: string;
@@ -16,14 +18,27 @@ export interface ContractPdf {
 
 export interface CreateContractInput {
   role: string;
+  startDate?: string | null;
+  endDate?: string | null;
   userId: number;
 }
 
 export interface UpdateContractInput {
   role?: string;
+  startDate?: string | null;
+  endDate?: string | null;
 }
 
-const LIST_FIELDS = ["id", "role", "pdfFilename", "userId", "createdAt", "updatedAt"] as const;
+const LIST_FIELDS = [
+  "id",
+  "role",
+  "startDate",
+  "endDate",
+  "pdfFilename",
+  "userId",
+  "createdAt",
+  "updatedAt",
+] as const;
 
 export async function findContractsByUser(userId: number): Promise<Contract[]> {
   return db.orm.public.Contract.select(...LIST_FIELDS).where({ userId }).all();
@@ -48,6 +63,8 @@ export async function createContract(data: CreateContractInput): Promise<Contrac
   return {
     id: created.id,
     role: created.role,
+    startDate: created.startDate,
+    endDate: created.endDate,
     pdfFilename: created.pdfFilename,
     userId: created.userId,
     createdAt: created.createdAt,
