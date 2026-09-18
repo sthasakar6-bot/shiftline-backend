@@ -37,7 +37,7 @@ interface NewCompanyBilling {
 // (already paid -- plan/billing fields carried over from the PendingSignup
 // row) -- everything else about creating the company + its first manager
 // account is identical between the two.
-async function createCompanyAndManager(
+export async function createCompanyAndManager(
   input: {
     companyName: string;
     firstName: string;

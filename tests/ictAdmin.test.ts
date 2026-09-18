@@ -75,6 +75,61 @@ describe("ICT-admin protected routes", () => {
     expect(typeof res.body.uptimeSeconds).toBe("number");
   });
 
+  it("creates a company, lists it, then deletes it and its data", async () => {
+    const token = await getToken();
+    const auth = { Authorization: `Bearer ${token}` };
+    const email = `ict-admin-company-test-${Date.now()}@example.com`;
+
+    const create = await request(app)
+      .post("/api/ict-admin/companies")
+      .set(auth)
+      .field("companyName", `ICT Admin Test Co ${Date.now()}`)
+      .field("firstName", "Op")
+      .field("lastName", "Erator")
+      .field("email", email)
+      .field("password", "password123")
+      .attach(
+        "logo",
+        Buffer.from(
+          "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+          "base64",
+        ),
+        { filename: "logo.png", contentType: "image/png" },
+      );
+    expect(create.status).toBe(201);
+    const companyId = create.body.companyId;
+
+    const list = await request(app).get("/api/ict-admin/companies").set(auth);
+    expect(list.status).toBe(200);
+    expect(list.body.some((c: { id: number }) => c.id === companyId)).toBe(true);
+
+    const del = await request(app).delete(`/api/ict-admin/companies/${companyId}`).set(auth);
+    expect(del.status).toBe(204);
+
+    const listAfter = await request(app).get("/api/ict-admin/companies").set(auth);
+    expect(listAfter.body.some((c: { id: number }) => c.id === companyId)).toBe(false);
+
+    // The manager account that came with it should be gone too -- signing
+    // up again with the same email must succeed, which it couldn't if the
+    // user row were still there (email-already-exists would block it).
+    const resignup = await request(app)
+      .post("/api/signup")
+      .field("companyName", `Resignup Co ${Date.now()}`)
+      .field("firstName", "New")
+      .field("lastName", "Owner")
+      .field("email", email)
+      .field("password", "password123")
+      .attach(
+        "logo",
+        Buffer.from(
+          "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+          "base64",
+        ),
+        { filename: "logo.png", contentType: "image/png" },
+      );
+    expect(resignup.status).toBe(201);
+  });
+
   it("creates, lists, and updates a ticket", async () => {
     const token = await getToken();
     const auth = { Authorization: `Bearer ${token}` };

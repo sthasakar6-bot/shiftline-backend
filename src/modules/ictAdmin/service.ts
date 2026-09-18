@@ -3,6 +3,8 @@ import jwt from "jsonwebtoken";
 import { env } from "../../config/env";
 import { AppError } from "../../errors/AppError";
 import { listTickets, createTicket, updateTicketStatus, findTicketById } from "./model";
+import { listCompaniesWithUserCounts, deleteCompanyCascade } from "./model";
+import { signup } from "../signup/service";
 import { db } from "../../prisma/db";
 
 // In-memory brute-force guard for the single ICT-admin login endpoint --
@@ -85,6 +87,27 @@ export async function setTicketStatus(id: number, status: string) {
   }
   await updateTicketStatus(id, status);
   return findTicketById(id);
+}
+
+export async function getCompanies() {
+  return listCompaniesWithUserCounts();
+}
+
+export async function addCompany(input: {
+  companyName: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  logoBuffer: Buffer;
+  logoMimeType: string;
+}) {
+  const { user } = await signup(input);
+  return user;
+}
+
+export async function removeCompany(companyId: number) {
+  await deleteCompanyCascade(companyId);
 }
 
 export async function getSystemMonitoring() {

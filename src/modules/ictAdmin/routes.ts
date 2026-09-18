@@ -1,14 +1,37 @@
 import { Router } from "express";
+import multer from "multer";
 import { validate } from "../../middleware/validate";
 import { requireIctAdmin } from "../../middleware/requireIctAdmin";
-import { ictAdminLoginSchema, createTicketSchema, updateTicketStatusSchema } from "./schemas";
+import {
+  ictAdminLoginSchema,
+  createTicketSchema,
+  updateTicketStatusSchema,
+  createCompanySchema,
+} from "./schemas";
 import {
   ictAdminLoginController,
   listTicketsController,
   createTicketController,
   updateTicketStatusController,
   monitoringController,
+  listCompaniesController,
+  createCompanyController,
+  deleteCompanyController,
 } from "./controller";
+import { AppError } from "../../errors/AppError";
+
+// Mirrors signup/routes.ts's own upload config.
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 3 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (!file.mimetype.startsWith("image/")) {
+      cb(new AppError(400, "The company logo must be an image file"));
+      return;
+    }
+    cb(null, true);
+  },
+});
 
 const router = Router();
 
@@ -26,5 +49,15 @@ router.patch(
   validate(updateTicketStatusSchema),
   updateTicketStatusController,
 );
+
+router.get("/ict-admin/companies", requireIctAdmin, listCompaniesController);
+router.post(
+  "/ict-admin/companies",
+  requireIctAdmin,
+  upload.single("logo"),
+  validate(createCompanySchema),
+  createCompanyController,
+);
+router.delete("/ict-admin/companies/:id", requireIctAdmin, deleteCompanyController);
 
 export default router;

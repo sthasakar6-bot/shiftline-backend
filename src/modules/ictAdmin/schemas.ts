@@ -14,3 +14,11 @@ export const createTicketSchema = z.object({
 export const updateTicketStatusSchema = z.object({
   status: z.enum(["open", "in_progress", "resolved", "closed"]),
 });
+
+export const createCompanySchema = z.object({
+  companyName: z.string().min(1).max(200),
+  firstName: z.string().min(1).max(100),
+  lastName: z.string().min(1).max(100),
+  email: z.string().email(),
+  password: z.string().min(8),
+});

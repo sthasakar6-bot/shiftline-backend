@@ -1,5 +1,15 @@
 import { Request, Response } from "express";
-import { ictAdminLogin, getTickets, addTicket, setTicketStatus, getSystemMonitoring } from "./service";
+import {
+  ictAdminLogin,
+  getTickets,
+  addTicket,
+  setTicketStatus,
+  getSystemMonitoring,
+  getCompanies,
+  addCompany,
+  removeCompany,
+} from "./service";
+import { AppError } from "../../errors/AppError";
 
 export async function ictAdminLoginController(req: Request, res: Response) {
   const { email, password } = req.body;
@@ -32,4 +42,32 @@ export async function updateTicketStatusController(req: Request, res: Response) 
 export async function monitoringController(_req: Request, res: Response) {
   const data = await getSystemMonitoring();
   res.json(data);
+}
+
+export async function listCompaniesController(_req: Request, res: Response) {
+  const companies = await getCompanies();
+  res.json(companies);
+}
+
+export async function createCompanyController(req: Request, res: Response) {
+  if (!req.file) {
+    throw new AppError(400, "A company logo is required");
+  }
+  const { companyName, firstName, lastName, email, password } = req.body;
+  const user = await addCompany({
+    companyName,
+    firstName,
+    lastName,
+    email,
+    password,
+    logoBuffer: req.file.buffer,
+    logoMimeType: req.file.mimetype,
+  });
+  res.status(201).json(user);
+}
+
+export async function deleteCompanyController(req: Request, res: Response) {
+  const id = Number(req.params.id);
+  await removeCompany(id);
+  res.status(204).send();
 }
