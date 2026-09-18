@@ -11,4 +11,6 @@ export const env = {
   mollieApiKey: process.env.MOLLIE_API_KEY || "",
   mollieWebhookSecret: process.env.MOLLIE_WEBHOOK_SECRET || "",
   anthropicApiKey: process.env.ANTHROPIC_API_KEY || "",
+  ictAdminEmail: process.env.ICT_ADMIN_EMAIL || "",
+  ictAdminPasswordHash: process.env.ICT_ADMIN_PASSWORD_HASH || "",
 };

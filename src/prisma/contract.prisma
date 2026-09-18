@@ -388,3 +388,17 @@ model Message {
 
   createdAt TimestamptzString @default(now())
 }
+
+// Internal ICT-admin ticket board -- entirely separate from company/user
+// data. No FK to Company/User: the ICT admin operator isn't a row in either
+// table, just a single operator identified by env-configured credentials.
+model IctAdminTicket {
+  id          Int               @id @default(autoincrement())
+  title       String
+  description String
+  status      String            @default("open")
+  priority    String            @default("normal")
+
+  createdAt   TimestamptzString @default(now())
+  updatedAt   TimestamptzString @default(now())
+}
