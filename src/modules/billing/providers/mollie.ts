@@ -154,7 +154,7 @@ export async function createPresignupCheckoutSession(params: PresignupCheckoutPa
     paymentRequest: {
       amount: amountFor(params.plan, params.interval),
       description: `Shiftline ${params.plan} (${params.interval}) -- ${params.email}`,
-      redirectUrl: `${env.appUrl}/complete-signup?email=${encodeURIComponent(params.email)}`,
+      redirectUrl: `${env.appUrl}/complete-signup?email=${encodeURIComponent(params.email)}&plan=${params.plan}&interval=${params.interval}`,
       customerId,
       sequenceType: "first",
       metadata: {
