@@ -1,6 +1,11 @@
 import { Router } from "express";
 import multer from "multer";
-import { signupController, purchaseCheckoutController, completeSignupController } from "./controller";
+import {
+  signupController,
+  purchaseCheckoutController,
+  purchasePendingStatusController,
+  completeSignupController,
+} from "./controller";
 import { validate } from "../../middleware/validate";
 import { signupSchema, purchaseCheckoutSchema, completeSignupSchema } from "./schemas";
 import { AppError } from "../../errors/AppError";
@@ -29,6 +34,7 @@ router.post("/signup", upload.single("logo"), validate(signupSchema), signupCont
 // Public -- reached from the marketing site's "Get Starter"/"Get Unlimited"
 // buttons, before any account exists (or while one is logged out).
 router.post("/signup/checkout", validate(purchaseCheckoutSchema), purchaseCheckoutController);
+router.get("/signup/pending-status", purchasePendingStatusController);
 router.post(
   "/signup/complete",
   upload.single("logo"),
