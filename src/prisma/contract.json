@@ -411,6 +411,34 @@
           },
           "Company": {
             "fields": {
+              "addressCity": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "addressNumber": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "addressPostcode": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "addressStreet": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "aiAssistantStatus": {
                 "nullable": true,
                 "type": {
@@ -474,6 +502,20 @@
                   "kind": "scalar"
                 }
               },
+              "companyEmail": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "companyPhone": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "contactPersonName": {
                 "nullable": true,
                 "type": {
@@ -513,6 +555,13 @@
                 "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "estimatedEmployeeCount": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
                   "kind": "scalar"
                 }
               },
@@ -788,6 +837,18 @@
             },
             "storage": {
               "fields": {
+                "addressCity": {
+                  "column": "addressCity"
+                },
+                "addressNumber": {
+                  "column": "addressNumber"
+                },
+                "addressPostcode": {
+                  "column": "addressPostcode"
+                },
+                "addressStreet": {
+                  "column": "addressStreet"
+                },
                 "aiAssistantStatus": {
                   "column": "aiAssistantStatus"
                 },
@@ -815,6 +876,12 @@
                 "businessType": {
                   "column": "businessType"
                 },
+                "companyEmail": {
+                  "column": "companyEmail"
+                },
+                "companyPhone": {
+                  "column": "companyPhone"
+                },
                 "contactPersonName": {
                   "column": "contactPersonName"
                 },
@@ -832,6 +899,9 @@
                 },
                 "emergencyContact": {
                   "column": "emergencyContact"
+                },
+                "estimatedEmployeeCount": {
+                  "column": "estimatedEmployeeCount"
                 },
                 "id": {
                   "column": "id"
@@ -2903,6 +2973,13 @@
                   "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
+              },
+              "termsAcceptedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
               }
             },
             "relations": {
@@ -3217,6 +3294,9 @@
                 },
                 "role": {
                   "column": "role"
+                },
+                "termsAcceptedAt": {
+                  "column": "termsAcceptedAt"
                 }
               },
               "namespaceId": "public",
@@ -3516,6 +3596,26 @@
             },
             "company": {
               "columns": {
+                "addressCity": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "addressNumber": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "addressPostcode": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "addressStreet": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "aiAssistantStatus": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -3561,6 +3661,16 @@
                   "nativeType": "text",
                   "nullable": true
                 },
+                "companyEmail": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "companyPhone": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "contactPersonName": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -3593,6 +3703,11 @@
                 "emergencyContact": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
+                  "nullable": true
+                },
+                "estimatedEmployeeCount": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
                   "nullable": true
                 },
                 "id": {
@@ -5464,6 +5579,11 @@
                   },
                   "nativeType": "text",
                   "nullable": false
+                },
+                "termsAcceptedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
                 }
               },
               "foreignKeys": [
@@ -5562,7 +5682,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "b4d29cb4ae06636d67be699d6bc77f8670896a4af93f53427b5876d79c70c545"
+    "storageHash": "ba539faae377f33b2e0175c6bd366de2775bfdaccae17bd120d095762de4886e"
   },
   "capabilities": {
     "postgres": {

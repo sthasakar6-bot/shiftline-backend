@@ -1,0 +1,338 @@
+[
+  {
+    "id": "column.public.company.addressCity",
+    "label": "Add column \"addressCity\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "addressCity",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"addressCity\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "addressCity"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"addressCity\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"addressCity\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"addressCity\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "addressCity"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.addressNumber",
+    "label": "Add column \"addressNumber\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "addressNumber",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"addressNumber\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "addressNumber"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"addressNumber\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"addressNumber\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"addressNumber\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "addressNumber"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.addressPostcode",
+    "label": "Add column \"addressPostcode\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "addressPostcode",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"addressPostcode\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "addressPostcode"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"addressPostcode\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"addressPostcode\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"addressPostcode\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "addressPostcode"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.addressStreet",
+    "label": "Add column \"addressStreet\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "addressStreet",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"addressStreet\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "addressStreet"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"addressStreet\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"addressStreet\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"addressStreet\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "addressStreet"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.companyEmail",
+    "label": "Add column \"companyEmail\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "companyEmail",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"companyEmail\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "companyEmail"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"companyEmail\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"companyEmail\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"companyEmail\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "companyEmail"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.companyPhone",
+    "label": "Add column \"companyPhone\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "companyPhone",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"companyPhone\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "companyPhone"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"companyPhone\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"companyPhone\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"companyPhone\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "companyPhone"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.estimatedEmployeeCount",
+    "label": "Add column \"estimatedEmployeeCount\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "estimatedEmployeeCount",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"estimatedEmployeeCount\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "estimatedEmployeeCount"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"estimatedEmployeeCount\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"estimatedEmployeeCount\" int4"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"estimatedEmployeeCount\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "estimatedEmployeeCount"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.user.termsAcceptedAt",
+    "label": "Add column \"termsAcceptedAt\" to \"user\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "termsAcceptedAt",
+        "table": "user"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"termsAcceptedAt\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "user",
+          "termsAcceptedAt"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"termsAcceptedAt\"",
+        "sql": "ALTER TABLE \"public\".\"user\" ADD COLUMN \"termsAcceptedAt\" timestamptz"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"termsAcceptedAt\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "user",
+          "termsAcceptedAt"
+        ]
+      }
+    ]
+  }
+]

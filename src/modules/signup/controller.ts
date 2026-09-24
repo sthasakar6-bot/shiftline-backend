@@ -7,7 +7,28 @@ export async function signupController(req: Request, res: Response) {
   if (!req.file) {
     throw new AppError(400, "A company logo is required");
   }
-  const { companyName, firstName, lastName, email, password } = req.body;
+  const {
+    companyName,
+    firstName,
+    lastName,
+    email,
+    password,
+    kvkNumber,
+    vatNumber,
+    businessType,
+    industry,
+    estimatedEmployeeCount,
+    companyEmail,
+    companyPhone,
+    phone,
+    addressStreet,
+    addressNumber,
+    addressPostcode,
+    addressCity,
+    countryOfRegistration,
+    billingAddress,
+    contactPersonRole,
+  } = req.body;
   const result = await signup({
     companyName,
     firstName,
@@ -16,6 +37,21 @@ export async function signupController(req: Request, res: Response) {
     password,
     logoBuffer: req.file.buffer,
     logoMimeType: req.file.mimetype,
+    kvkNumber,
+    vatNumber,
+    businessType,
+    industry,
+    estimatedEmployeeCount,
+    companyEmail,
+    companyPhone,
+    phone,
+    addressStreet,
+    addressNumber,
+    addressPostcode,
+    addressCity,
+    countryOfRegistration,
+    billingAddress,
+    contactPersonRole,
   });
   res.status(201).json(result);
 }
@@ -43,7 +79,28 @@ export async function completeSignupController(req: Request, res: Response) {
   if (!req.file) {
     throw new AppError(400, "A company logo is required");
   }
-  const { email, companyName, firstName, lastName, password } = req.body;
+  const {
+    email,
+    companyName,
+    firstName,
+    lastName,
+    password,
+    kvkNumber,
+    vatNumber,
+    businessType,
+    industry,
+    estimatedEmployeeCount,
+    companyEmail,
+    companyPhone,
+    phone,
+    addressStreet,
+    addressNumber,
+    addressPostcode,
+    addressCity,
+    countryOfRegistration,
+    billingAddress,
+    contactPersonRole,
+  } = req.body;
   const result = await completeSignup({
     email,
     companyName,
@@ -52,6 +109,21 @@ export async function completeSignupController(req: Request, res: Response) {
     password,
     logoBuffer: req.file.buffer,
     logoMimeType: req.file.mimetype,
+    kvkNumber,
+    vatNumber,
+    businessType,
+    industry,
+    estimatedEmployeeCount,
+    companyEmail,
+    companyPhone,
+    phone,
+    addressStreet,
+    addressNumber,
+    addressPostcode,
+    addressCity,
+    countryOfRegistration,
+    billingAddress,
+    contactPersonRole,
   });
   res.status(201).json(result);
 }

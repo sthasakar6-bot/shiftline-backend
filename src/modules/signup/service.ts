@@ -33,6 +33,24 @@ interface NewCompanyBilling {
   subscriptionStatus: string | null;
 }
 
+export interface CompanyDetailsInput {
+  kvkNumber: string;
+  vatNumber: string;
+  businessType: string;
+  industry: string;
+  estimatedEmployeeCount: number;
+  companyEmail: string;
+  companyPhone: string;
+  phone: string;
+  addressStreet: string;
+  addressNumber: string;
+  addressPostcode: string;
+  addressCity: string;
+  countryOfRegistration: string;
+  billingAddress: string;
+  contactPersonRole: string;
+}
+
 // Shared by signup() (free trial, no billing fields) and completeSignup()
 // (already paid -- plan/billing fields carried over from the PendingSignup
 // row) -- everything else about creating the company + its first manager
@@ -46,7 +64,7 @@ export async function createCompanyAndManager(
     password: string;
     logoBuffer: Buffer;
     logoMimeType: string;
-  },
+  } & CompanyDetailsInput,
   billing: NewCompanyBilling,
 ) {
   const passwordHash = await argon2.hash(input.password);
@@ -90,6 +108,21 @@ export async function createCompanyAndManager(
       slug,
       logoBase64: input.logoBuffer.toString("base64"),
       logoMimeType: input.logoMimeType,
+      kvkNumber: input.kvkNumber,
+      vatNumber: input.vatNumber,
+      businessType: input.businessType,
+      industry: input.industry,
+      estimatedEmployeeCount: input.estimatedEmployeeCount,
+      companyEmail: input.companyEmail,
+      companyPhone: input.companyPhone,
+      addressStreet: input.addressStreet,
+      addressNumber: input.addressNumber,
+      addressPostcode: input.addressPostcode,
+      addressCity: input.addressCity,
+      countryOfRegistration: input.countryOfRegistration,
+      billingAddress: input.billingAddress,
+      contactPersonName: `${firstName} ${lastName}`.trim(),
+      contactPersonRole: input.contactPersonRole,
       ...billing,
     });
 
@@ -106,6 +139,8 @@ export async function createCompanyAndManager(
       role: "manager",
       companyId: company.id,
       needsOnboarding: false,
+      phone: input.phone,
+      termsAcceptedAt: new Date().toISOString(),
     });
 
     return { company, user };
@@ -125,7 +160,7 @@ export async function createCompanyAndManager(
       email: user.email,
       role: user.role,
       hasAvatar: false,
-      phone: null,
+      phone: user.phone,
       address: null,
       location: null,
       needsOnboarding: false,
@@ -136,17 +171,42 @@ export async function createCompanyAndManager(
   };
 }
 
-export async function signup(input: {
-  companyName: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  logoBuffer: Buffer;
-  logoMimeType: string;
-}) {
+const BLANK_COMPANY_DETAILS: CompanyDetailsInput = {
+  kvkNumber: "",
+  vatNumber: "",
+  businessType: "",
+  industry: "",
+  estimatedEmployeeCount: 0,
+  companyEmail: "",
+  companyPhone: "",
+  phone: "",
+  addressStreet: "",
+  addressNumber: "",
+  addressPostcode: "",
+  addressCity: "",
+  countryOfRegistration: "",
+  billingAddress: "",
+  contactPersonRole: "",
+};
+
+export async function signup(
+  input: {
+    companyName: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    logoBuffer: Buffer;
+    logoMimeType: string;
+  } & Partial<CompanyDetailsInput>,
+) {
+  // The self-service marketing-site form (validated by signupSchema) always
+  // sends every field below; the ICT admin's own "add company" tool does
+  // not collect them at creation time -- they get filled in later from the
+  // company profile editor -- so this fills any gaps with blanks rather
+  // than requiring ICT admin to duplicate the whole KVK/VAT/address form.
   const trialEndsAt = new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
-  return createCompanyAndManager(input, {
+  return createCompanyAndManager({ ...BLANK_COMPANY_DETAILS, ...input }, {
     plan: "trial",
     trialEndsAt: trialEndsAt.toISOString(),
     billingProvider: null,
@@ -195,15 +255,17 @@ export async function startPurchase(
 // Reached from CompleteSignupPage.tsx after a presignup payment succeeds --
 // the mirror image of signup() for a customer who already paid instead of
 // starting a free trial.
-export async function completeSignup(input: {
-  email: string;
-  companyName: string;
-  firstName: string;
-  lastName: string;
-  password: string;
-  logoBuffer: Buffer;
-  logoMimeType: string;
-}) {
+export async function completeSignup(
+  input: {
+    email: string;
+    companyName: string;
+    firstName: string;
+    lastName: string;
+    password: string;
+    logoBuffer: Buffer;
+    logoMimeType: string;
+  } & CompanyDetailsInput,
+) {
   const normalized = input.email.trim().toLowerCase();
   const pending = await findPendingSignupByEmail(normalized);
   if (!pending || !pending.paid) {

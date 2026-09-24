@@ -5,6 +5,34 @@ import app from "../src/app";
 const EMAIL = "sthasakar6@gmail.com";
 const PASSWORD = "@Sitagrestha00";
 
+// Required by signupSchema (the public self-service form) -- not needed for
+// ICT admin's own POST /api/ict-admin/companies, which bypasses that schema.
+const COMPANY_DETAILS_FIELDS: Record<string, string> = {
+  kvkNumber: "12345678",
+  vatNumber: "NL123456789B01",
+  businessType: "BV",
+  industry: "Retail",
+  estimatedEmployeeCount: "5",
+  companyEmail: "info@test-co.example",
+  companyPhone: "+31612345678",
+  phone: "+31687654321",
+  addressStreet: "Teststraat",
+  addressNumber: "1",
+  addressPostcode: "1234AB",
+  addressCity: "Amsterdam",
+  countryOfRegistration: "Netherlands",
+  billingAddress: "Teststraat 1, 1234AB Amsterdam",
+  contactPersonRole: "Owner",
+  termsAccepted: "true",
+};
+
+function withCompanyDetails<T extends { field: (name: string, value: string) => T }>(req: T): T {
+  for (const [key, value] of Object.entries(COMPANY_DETAILS_FIELDS)) {
+    req = req.field(key, value);
+  }
+  return req;
+}
+
 describe("POST /api/ict-admin/login", () => {
   it("rejects the wrong password", async () => {
     const res = await request(app)
@@ -42,14 +70,15 @@ describe("ICT-admin protected routes", () => {
     // A real company signup/login token has {sub, email, role, companyId},
     // never {ictAdmin: true} -- confirms the two token types aren't
     // interchangeable even though they're signed with the same secret.
-    const signupRes = await request(app)
-      .post("/api/signup")
-      .field("companyName", `ICT Test Co ${Date.now()}`)
-      .field("firstName", "Test")
-      .field("lastName", "User")
-      .field("email", `ict-admin-test-${Date.now()}@example.com`)
-      .field("password", "password123")
-      .attach(
+    const signupRes = await withCompanyDetails(
+      request(app)
+        .post("/api/signup")
+        .field("companyName", `ICT Test Co ${Date.now()}`)
+        .field("firstName", "Test")
+        .field("lastName", "User")
+        .field("email", `ict-admin-test-${Date.now()}@example.com`)
+        .field("password", "password123"),
+    ).attach(
         "logo",
         Buffer.from(
           "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
@@ -112,14 +141,15 @@ describe("ICT-admin protected routes", () => {
     // The manager account that came with it should be gone too -- signing
     // up again with the same email must succeed, which it couldn't if the
     // user row were still there (email-already-exists would block it).
-    const resignup = await request(app)
-      .post("/api/signup")
-      .field("companyName", `Resignup Co ${Date.now()}`)
-      .field("firstName", "New")
-      .field("lastName", "Owner")
-      .field("email", email)
-      .field("password", "password123")
-      .attach(
+    const resignup = await withCompanyDetails(
+      request(app)
+        .post("/api/signup")
+        .field("companyName", `Resignup Co ${Date.now()}`)
+        .field("firstName", "New")
+        .field("lastName", "Owner")
+        .field("email", email)
+        .field("password", "password123"),
+    ).attach(
         "logo",
         Buffer.from(
           "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",

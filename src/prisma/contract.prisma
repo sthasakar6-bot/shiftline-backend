@@ -76,6 +76,17 @@ model Company {
   preferredLanguage      String?
   emergencyContact       String?
   preferredCommunicationChannel String?
+  // Collected directly on the signup form (both the free-trial and the
+  // paid presignup flow share createCompanyAndManager) -- distinct from
+  // the ICT-admin-only fields above, though contactPersonName/
+  // contactPersonRole double as "who signed up" once filled in here.
+  estimatedEmployeeCount Int?
+  companyEmail           String?
+  companyPhone           String?
+  addressStreet          String?
+  addressNumber          String?
+  addressPostcode        String?
+  addressCity            String?
   users       User[]
   invites     Invite[]
   departments Department[]
@@ -129,6 +140,10 @@ model User {
   department    Department?    @relation(fields: [departmentId], references: [id])
   needsOnboarding Boolean       @default(false)
   active        Boolean        @default(true)
+  // Set only for the manager who filled in the signup form's terms
+  // checkbox -- null for every pre-existing account and every employee
+  // added afterward by a manager (they never see that checkbox).
+  termsAcceptedAt TimestamptzString?
   lastSeenAt    TimestamptzString?
   managerId     Int?
   manager       User?          @relation("ManagerReports", fields: [managerId], references: [id])

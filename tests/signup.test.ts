@@ -9,25 +9,53 @@ const MIN_PNG = Buffer.from(
   "base64",
 );
 
+const COMPANY_DETAILS_FIELDS: Record<string, string> = {
+  kvkNumber: "12345678",
+  vatNumber: "NL123456789B01",
+  businessType: "BV",
+  industry: "Retail",
+  estimatedEmployeeCount: "5",
+  companyEmail: "info@test-co.example",
+  companyPhone: "+31612345678",
+  phone: "+31687654321",
+  addressStreet: "Teststraat",
+  addressNumber: "1",
+  addressPostcode: "1234AB",
+  addressCity: "Amsterdam",
+  countryOfRegistration: "Netherlands",
+  billingAddress: "Teststraat 1, 1234AB Amsterdam",
+  contactPersonRole: "Owner",
+  termsAccepted: "true",
+};
+
+function withCompanyDetails<T extends { field: (name: string, value: string) => T }>(req: T): T {
+  for (const [key, value] of Object.entries(COMPANY_DETAILS_FIELDS)) {
+    req = req.field(key, value);
+  }
+  return req;
+}
+
 function signupRequest() {
-  return request(app)
-    .post("/api/signup")
-    .field("companyName", `Test Co ${Date.now()}`)
-    .field("firstName", "Ada")
-    .field("lastName", "Lovelace")
-    .field("password", "password123")
-    .attach("logo", MIN_PNG, { filename: "logo.png", contentType: "image/png" });
+  return withCompanyDetails(
+    request(app)
+      .post("/api/signup")
+      .field("companyName", `Test Co ${Date.now()}`)
+      .field("firstName", "Ada")
+      .field("lastName", "Lovelace")
+      .field("password", "password123"),
+  ).attach("logo", MIN_PNG, { filename: "logo.png", contentType: "image/png" });
 }
 
 function completeSignupRequest(email: string) {
-  return request(app)
-    .post("/api/signup/complete")
-    .field("email", email)
-    .field("companyName", `Paid Co ${Date.now()}`)
-    .field("firstName", "Grace")
-    .field("lastName", "Hopper")
-    .field("password", "password123")
-    .attach("logo", MIN_PNG, { filename: "logo.png", contentType: "image/png" });
+  return withCompanyDetails(
+    request(app)
+      .post("/api/signup/complete")
+      .field("email", email)
+      .field("companyName", `Paid Co ${Date.now()}`)
+      .field("firstName", "Grace")
+      .field("lastName", "Hopper")
+      .field("password", "password123"),
+  ).attach("logo", MIN_PNG, { filename: "logo.png", contentType: "image/png" });
 }
 
 describe("POST /api/signup (free trial, unaffected regression check)", () => {
