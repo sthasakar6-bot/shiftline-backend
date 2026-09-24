@@ -22,6 +22,9 @@ function mollie(): Client {
   return mollieClient;
 }
 
+// These are the net (VAT-exclusive) prices -- the marketing site advertises
+// them as "+ VAT", and VAT is added on top at checkout (see withVat below),
+// so what's actually charged is higher than these numbers.
 const PRICE_EUR: Record<PlanKey, string> = {
   starter: "9.99",
   unlimited: "19.99",
@@ -34,9 +37,28 @@ const YEARLY_PRICE_EUR: Record<PlanKey, string> = {
   unlimited: "191.90",
 };
 
+// Flat 21% Dutch VAT for every customer regardless of location -- no
+// reverse-charge handling for EU business customers yet (would need VAT
+// number validation via VIES); can be added later if needed.
+const VAT_RATE = 0.21;
+
+interface PriceBreakdown {
+  netValue: string;
+  vatValue: string;
+  grossValue: string;
+}
+
+function computeVat(netValue: string): PriceBreakdown {
+  const net = Number(netValue);
+  const vat = Math.round(net * VAT_RATE * 100) / 100;
+  const gross = Math.round((net + vat) * 100) / 100;
+  return { netValue: net.toFixed(2), vatValue: vat.toFixed(2), grossValue: gross.toFixed(2) };
+}
+
 function amountFor(plan: PlanKey, interval: BillingInterval) {
-  const value = interval === "monthly" ? PRICE_EUR[plan] : YEARLY_PRICE_EUR[plan];
-  return { currency: "EUR", value };
+  const netValue = interval === "monthly" ? PRICE_EUR[plan] : YEARLY_PRICE_EUR[plan];
+  const { grossValue } = computeVat(netValue);
+  return { currency: "EUR", value: grossValue };
 }
 
 function mollieInterval(interval: BillingInterval): string {
@@ -46,8 +68,12 @@ function mollieInterval(interval: BillingInterval): string {
 // Placeholder default -- well above the ~$3-6/mo real Claude API cost at
 // realistic usage; the final number is a business decision, not a
 // technical one. Flat monthly only, no yearly variant -- kept as a simple
-// toggle rather than mirroring the base plan's interval choice.
-const AI_ASSISTANT_PRICE_EUR = { currency: "EUR", value: "4.99" };
+// toggle rather than mirroring the base plan's interval choice. Net (pre-VAT).
+const AI_ASSISTANT_NET_EUR = "4.99";
+function aiAssistantAmount() {
+  const { grossValue } = computeVat(AI_ASSISTANT_NET_EUR);
+  return { currency: "EUR", value: grossValue };
+}
 
 // Mollie has no way to create a subscription up front: a subscription
 // needs a mandate, and a mandate only exists once a "first" payment has
@@ -76,7 +102,7 @@ export async function createCheckoutSession(params: CheckoutParams): Promise<Che
   const payment = await mollie().payments.create({
     paymentRequest: {
       amount: amountFor(params.plan, params.interval),
-      description: `Shiftline ${params.plan} (${params.interval}) -- ${params.companyName}`,
+      description: `Shiftline ${params.plan} (${params.interval}) incl. 21% VAT -- ${params.companyName}`,
       redirectUrl: `${env.appUrl}/admin?tab=billing&checkout=success`,
       customerId,
       sequenceType: "first",
@@ -84,6 +110,7 @@ export async function createCheckoutSession(params: CheckoutParams): Promise<Che
         companyId: String(params.companyId),
         plan: params.plan,
         interval: params.interval,
+        ...computeVat(params.interval === "monthly" ? PRICE_EUR[params.plan] : YEARLY_PRICE_EUR[params.plan]),
       },
     },
   });
@@ -113,14 +140,15 @@ export async function createAddonCheckoutSession(params: AddonCheckoutParams): P
 
   const payment = await mollie().payments.create({
     paymentRequest: {
-      amount: AI_ASSISTANT_PRICE_EUR,
-      description: `Shiftline AI Assistant -- ${params.companyName}`,
+      amount: aiAssistantAmount(),
+      description: `Shiftline AI Assistant incl. 21% VAT -- ${params.companyName}`,
       redirectUrl: `${env.appUrl}/admin?tab=assistant&checkout=success`,
       customerId,
       sequenceType: "first",
       metadata: {
         companyId: String(params.companyId),
         product: "aiAssistant",
+        ...computeVat(AI_ASSISTANT_NET_EUR),
       },
     },
   });
@@ -153,7 +181,7 @@ export async function createPresignupCheckoutSession(params: PresignupCheckoutPa
   const payment = await mollie().payments.create({
     paymentRequest: {
       amount: amountFor(params.plan, params.interval),
-      description: `Shiftline ${params.plan} (${params.interval}) -- ${params.email}`,
+      description: `Shiftline ${params.plan} (${params.interval}) incl. 21% VAT -- ${params.email}`,
       redirectUrl: `${env.appUrl}/complete-signup?email=${encodeURIComponent(params.email)}&plan=${params.plan}&interval=${params.interval}`,
       customerId,
       sequenceType: "first",
@@ -162,6 +190,7 @@ export async function createPresignupCheckoutSession(params: PresignupCheckoutPa
         email: params.email,
         plan: params.plan,
         interval: params.interval,
+        ...computeVat(params.interval === "monthly" ? PRICE_EUR[params.plan] : YEARLY_PRICE_EUR[params.plan]),
       },
     },
   });
@@ -226,9 +255,9 @@ async function handlePaymentWebhook(paymentId: string): Promise<NormalizedWebhoo
         const subscription = await mollie().subscriptions.create({
           customerId,
           subscriptionRequest: {
-            amount: AI_ASSISTANT_PRICE_EUR,
+            amount: aiAssistantAmount(),
             interval: "1 month",
-            description: "Shiftline AI Assistant",
+            description: "Shiftline AI Assistant incl. 21% VAT",
             mandateId: payment.mandateId,
           },
         });
@@ -243,7 +272,7 @@ async function handlePaymentWebhook(paymentId: string): Promise<NormalizedWebhoo
           subscriptionRequest: {
             amount: amountFor(plan, interval),
             interval: mollieInterval(interval),
-            description: `Shiftline ${plan} (${interval})`,
+            description: `Shiftline ${plan} (${interval}) incl. 21% VAT`,
             mandateId: payment.mandateId,
           },
         });
