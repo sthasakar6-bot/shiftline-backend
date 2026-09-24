@@ -20,6 +20,14 @@ export const COMPANY_PROFILE_FIELDS = [
   "preferredLanguage",
   "emergencyContact",
   "preferredCommunicationChannel",
+  // Collected at signup (see signup/service.ts) but still editable here for
+  // support/correction purposes.
+  "companyEmail",
+  "companyPhone",
+  "addressStreet",
+  "addressNumber",
+  "addressPostcode",
+  "addressCity",
 ] as const;
 
 export type CompanyProfileField = (typeof COMPANY_PROFILE_FIELDS)[number];
@@ -163,7 +171,10 @@ export async function getCompanyDetail(companyId: number) {
   };
 }
 
-export function updateCompanyProfile(companyId: number, fields: Partial<Record<CompanyProfileField, string | null>>) {
+export function updateCompanyProfile(
+  companyId: number,
+  fields: Partial<Record<CompanyProfileField, string | null>> & { estimatedEmployeeCount?: number | null },
+) {
   return db.orm.public.Company.where({ id: companyId }).update(fields);
 }
 

@@ -29,6 +29,8 @@ export const createCompanySchema = z.object({
 // String on the Company model, so there's nothing stronger to validate than
 // "reasonable length" here. An empty string clears a field back to unset.
 const profileFieldSchema = z.string().max(500).optional().nullable();
-export const updateCompanyProfileSchema = z.object(
-  Object.fromEntries(COMPANY_PROFILE_FIELDS.map((f) => [f, profileFieldSchema])),
-);
+export const updateCompanyProfileSchema = z.object({
+  ...Object.fromEntries(COMPANY_PROFILE_FIELDS.map((f) => [f, profileFieldSchema])),
+  // Int column, not a free-text field -- validated/coerced separately.
+  estimatedEmployeeCount: z.coerce.number().int().min(0).max(100000).optional().nullable(),
+});

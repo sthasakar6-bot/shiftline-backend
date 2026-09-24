@@ -139,7 +139,7 @@ export async function getCompanyProfile(companyId: number) {
 
 export async function updateCompanyProfileFields(
   companyId: number,
-  fields: Partial<Record<CompanyProfileField, string | null>>,
+  fields: Partial<Record<CompanyProfileField, string | null>> & { estimatedEmployeeCount?: number | null },
 ) {
   const existing = await db.orm.public.Company.first({ id: companyId });
   if (!existing) {
