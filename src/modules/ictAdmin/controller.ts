@@ -8,6 +8,8 @@ import {
   getCompanies,
   addCompany,
   removeCompany,
+  getCompanyProfile,
+  updateCompanyProfileFields,
 } from "./service";
 import { AppError } from "../../errors/AppError";
 
@@ -70,4 +72,16 @@ export async function deleteCompanyController(req: Request, res: Response) {
   const id = Number(req.params.id);
   await removeCompany(id);
   res.status(204).send();
+}
+
+export async function getCompanyProfileController(req: Request, res: Response) {
+  const id = Number(req.params.id);
+  const detail = await getCompanyProfile(id);
+  res.json(detail);
+}
+
+export async function updateCompanyProfileController(req: Request, res: Response) {
+  const id = Number(req.params.id);
+  const detail = await updateCompanyProfileFields(id, req.body);
+  res.json(detail);
 }

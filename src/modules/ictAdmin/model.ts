@@ -1,5 +1,29 @@
 import { db } from "../../prisma/db";
 
+export const COMPANY_PROFILE_FIELDS = [
+  "kvkNumber",
+  "vatNumber",
+  "legalAddress",
+  "businessType",
+  "countryOfRegistration",
+  "contactPersonName",
+  "contactPersonRole",
+  "billingEmail",
+  "billingAddress",
+  "customPricingNotes",
+  "industry",
+  "payrollCycle",
+  "schedulingFormat",
+  "shiftRulesNotes",
+  "supportEmail",
+  "phoneNumber",
+  "preferredLanguage",
+  "emergencyContact",
+  "preferredCommunicationChannel",
+] as const;
+
+export type CompanyProfileField = (typeof COMPANY_PROFILE_FIELDS)[number];
+
 export async function listCompaniesWithUserCounts() {
   const [companies, users] = await Promise.all([
     db.orm.public.Company.orderBy((c) => c.createdAt.desc()).all(),
@@ -112,6 +136,35 @@ export async function deleteCompanyCascade(companyId: number) {
 
     await tx.orm.public.Company.where({ id: companyId }).delete();
   });
+}
+
+export async function getCompanyDetail(companyId: number) {
+  const company = await db.orm.public.Company.first({ id: companyId });
+  if (!company) return null;
+
+  const [users, departments] = await Promise.all([
+    db.orm.public.User.where({ companyId }).all(),
+    db.orm.public.Department.where({ companyId }).all(),
+  ]);
+
+  const rolesCount = new Map<string, number>();
+  for (const u of users) {
+    rolesCount.set(u.role, (rolesCount.get(u.role) ?? 0) + 1);
+  }
+
+  return {
+    company,
+    stats: {
+      employeeCount: users.length,
+      activeEmployeeCount: users.filter((u) => u.active).length,
+      rolesBreakdown: Array.from(rolesCount.entries()).map(([role, count]) => ({ role, count })),
+      workLocations: departments.map((d) => d.name),
+    },
+  };
+}
+
+export function updateCompanyProfile(companyId: number, fields: Partial<Record<CompanyProfileField, string | null>>) {
+  return db.orm.public.Company.where({ id: companyId }).update(fields);
 }
 
 export function listTickets() {

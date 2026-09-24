@@ -7,6 +7,7 @@ import {
   createTicketSchema,
   updateTicketStatusSchema,
   createCompanySchema,
+  updateCompanyProfileSchema,
 } from "./schemas";
 import {
   ictAdminLoginController,
@@ -17,6 +18,8 @@ import {
   listCompaniesController,
   createCompanyController,
   deleteCompanyController,
+  getCompanyProfileController,
+  updateCompanyProfileController,
 } from "./controller";
 import { AppError } from "../../errors/AppError";
 
@@ -59,5 +62,12 @@ router.post(
   createCompanyController,
 );
 router.delete("/ict-admin/companies/:id", requireIctAdmin, deleteCompanyController);
+router.get("/ict-admin/companies/:id", requireIctAdmin, getCompanyProfileController);
+router.patch(
+  "/ict-admin/companies/:id",
+  requireIctAdmin,
+  validate(updateCompanyProfileSchema),
+  updateCompanyProfileController,
+);
 
 export default router;

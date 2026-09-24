@@ -3,8 +3,10 @@ import jwt from "jsonwebtoken";
 import { env } from "../../config/env";
 import { AppError } from "../../errors/AppError";
 import { listTickets, createTicket, updateTicketStatus, findTicketById } from "./model";
-import { listCompaniesWithUserCounts, deleteCompanyCascade } from "./model";
+import { listCompaniesWithUserCounts, deleteCompanyCascade, getCompanyDetail, updateCompanyProfile } from "./model";
+import type { CompanyProfileField } from "./model";
 import { signup } from "../signup/service";
+import { getCustomerBillingSummary } from "../billing/providers/mollie";
 import { db } from "../../prisma/db";
 
 // In-memory brute-force guard for the single ICT-admin login endpoint --
@@ -108,6 +110,43 @@ export async function addCompany(input: {
 
 export async function removeCompany(companyId: number) {
   await deleteCompanyCascade(companyId);
+}
+
+// Billing history/renewal date is fetched live from Mollie -- best-effort,
+// since a Mollie outage or a company with no billingCustomerId (still on
+// trial, or a pre-billing legacy company) shouldn't block the rest of the
+// detail view from loading.
+export async function getCompanyProfile(companyId: number) {
+  const detail = await getCompanyDetail(companyId);
+  if (!detail) {
+    throw new AppError(404, "Company not found");
+  }
+
+  let billing: Awaited<ReturnType<typeof getCustomerBillingSummary>> | null = null;
+  if (detail.company.billingCustomerId) {
+    try {
+      billing = await getCustomerBillingSummary(
+        detail.company.billingCustomerId,
+        detail.company.billingSubscriptionId,
+      );
+    } catch (err) {
+      console.error("ICT admin: failed to fetch Mollie billing summary:", err);
+    }
+  }
+
+  return { ...detail, billing };
+}
+
+export async function updateCompanyProfileFields(
+  companyId: number,
+  fields: Partial<Record<CompanyProfileField, string | null>>,
+) {
+  const existing = await db.orm.public.Company.first({ id: companyId });
+  if (!existing) {
+    throw new AppError(404, "Company not found");
+  }
+  await updateCompanyProfile(companyId, fields);
+  return getCompanyProfile(companyId);
 }
 
 export async function getSystemMonitoring() {

@@ -425,7 +425,21 @@
                   "kind": "scalar"
                 }
               },
+              "billingAddress": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "billingCustomerId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "billingEmail": {
                 "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
@@ -453,6 +467,34 @@
                   "kind": "scalar"
                 }
               },
+              "businessType": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "contactPersonName": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "contactPersonRole": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "countryOfRegistration": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "createdAt": {
                 "nullable": false,
                 "type": {
@@ -460,10 +502,45 @@
                   "kind": "scalar"
                 }
               },
+              "customPricingNotes": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "emergencyContact": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "id": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "industry": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "kvkNumber": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "legalAddress": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
@@ -488,6 +565,13 @@
                   "kind": "scalar"
                 }
               },
+              "payrollCycle": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "pendingInterval": {
                 "nullable": true,
                 "type": {
@@ -502,8 +586,43 @@
                   "kind": "scalar"
                 }
               },
+              "phoneNumber": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "plan": {
                 "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "preferredCommunicationChannel": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "preferredLanguage": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "schedulingFormat": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "shiftRulesNotes": {
+                "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
@@ -523,10 +642,24 @@
                   "kind": "scalar"
                 }
               },
+              "supportEmail": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "trialEndsAt": {
                 "nullable": true,
                 "type": {
                   "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "vatNumber": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               }
@@ -661,8 +794,14 @@
                 "aiAssistantSubscriptionId": {
                   "column": "aiAssistantSubscriptionId"
                 },
+                "billingAddress": {
+                  "column": "billingAddress"
+                },
                 "billingCustomerId": {
                   "column": "billingCustomerId"
+                },
+                "billingEmail": {
+                  "column": "billingEmail"
                 },
                 "billingInterval": {
                   "column": "billingInterval"
@@ -673,11 +812,38 @@
                 "billingSubscriptionId": {
                   "column": "billingSubscriptionId"
                 },
+                "businessType": {
+                  "column": "businessType"
+                },
+                "contactPersonName": {
+                  "column": "contactPersonName"
+                },
+                "contactPersonRole": {
+                  "column": "contactPersonRole"
+                },
+                "countryOfRegistration": {
+                  "column": "countryOfRegistration"
+                },
                 "createdAt": {
                   "column": "createdAt"
                 },
+                "customPricingNotes": {
+                  "column": "customPricingNotes"
+                },
+                "emergencyContact": {
+                  "column": "emergencyContact"
+                },
                 "id": {
                   "column": "id"
+                },
+                "industry": {
+                  "column": "industry"
+                },
+                "kvkNumber": {
+                  "column": "kvkNumber"
+                },
+                "legalAddress": {
+                  "column": "legalAddress"
                 },
                 "logoBase64": {
                   "column": "logoBase64"
@@ -688,14 +854,32 @@
                 "name": {
                   "column": "name"
                 },
+                "payrollCycle": {
+                  "column": "payrollCycle"
+                },
                 "pendingInterval": {
                   "column": "pendingInterval"
                 },
                 "pendingPlan": {
                   "column": "pendingPlan"
                 },
+                "phoneNumber": {
+                  "column": "phoneNumber"
+                },
                 "plan": {
                   "column": "plan"
+                },
+                "preferredCommunicationChannel": {
+                  "column": "preferredCommunicationChannel"
+                },
+                "preferredLanguage": {
+                  "column": "preferredLanguage"
+                },
+                "schedulingFormat": {
+                  "column": "schedulingFormat"
+                },
+                "shiftRulesNotes": {
+                  "column": "shiftRulesNotes"
                 },
                 "slug": {
                   "column": "slug"
@@ -703,8 +887,14 @@
                 "subscriptionStatus": {
                   "column": "subscriptionStatus"
                 },
+                "supportEmail": {
+                  "column": "supportEmail"
+                },
                 "trialEndsAt": {
                   "column": "trialEndsAt"
+                },
+                "vatNumber": {
+                  "column": "vatNumber"
                 }
               },
               "namespaceId": "public",
@@ -3336,7 +3526,17 @@
                   "nativeType": "text",
                   "nullable": true
                 },
+                "billingAddress": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "billingCustomerId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "billingEmail": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": true
@@ -3356,6 +3556,26 @@
                   "nativeType": "text",
                   "nullable": true
                 },
+                "businessType": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "contactPersonName": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "contactPersonRole": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "countryOfRegistration": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "createdAt": {
                   "codecId": "pg/timestamptz-string@1",
                   "default": {
@@ -3365,6 +3585,16 @@
                   "nativeType": "timestamptz",
                   "nullable": false
                 },
+                "customPricingNotes": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "emergencyContact": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "id": {
                   "codecId": "pg/int4@1",
                   "default": {
@@ -3373,6 +3603,21 @@
                   },
                   "nativeType": "int4",
                   "nullable": false
+                },
+                "industry": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "kvkNumber": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "legalAddress": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
                 },
                 "logoBase64": {
                   "codecId": "pg/text@1",
@@ -3389,12 +3634,22 @@
                   "nativeType": "text",
                   "nullable": false
                 },
+                "payrollCycle": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "pendingInterval": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": true
                 },
                 "pendingPlan": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "phoneNumber": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": true
@@ -3408,6 +3663,26 @@
                   "nativeType": "text",
                   "nullable": false
                 },
+                "preferredCommunicationChannel": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "preferredLanguage": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "schedulingFormat": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "shiftRulesNotes": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "slug": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -3418,9 +3693,19 @@
                   "nativeType": "text",
                   "nullable": true
                 },
+                "supportEmail": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "trialEndsAt": {
                   "codecId": "pg/timestamptz-string@1",
                   "nativeType": "timestamptz",
+                  "nullable": true
+                },
+                "vatNumber": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
                   "nullable": true
                 }
               },
@@ -5277,7 +5562,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "c8ac2789b8e32cf7ed1af94f8944769504e489de874eb71096c055d5ade1c943"
+    "storageHash": "b4d29cb4ae06636d67be699d6bc77f8670896a4af93f53427b5876d79c70c545"
   },
   "capabilities": {
     "postgres": {

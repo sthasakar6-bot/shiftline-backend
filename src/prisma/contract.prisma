@@ -53,6 +53,29 @@ model Company {
   // punishing a self-healing failed retry) -- only "canceled" gates the
   // assistant tab behind the paywall again.
   aiAssistantStatus         String?
+  // Everything below is ICT-admin-only business/contact metadata -- purely
+  // optional, filled in by hand from the ICT admin panel when needed (e.g.
+  // for invoicing correctness or support context), never required by
+  // signup or any customer-facing flow.
+  kvkNumber              String?
+  vatNumber              String?
+  legalAddress           String?
+  businessType           String?
+  countryOfRegistration  String?
+  contactPersonName      String?
+  contactPersonRole      String?
+  billingEmail           String?
+  billingAddress         String?
+  customPricingNotes     String?
+  industry               String?
+  payrollCycle           String?
+  schedulingFormat       String?
+  shiftRulesNotes        String?
+  supportEmail           String?
+  phoneNumber            String?
+  preferredLanguage      String?
+  emergencyContact       String?
+  preferredCommunicationChannel String?
   users       User[]
   invites     Invite[]
   departments Department[]

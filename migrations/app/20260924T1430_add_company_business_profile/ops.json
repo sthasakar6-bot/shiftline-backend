@@ -1,0 +1,800 @@
+[
+  {
+    "id": "column.public.company.billingAddress",
+    "label": "Add column \"billingAddress\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "billingAddress",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"billingAddress\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "billingAddress"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"billingAddress\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"billingAddress\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"billingAddress\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "billingAddress"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.billingEmail",
+    "label": "Add column \"billingEmail\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "billingEmail",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"billingEmail\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "billingEmail"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"billingEmail\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"billingEmail\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"billingEmail\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "billingEmail"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.businessType",
+    "label": "Add column \"businessType\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "businessType",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"businessType\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "businessType"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"businessType\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"businessType\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"businessType\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "businessType"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.contactPersonName",
+    "label": "Add column \"contactPersonName\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "contactPersonName",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"contactPersonName\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "contactPersonName"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"contactPersonName\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"contactPersonName\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"contactPersonName\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "contactPersonName"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.contactPersonRole",
+    "label": "Add column \"contactPersonRole\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "contactPersonRole",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"contactPersonRole\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "contactPersonRole"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"contactPersonRole\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"contactPersonRole\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"contactPersonRole\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "contactPersonRole"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.countryOfRegistration",
+    "label": "Add column \"countryOfRegistration\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "countryOfRegistration",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"countryOfRegistration\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "countryOfRegistration"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"countryOfRegistration\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"countryOfRegistration\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"countryOfRegistration\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "countryOfRegistration"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.customPricingNotes",
+    "label": "Add column \"customPricingNotes\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "customPricingNotes",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"customPricingNotes\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "customPricingNotes"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"customPricingNotes\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"customPricingNotes\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"customPricingNotes\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "customPricingNotes"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.emergencyContact",
+    "label": "Add column \"emergencyContact\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "emergencyContact",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"emergencyContact\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "emergencyContact"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"emergencyContact\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"emergencyContact\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"emergencyContact\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "emergencyContact"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.industry",
+    "label": "Add column \"industry\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "industry",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"industry\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "industry"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"industry\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"industry\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"industry\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "industry"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.kvkNumber",
+    "label": "Add column \"kvkNumber\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "kvkNumber",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"kvkNumber\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "kvkNumber"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"kvkNumber\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"kvkNumber\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"kvkNumber\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "kvkNumber"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.legalAddress",
+    "label": "Add column \"legalAddress\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "legalAddress",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"legalAddress\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "legalAddress"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"legalAddress\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"legalAddress\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"legalAddress\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "legalAddress"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.payrollCycle",
+    "label": "Add column \"payrollCycle\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "payrollCycle",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"payrollCycle\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "payrollCycle"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"payrollCycle\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"payrollCycle\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"payrollCycle\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "payrollCycle"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.phoneNumber",
+    "label": "Add column \"phoneNumber\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "phoneNumber",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"phoneNumber\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "phoneNumber"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"phoneNumber\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"phoneNumber\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"phoneNumber\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "phoneNumber"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.preferredCommunicationChannel",
+    "label": "Add column \"preferredCommunicationChannel\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "preferredCommunicationChannel",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"preferredCommunicationChannel\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "preferredCommunicationChannel"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"preferredCommunicationChannel\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"preferredCommunicationChannel\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"preferredCommunicationChannel\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "preferredCommunicationChannel"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.preferredLanguage",
+    "label": "Add column \"preferredLanguage\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "preferredLanguage",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"preferredLanguage\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "preferredLanguage"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"preferredLanguage\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"preferredLanguage\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"preferredLanguage\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "preferredLanguage"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.schedulingFormat",
+    "label": "Add column \"schedulingFormat\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "schedulingFormat",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"schedulingFormat\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "schedulingFormat"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"schedulingFormat\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"schedulingFormat\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"schedulingFormat\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "schedulingFormat"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.shiftRulesNotes",
+    "label": "Add column \"shiftRulesNotes\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "shiftRulesNotes",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"shiftRulesNotes\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "shiftRulesNotes"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"shiftRulesNotes\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"shiftRulesNotes\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"shiftRulesNotes\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "shiftRulesNotes"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.supportEmail",
+    "label": "Add column \"supportEmail\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "supportEmail",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"supportEmail\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "supportEmail"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"supportEmail\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"supportEmail\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"supportEmail\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "supportEmail"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.company.vatNumber",
+    "label": "Add column \"vatNumber\" to \"company\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "vatNumber",
+        "table": "company"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"vatNumber\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "vatNumber"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"vatNumber\"",
+        "sql": "ALTER TABLE \"public\".\"company\" ADD COLUMN \"vatNumber\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"vatNumber\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "company",
+          "vatNumber"
+        ]
+      }
+    ]
+  }
+]

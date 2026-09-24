@@ -174,6 +174,36 @@ export async function createPresignupCheckoutSession(params: PresignupCheckoutPa
   return { redirectUrl, providerCustomerId: customerId };
 }
 
+// Live lookup for the ICT admin company-detail view -- nothing here is
+// stored locally (payment history, next renewal date), so it's fetched
+// fresh from Mollie on each request rather than duplicated into our own
+// schema. Best-effort: any Mollie API failure here should never break the
+// rest of the company-detail response, so callers catch and fall back.
+export async function getCustomerBillingSummary(customerId: string, subscriptionId: string | null) {
+  const [paymentsPage, subscription] = await Promise.all([
+    mollie().customers.listPayments({ customerId, limit: 10 }),
+    subscriptionId
+      ? mollie().subscriptions.get({ customerId, subscriptionId }).catch(() => null)
+      : Promise.resolve(null),
+  ]);
+
+  const payments = (paymentsPage.result.embedded.payments ?? []).map((p) => ({
+    id: p.id,
+    amount: p.amount,
+    status: p.status,
+    method: p.method ?? null,
+    description: p.description,
+    createdAt: p.createdAt,
+    paidAt: p.paidAt ?? null,
+  }));
+
+  return {
+    payments,
+    nextPaymentDate: subscription?.nextPaymentDate ?? null,
+    subscriptionStatus: subscription?.status ?? null,
+  };
+}
+
 async function handlePaymentWebhook(paymentId: string): Promise<NormalizedWebhookEvent> {
   const payment = await mollie().payments.get({ paymentId });
   const customerId = payment.customerId;
