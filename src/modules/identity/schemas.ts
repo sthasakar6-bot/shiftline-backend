@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { WALLPAPER_URLS } from "./wallpapers";
 
 export const loginSchema = z.object({
   email: z.string().email("invalid email"),
@@ -13,6 +14,11 @@ export const changePasswordSchema = z.object({
 
 export const updatePhoneSchema = z.object({
   phone: z.string().max(30, "phone must be at most 30 characters"),
+});
+
+// null clears back to the default app background.
+export const updateWallpaperSchema = z.object({
+  wallpaperUrl: z.enum(WALLPAPER_URLS).nullable(),
 });
 
 export const completeOnboardingSchema = z.object({

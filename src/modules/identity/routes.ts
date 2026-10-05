@@ -4,6 +4,7 @@ import {
   meController,
   changePasswordController,
   updatePhoneController,
+  updateWallpaperController,
   completeOnboardingController,
 } from "./controller";
 import { requireAuth } from "../../middleware/requireAuth";
@@ -12,6 +13,7 @@ import {
   loginSchema,
   changePasswordSchema,
   updatePhoneSchema,
+  updateWallpaperSchema,
   completeOnboardingSchema,
 } from "./schemas";
 
@@ -26,6 +28,12 @@ router.patch(
   changePasswordController,
 );
 router.patch("/auth/phone", requireAuth, validate(updatePhoneSchema), updatePhoneController);
+router.patch(
+  "/auth/wallpaper",
+  requireAuth,
+  validate(updateWallpaperSchema),
+  updateWallpaperController,
+);
 router.patch(
   "/auth/complete-onboarding",
   requireAuth,
