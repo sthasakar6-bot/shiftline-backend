@@ -2,6 +2,7 @@ import argon2 from "argon2";
 import {
   findAllUsersInCompany,
   findAllEmployeesInCompany,
+  findPayrollEligibleInCompany,
   findFormerEmployeesInCompany,
   findDirectReports,
   findTeamDirectory,
@@ -106,6 +107,10 @@ export const getDirectReports = async (managerId: number) => {
 
 export const getAllEmployees = async (companyId: number, callerId: number) => {
   return findAllEmployeesInCompany(companyId, callerId);
+};
+
+export const getPayrollEligible = async (companyId: number) => {
+  return findPayrollEligibleInCompany(companyId);
 };
 
 export const promoteToManager = async (id: number) => {

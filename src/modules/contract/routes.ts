@@ -13,7 +13,7 @@ import {
 } from "./controller";
 import { requireAuth } from "../../middleware/requireAuth";
 import { requireRole } from "../../middleware/requireRole";
-import { requireManagesTargetOrSelf } from "../../middleware/requireManagesTarget";
+import { requireManagesTargetOrSelf, requireSameCompanyOrSelf } from "../../middleware/requireManagesTarget";
 import { validate } from "../../middleware/validate";
 import { AppError } from "../../errors/AppError";
 import { createContractSchema, updateContractSchema } from "./schemas";
@@ -38,18 +38,22 @@ router.get("/contracts", requireAuth, listContractsController);
 router.get("/contracts/:id", requireAuth, getContractController);
 router.get("/contracts/:id/pdf", requireAuth, getContractPdfController);
 
+// Read access is company-wide (any manager/co-manager can see any
+// employee's contracts for oversight), but only the actual manager
+// (requireManagesTargetOrSelf below) can create/edit/upload/delete --
+// enforced here, not just hidden in the UI.
 router.get(
   "/users/:id/contracts",
   requireAuth,
   requireRole("manager"),
-  requireManagesTargetOrSelf,
+  requireSameCompanyOrSelf,
   listContractsForReportController,
 );
 router.get(
   "/users/:id/contracts/:contractId/pdf",
   requireAuth,
   requireRole("manager"),
-  requireManagesTargetOrSelf,
+  requireSameCompanyOrSelf,
   getContractPdfForReportController,
 );
 router.post(

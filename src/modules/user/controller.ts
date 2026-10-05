@@ -10,6 +10,7 @@ import {
   getAvatar,
   getDirectReports,
   getFormerEmployees,
+  getPayrollEligible,
   getTeamDirectory,
   promoteToManager,
   reactivateEmployee,
@@ -51,6 +52,15 @@ export const createBookkeeperController = async (req: Request, res: Response) =>
 export const getReportsController = async (req: Request, res: Response) => {
   const reports = await getDirectReports(req.user!.sub);
   res.json(reports);
+};
+
+// Company-wide, for the Payroll tab: any manager/co-manager can see every
+// payroll-eligible person (contracts/payslips read access is enforced
+// company-wide too -- see contract/payslip routes), not just their own
+// direct reports.
+export const getPayrollEligibleController = async (req: Request, res: Response) => {
+  const people = await getPayrollEligible(req.user!.companyId);
+  res.json(people);
 };
 
 export const getEmployeesController = async (req: Request, res: Response) => {

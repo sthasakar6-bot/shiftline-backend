@@ -12,7 +12,7 @@ import {
 } from "./controller";
 import { requireAuth } from "../../middleware/requireAuth";
 import { requireRole } from "../../middleware/requireRole";
-import { requireManagesTargetOrSelf } from "../../middleware/requireManagesTarget";
+import { requireManagesTargetOrSelf, requireSameCompanyOrSelf } from "../../middleware/requireManagesTarget";
 import { validate } from "../../middleware/validate";
 import { AppError } from "../../errors/AppError";
 import { createPayslipSchema } from "./schemas";
@@ -37,18 +37,22 @@ router.get("/payslips", requireAuth, listPayslipsController);
 router.get("/payslips/:id", requireAuth, getPayslipController);
 router.get("/payslips/:id/pdf", requireAuth, getPayslipPdfController);
 
+// Read access is company-wide (any manager/co-manager can see any
+// employee's payslips for oversight), but only the actual manager
+// (requireManagesTargetOrSelf below) can create/upload/delete -- enforced
+// here, not just hidden in the UI.
 router.get(
   "/users/:id/payslips",
   requireAuth,
   requireRole("manager"),
-  requireManagesTargetOrSelf,
+  requireSameCompanyOrSelf,
   listPayslipsForReportController,
 );
 router.get(
   "/users/:id/payslips/:payslipId/pdf",
   requireAuth,
   requireRole("manager"),
-  requireManagesTargetOrSelf,
+  requireSameCompanyOrSelf,
   getPayslipPdfForReportController,
 );
 router.post(

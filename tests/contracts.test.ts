@@ -199,4 +199,36 @@ describe("Contracts", () => {
       .send({ role: "Should fail" });
     expect(res.status).toBe(403);
   });
+
+  // A co-manager (same company, not the employee's own manager) can see
+  // the contract for oversight purposes, but still can't create, edit, or
+  // delete it -- that stays limited to the employee's actual manager.
+  it("lets a co-manager read, but not write, another manager's report's contracts", async () => {
+    const create = await request(app)
+      .post(`/api/users/${reportId}/contracts`)
+      .set("Authorization", `Bearer ${managerToken}`)
+      .send({ role: "Cashier" });
+    expect(create.status).toBe(201);
+
+    const coManager = await registerUser({ email: uniqueEmail("contract-comanager") });
+    await db.orm.public.User.where({ id: coManager.id }).update({ role: "manager" });
+    const coManagerToken = await loginUser(coManager.email, coManager.password);
+
+    const read = await request(app)
+      .get(`/api/users/${reportId}/contracts`)
+      .set("Authorization", `Bearer ${coManagerToken}`);
+    expect(read.status).toBe(200);
+    expect(read.body.some((c: { id: number }) => c.id === create.body.id)).toBe(true);
+
+    const writeAttempt = await request(app)
+      .post(`/api/users/${reportId}/contracts`)
+      .set("Authorization", `Bearer ${coManagerToken}`)
+      .send({ role: "Should still fail" });
+    expect(writeAttempt.status).toBe(403);
+
+    const deleteAttempt = await request(app)
+      .delete(`/api/users/${reportId}/contracts/${create.body.id}`)
+      .set("Authorization", `Bearer ${coManagerToken}`);
+    expect(deleteAttempt.status).toBe(403);
+  });
 });

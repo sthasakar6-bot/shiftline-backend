@@ -9,6 +9,7 @@ import {
   getAvatarController,
   getEmployeesController,
   getFormerEmployeesController,
+  getPayrollEligibleController,
   getTeamController,
   getUsersController,
   getReportsController,
@@ -64,6 +65,12 @@ router.post(
   createBookkeeperController,
 );
 router.get("/users/reports", requireAuth, requireRole("manager"), getReportsController);
+router.get(
+  "/users/payroll-eligible",
+  requireAuth,
+  requireRole("manager"),
+  getPayrollEligibleController,
+);
 router.get("/users/employees", requireAuth, requireRole("manager"), getEmployeesController);
 router.get(
   "/users/former-employees",
