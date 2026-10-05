@@ -57,6 +57,13 @@ async function deleteUserOwnData(userId: number) {
     await deleteAllBy(await tx.orm.public.OpenShiftRequest.where({ userId }).all(), (id) => tx.orm.public.OpenShiftRequest.where({ id }).delete());
     await deleteAllBy(await tx.orm.public.Shift.where({ userId }).all(), (id) => tx.orm.public.Shift.where({ id }).delete());
     await deleteAllBy(await tx.orm.public.Message.where({ userId }).all(), (id) => tx.orm.public.Message.where({ id }).delete());
+    // User.managerId is a self-referential FK -- if this user manages
+    // anyone else (team-lead style, independent of role), that row's
+    // managerId must be cleared first or this delete violates the FK.
+    await deleteAllBy(
+      await tx.orm.public.User.where({ managerId: userId }).all(),
+      (id) => tx.orm.public.User.where({ id }).update({ managerId: null }),
+    );
     await tx.orm.public.User.where({ id: userId }).delete();
   });
 }

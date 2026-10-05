@@ -140,6 +140,17 @@ export async function deleteCompanyCascade(companyId: number) {
       (id) => tx.orm.public.Department.where({ id }).delete(),
     );
 
+    // User.managerId is a self-referential FK -- an employee whose manager
+    // hasn't been nulled out yet blocks that manager's own row from
+    // deleting (Promise.all below has no ordering guarantee relative to
+    // this chain, so a manager can easily race ahead of their reports).
+    // Clearing every managerId first breaks the chain before any row is
+    // actually removed.
+    await deleteAllBy(
+      users.filter((u) => u.managerId !== null),
+      (id) => tx.orm.public.User.where({ id }).update({ managerId: null }),
+    );
+
     await deleteAllBy(users, (id) => tx.orm.public.User.where({ id }).delete());
 
     await tx.orm.public.Company.where({ id: companyId }).delete();

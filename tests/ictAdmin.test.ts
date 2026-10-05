@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import request from "supertest";
 import app from "../src/app";
+import { createCompany, registerAndLogin, registerUser } from "./helpers";
 
 const EMAIL = "sthasakar6@gmail.com";
 const PASSWORD = "@Sitagrestha00";
@@ -181,5 +182,20 @@ describe("ICT-admin protected routes", () => {
       .send({ status: "resolved" });
     expect(update.status).toBe(200);
     expect(update.body.status).toBe("resolved");
+  });
+
+  // Regression: User.managerId is a self-referential FK. Deleting every
+  // user in a company concurrently (Promise.all, no ordering) used to fail
+  // whenever an employee still pointed at a manager via managerId, since
+  // Postgres would hit the FK constraint on whichever row happened to
+  // delete out of order.
+  it("deletes a company whose employees have a manager assigned", async () => {
+    const companyId = await createCompany("ICT Delete With Manager Co");
+    const { user: manager } = await registerAndLogin({ companyId });
+    await registerUser({ companyId, managerId: manager.id });
+
+    const token = await getToken();
+    const del = await request(app).delete(`/api/ict-admin/companies/${companyId}`).set("Authorization", `Bearer ${token}`);
+    expect(del.status).toBe(204);
   });
 });
