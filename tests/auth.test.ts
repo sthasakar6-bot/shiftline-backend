@@ -48,12 +48,12 @@ describe("PATCH /api/auth/wallpaper", () => {
       .send({ email: user.email, password: user.password, companyId: user.companyId });
     const auth = { Authorization: `Bearer ${login.body.token}` };
 
-    const url = "https://images.unsplash.com/photo-1759851942096-cf73a51532ba";
-    const set = await request(app).patch("/api/auth/wallpaper").set(auth).send({ wallpaperUrl: url });
+    const key = "aurora";
+    const set = await request(app).patch("/api/auth/wallpaper").set(auth).send({ wallpaperUrl: key });
     expect(set.status).toBe(204);
 
     const me = await request(app).get("/api/auth/me").set(auth);
-    expect(me.body.wallpaperUrl).toBe(url);
+    expect(me.body.wallpaperUrl).toBe(key);
 
     const clear = await request(app).patch("/api/auth/wallpaper").set(auth).send({ wallpaperUrl: null });
     expect(clear.status).toBe(204);
@@ -61,7 +61,7 @@ describe("PATCH /api/auth/wallpaper", () => {
     expect(meAfter.body.wallpaperUrl).toBeNull();
   });
 
-  it("rejects a URL that isn't in the curated list", async () => {
+  it("rejects a key that isn't in the curated list", async () => {
     const user = await registerUser({ email: uniqueEmail("wallpaper-bad") });
     const login = await request(app)
       .post("/api/auth/login")
