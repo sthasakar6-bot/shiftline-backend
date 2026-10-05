@@ -79,18 +79,18 @@ describe("DELETE /api/me", () => {
     expect(company).not.toBeNull();
   });
 
-  it("cascades the whole company when the last manager deletes their account", async () => {
+  it("refuses when the caller is the only manager left at their company", async () => {
     const companyId = await createCompany("Privacy Test Co Last Manager");
-    const { token } = await createManager(companyId);
+    const { user: manager, token } = await createManager(companyId);
     await registerAndLogin({ companyId });
 
     const res = await request(app).delete("/api/me").set("Authorization", `Bearer ${token}`);
-    expect(res.status).toBe(200);
-    expect(res.body.deletedCompany).toBe(true);
+    expect(res.status).toBe(409);
+    expect(res.body.code).toBe("SOLE_MANAGER");
 
     const company = await db.orm.public.Company.first({ id: companyId });
-    expect(company).toBeNull();
-    const remainingUsers = await db.orm.public.User.where({ companyId }).all();
-    expect(remainingUsers.length).toBe(0);
+    expect(company).not.toBeNull();
+    const stillThere = await db.orm.public.User.where({ id: manager.id }).first();
+    expect(stillThere).not.toBeNull();
   });
 });

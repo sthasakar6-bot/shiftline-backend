@@ -1,5 +1,5 @@
 import { db } from "../../prisma/db";
-import { deleteCompanyCascade } from "../ictAdmin/model";
+import { AppError } from "../../errors/AppError";
 
 // GDPR data export -- a machine-readable snapshot of everything Shiftline
 // holds for this one user. Deliberately excludes passwordHash (a secret,
@@ -62,19 +62,24 @@ async function deleteUserOwnData(userId: number) {
 }
 
 // Self-service account deletion. A manager who's the last manager left in
-// their company can't just delete themselves and leave the company
-// ownerless -- that would strand every remaining employee's data with no
-// one able to administer it -- so that case deletes the whole company
-// instead (the same cascade ICT admin's tooling uses). Every other case
-// (an employee, or a manager with co-managers) only removes this one
-// user's own data.
+// their company is refused outright -- deleting themselves would strand
+// every remaining employee's real data (shifts, attendance, payslips, team
+// chat) with no one left who can administer it. Automatically cascading the
+// whole company away on a single self-delete click was judged too easy to
+// trigger by accident for something this irreversible; instead they're
+// told to add a co-manager (or contact support) before they can leave.
+// Every other case (an employee, or a manager with a co-manager already in
+// place) only removes this one user's own data.
 export async function deleteOwnAccount(userId: number, companyId: number, role: string) {
   if (role === "manager") {
     const managers = await db.orm.public.User.where({ companyId, role: "manager" }).all();
     const otherManagers = managers.filter((m) => m.id !== userId);
     if (otherManagers.length === 0) {
-      await deleteCompanyCascade(companyId);
-      return { deletedCompany: true };
+      throw new AppError(
+        409,
+        "You're the only manager at this company. Add another manager first, or contact us, before deleting your account -- deleting it now would leave the company and everyone else's data with no one able to manage it.",
+        "SOLE_MANAGER",
+      );
     }
   }
   await deleteUserOwnData(userId);
