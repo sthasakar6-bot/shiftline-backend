@@ -37,3 +37,15 @@ export async function findMessageById(id: number): Promise<ChatMessageRow | null
 export async function deleteMessageById(id: number): Promise<void> {
   await db.orm.public.Message.where({ id }).delete();
 }
+
+// Only employees and managers see the chat tab at all (bookkeepers don't),
+// so those are the only roles worth notifying about a new message.
+export async function findOtherChatRecipients(
+  companyId: number,
+  excludeUserId: number,
+): Promise<{ id: number; role: string }[]> {
+  const users = await db.orm.public.User.select("id", "role")
+    .where({ companyId, active: true })
+    .all();
+  return users.filter((u) => u.id !== excludeUserId && (u.role === "employee" || u.role === "manager"));
+}

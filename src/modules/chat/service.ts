@@ -1,7 +1,16 @@
 import { db } from "../../prisma/db";
 import { AppError } from "../../errors/AppError";
-import { createMessage, findRecentMessages, findMessageById, deleteMessageById } from "./model";
+import {
+  createMessage,
+  findRecentMessages,
+  findMessageById,
+  deleteMessageById,
+  findOtherChatRecipients,
+} from "./model";
 import { broadcastMessage, broadcastMessageDeleted } from "./ws";
+import { notify } from "../notifications/service";
+
+const NOTIFY_SNIPPET_MAX_LENGTH = 120;
 
 const HISTORY_LIMIT = 100;
 const REPLY_SNIPPET_MAX_LENGTH = 140;
@@ -100,6 +109,18 @@ export async function postMessage(
   const senders = await senderMapForCompany(companyId);
   const [message] = await hydrate([row], senders);
   broadcastMessage(companyId, message);
+
+  // Push/notification-bell alert for everyone else who can see this chat --
+  // the WS broadcast above only reaches people with the app open right now.
+  const snippet =
+    body.length > NOTIFY_SNIPPET_MAX_LENGTH ? `${body.slice(0, NOTIFY_SNIPPET_MAX_LENGTH)}…` : body;
+  const recipients = await findOtherChatRecipients(companyId, userId);
+  await Promise.all(
+    recipients.map((r) =>
+      notify(r.id, snippet, message.userName, r.role === "manager" ? "/admin?tab=chat" : "/?tab=chat"),
+    ),
+  );
+
   return message;
 }
 
