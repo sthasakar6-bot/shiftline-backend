@@ -4,7 +4,6 @@ import {
   getCurrentUser,
   changePassword,
   updatePhone,
-  updateWallpaper,
   completeOnboarding,
 } from "./service";
 
@@ -28,12 +27,6 @@ export async function changePasswordController(req: Request, res: Response) {
 export async function updatePhoneController(req: Request, res: Response) {
   const { phone } = req.body;
   await updatePhone(req.user!.sub, phone);
-  res.status(204).send();
-}
-
-export async function updateWallpaperController(req: Request, res: Response) {
-  const { wallpaperUrl } = req.body;
-  await updateWallpaper(req.user!.sub, wallpaperUrl);
   res.status(204).send();
 }
 

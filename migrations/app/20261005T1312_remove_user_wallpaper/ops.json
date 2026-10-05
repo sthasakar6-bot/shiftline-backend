@@ -1,0 +1,44 @@
+[
+  {
+    "id": "dropColumn.user.wallpaperUrl",
+    "label": "Drop column \"wallpaperUrl\" from \"user\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "wallpaperUrl",
+        "table": "user"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"wallpaperUrl\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "user",
+          "wallpaperUrl"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop column \"wallpaperUrl\"",
+        "sql": "ALTER TABLE \"public\".\"user\" DROP COLUMN \"wallpaperUrl\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"wallpaperUrl\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "user",
+          "wallpaperUrl"
+        ]
+      }
+    ]
+  }
+]

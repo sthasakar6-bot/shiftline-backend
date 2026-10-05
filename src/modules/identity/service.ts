@@ -7,7 +7,6 @@ import {
   findUserById,
   setUserPassword,
   setUserPhone,
-  setUserWallpaper,
   markOnboardingComplete,
 } from "./model";
 import { findCompanyById } from "../company/model";
@@ -81,7 +80,6 @@ export async function login(email: string, password: string, companyId: number) 
       location: user.location,
       departmentId: user.departmentId,
       needsOnboarding: user.needsOnboarding,
-      wallpaperUrl: user.wallpaperUrl,
       companyId: user.companyId,
       companyName: company?.name ?? "",
       companySlug: company?.slug ?? "",
@@ -108,7 +106,6 @@ export async function getCurrentUser(userId: number) {
     location: user.location,
     departmentId: user.departmentId,
     needsOnboarding: user.needsOnboarding,
-    wallpaperUrl: user.wallpaperUrl,
     companyId: user.companyId,
     companyName: company?.name ?? "",
     companySlug: company?.slug ?? "",
@@ -123,14 +120,6 @@ export async function updatePhone(userId: number, phone: string) {
     throw new AppError(404, "User not found");
   }
   await setUserPhone(userId, phone.trim() || null);
-}
-
-export async function updateWallpaper(userId: number, wallpaperUrl: string | null) {
-  const user = await findUserById(userId);
-  if (!user) {
-    throw new AppError(404, "User not found");
-  }
-  await setUserWallpaper(userId, wallpaperUrl);
 }
 
 export async function changePassword(

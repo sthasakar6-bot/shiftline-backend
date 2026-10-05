@@ -17,7 +17,6 @@ export interface AuthUser {
   departmentId: number | null;
   needsOnboarding: boolean;
   active: boolean;
-  wallpaperUrl: string | null;
   lastSeenAt: string | null;
 }
 
@@ -62,10 +61,6 @@ export async function setUserPassword(userId: number, passwordHash: string): Pro
 
 export async function setUserPhone(userId: number, phone: string | null): Promise<void> {
   await db.orm.public.User.where({ id: userId }).update({ phone });
-}
-
-export async function setUserWallpaper(userId: number, wallpaperUrl: string | null): Promise<void> {
-  await db.orm.public.User.where({ id: userId }).update({ wallpaperUrl });
 }
 
 export async function markOnboardingComplete(

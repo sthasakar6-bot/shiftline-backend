@@ -2980,13 +2980,6 @@
                   "codecId": "pg/timestamptz-string@1",
                   "kind": "scalar"
                 }
-              },
-              "wallpaperUrl": {
-                "nullable": true,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
               }
             },
             "relations": {
@@ -3304,9 +3297,6 @@
                 },
                 "termsAcceptedAt": {
                   "column": "termsAcceptedAt"
-                },
-                "wallpaperUrl": {
-                  "column": "wallpaperUrl"
                 }
               },
               "namespaceId": "public",
@@ -5594,11 +5584,6 @@
                   "codecId": "pg/timestamptz-string@1",
                   "nativeType": "timestamptz",
                   "nullable": true
-                },
-                "wallpaperUrl": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": true
                 }
               },
               "foreignKeys": [
@@ -5697,7 +5682,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "c6ffd7228c6d5baafae284b484bf1b422004ae2adf740ca193ee5546a9c87a58"
+    "storageHash": "ba539faae377f33b2e0175c6bd366de2775bfdaccae17bd120d095762de4886e"
   },
   "capabilities": {
     "postgres": {
